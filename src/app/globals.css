@@ -1,0 +1,160 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-success: var(--success);
+  --color-review: var(--review);
+  --font-sans:
+    var(--font-geist-sans), "Noto Sans JP", "PingFang SC", sans-serif;
+  --radius-sm: calc(var(--radius) * 0.7);
+  --radius-md: calc(var(--radius) * 0.85);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+}
+
+:root,
+[data-theme="sunshine"] {
+  --background: #fffcf5;
+  --foreground: #2d281f;
+  --card: #ffffff;
+  --card-foreground: #2d281f;
+  --popover: #ffffff;
+  --popover-foreground: #2d281f;
+  --primary: #f4b740;
+  --primary-foreground: #2d281f;
+  --secondary: #fff5d6;
+  --secondary-foreground: #72500e;
+  --muted: #f8f3e9;
+  --muted-foreground: #756d60;
+  --accent: #fff0bc;
+  --accent-foreground: #69480a;
+  --border: #e9e1d3;
+  --input: #e9e1d3;
+  --ring: #d99a1b;
+  --sidebar: #fffaf0;
+  --sidebar-foreground: #3c3427;
+  --sidebar-accent: #fff0bc;
+  --sidebar-accent-foreground: #5e400a;
+  --success: #3f9b67;
+  --review: #a855f7;
+  --destructive: #dc5a55;
+  --radius: 0.875rem;
+}
+
+[data-theme="coral"] {
+  --background: #fff9f7;
+  --primary: #f27b67;
+  --primary-foreground: #351b17;
+  --secondary: #ffebe6;
+  --secondary-foreground: #783528;
+  --accent: #ffe1da;
+  --accent-foreground: #743227;
+  --ring: #d85f4a;
+  --sidebar: #fff5f2;
+  --sidebar-accent: #ffe1da;
+  --sidebar-accent-foreground: #743227;
+}
+
+[data-theme="mint"] {
+  --background: #f8fdfa;
+  --primary: #63c49a;
+  --primary-foreground: #123126;
+  --secondary: #e2f7ee;
+  --secondary-foreground: #1e6148;
+  --accent: #d3f2e5;
+  --accent-foreground: #1e6148;
+  --ring: #3fa778;
+  --sidebar: #f2fbf7;
+  --sidebar-accent: #d3f2e5;
+  --sidebar-accent-foreground: #1e6148;
+}
+
+[data-theme="ocean"] {
+  --background: #f7fbff;
+  --primary: #6aa9e9;
+  --primary-foreground: #102a43;
+  --secondary: #e6f2ff;
+  --secondary-foreground: #24557d;
+  --accent: #d9ecff;
+  --accent-foreground: #24557d;
+  --ring: #488dcc;
+  --sidebar: #f2f8ff;
+  --sidebar-accent: #d9ecff;
+  --sidebar-accent-foreground: #24557d;
+}
+
+[data-theme="violet"] {
+  --background: #fbf9ff;
+  --primary: #a78bfa;
+  --primary-foreground: #251747;
+  --secondary: #eee8ff;
+  --secondary-foreground: #563b8d;
+  --accent: #e6ddff;
+  --accent-foreground: #563b8d;
+  --ring: #8b6be2;
+  --sidebar: #f8f5ff;
+  --sidebar-accent: #e6ddff;
+  --sidebar-accent-foreground: #563b8d;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    @apply max-w-full overflow-x-clip font-sans;
+  }
+  body {
+    @apply max-w-full overflow-x-clip bg-background text-foreground antialiased;
+    overflow-wrap: anywhere;
+  }
+  button,
+  a {
+    @apply transition-colors;
+  }
+}
+
+@layer utilities {
+  .warm-shadow {
+    box-shadow: 0 5px 20px color-mix(in srgb, var(--primary) 10%, transparent);
+  }
+  .soft-grid {
+    background-image: radial-gradient(
+      color-mix(in srgb, var(--primary) 20%, transparent) 1px,
+      transparent 1px
+    );
+    background-size: 20px 20px;
+  }
+  .ruby-reading {
+    ruby-align: center;
+    ruby-position: over;
+  }
+  .ruby-reading rt {
+    color: var(--muted-foreground);
+    font-size: 0.62em;
+    font-weight: 500;
+  }
+}

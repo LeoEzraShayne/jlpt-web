@@ -1,0 +1,26 @@
+# 文法トレーニング
+
+> 文法トレーニング是面向中文使用者的 JLPT N1～N4 日语语法学习 Web 应用。它通过语法解释、主动造句、AI 批改、个性化计划和间隔复习，帮助学习者把语法用于实际表达。
+
+Canonical website: https://jlpt.meritledger.org/
+Interface language: Simplified Chinese
+Learning content: Japanese
+Supported JLPT levels: N1, N2, N3, N4
+Access: Public product information; Google login is required to save learning progress
+Pricing: Currently free to use
+
+## Primary pages
+
+- [Official website](https://jlpt.meritledger.org/): Product purpose, core features, target learners, workflow, and FAQs
+- [About and contact](https://jlpt.meritledger.org/about): Project identity, scope, official URL, and feedback channel
+- [Privacy](https://jlpt.meritledger.org/privacy): Google login, learning data, AI review, and storage practices
+
+## Core functions
+
+- JLPT N1～N4 grammar explanations, connection rules, and examples
+- Japanese sentence-writing practice for a selected grammar point
+- AI-assisted feedback on grammar, connection, completeness, naturalness, and vocabulary
+- Personalized study planning based on target date and daily study time
+- Spaced review, progress tracking, and study history
+
+AI feedback can be inaccurate and does not replace a qualified teacher or authoritative JLPT guidance.
