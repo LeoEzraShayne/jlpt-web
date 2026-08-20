@@ -19,12 +19,6 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       {
-        source: "/:path*",
-        has: [{ type: "header", key: "x-forwarded-proto", value: "http" }],
-        destination: "https://jlpt.meritledger.org/:path*",
-        permanent: true,
-      },
-      {
         source: "/",
         has: [{ type: "query", key: "login", value: "success" }],
         destination: "/login?login=success",
