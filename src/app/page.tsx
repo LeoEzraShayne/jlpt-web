@@ -148,7 +148,7 @@ export default function Home() {
               </p>
               <h1 className="mt-6 max-w-4xl text-4xl font-bold leading-tight tracking-tight sm:text-5xl lg:text-6xl">
                 通过造句，真正掌握
-                <span className="text-secondary-foreground">日语语法</span>
+                <span className="block text-secondary-foreground">日语语法</span>
               </h1>
               <p className="mt-6 max-w-3xl text-lg leading-8 text-foreground/75 sm:text-xl">
                 文法トレーニング帮助中文使用者学习 JLPT N1～N4
@@ -177,7 +177,7 @@ export default function Home() {
                   <h2 className="text-xl font-bold">一次完整的语法练习</h2>
                 </div>
               </div>
-              <ol className="mt-7 space-y-4">
+              <ol className="mt-7 grid gap-4 sm:grid-cols-2">
                 {[
                   ["01", "理解", "阅读中文解释、接续和例句"],
                   ["02", "输出", "使用目标语法完成日语造句"],
@@ -213,10 +213,12 @@ export default function Home() {
             <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
               {features.map(({ icon: Icon, title, text }) => (
                 <article key={title} className="rounded-2xl border bg-card p-6">
-                  <span className="grid size-11 place-items-center rounded-xl bg-secondary text-secondary-foreground">
-                    <Icon className="size-5" />
-                  </span>
-                  <h3 className="mt-5 text-lg font-semibold">{title}</h3>
+                  <div className="flex items-center gap-3">
+                    <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-secondary text-secondary-foreground">
+                      <Icon className="size-5" />
+                    </span>
+                    <h3 className="text-lg font-semibold">{title}</h3>
+                  </div>
                   <p className="mt-2 leading-7 text-muted-foreground">{text}</p>
                 </article>
               ))}
@@ -225,10 +227,10 @@ export default function Home() {
         </section>
 
         <section id="how-it-works" className="scroll-mt-20 border-y bg-card px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
-          <div className="mx-auto grid max-w-[76rem] gap-10 lg:grid-cols-2 lg:items-center">
+          <div className="mx-auto grid max-w-[90rem] gap-10 xl:grid-cols-[minmax(0,1.35fr)_minmax(0,.65fr)] xl:items-center">
             <div>
               <p className="font-semibold text-secondary-foreground">适用场景</p>
-              <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
+              <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl xl:whitespace-nowrap">
                 适合想把 JLPT 语法用于表达的学习者
               </h2>
               <p className="mt-5 text-lg leading-8 text-muted-foreground">
@@ -236,7 +238,7 @@ export default function Home() {
                 文法トレーニング可以把每天的学习拆成可执行的小任务。
               </p>
             </div>
-            <ul className="space-y-4">
+            <ul className="grid gap-4 sm:grid-cols-2">
               {[
                 "按目标级别与目标日期制定学习计划",
                 "每天用 10～30 分钟完成新学与复习任务",
