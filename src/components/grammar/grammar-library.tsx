@@ -145,7 +145,7 @@ export function GrammarLibrary() {
               return (
                 <Card
                   key={item.id}
-                  className="min-w-0 warm-shadow md:h-full md:min-h-56"
+                  className="min-w-0 warm-shadow md:h-full md:min-h-44"
                 >
                   <CardContent className="flex min-w-0 flex-col md:h-full">
                     <div className="flex min-w-0 items-start justify-between gap-3">
@@ -157,7 +157,7 @@ export function GrammarLibrary() {
                     <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
                       {item.chineseExplanation}
                     </p>
-                    <div className="mt-4 md:mt-auto md:pt-5">
+                    <div className="mt-4 md:mt-auto md:pt-3">
                       <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
                         <span className="whitespace-nowrap rounded-full bg-secondary px-3 py-1 font-medium text-secondary-foreground">
                           {statusSummary(progress)}
