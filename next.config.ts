@@ -21,7 +21,7 @@ const nextConfig: NextConfig = {
       {
         // Recover clients that cached the previous malformed permanent redirect.
         source: "/\\:path\\*",
-        destination: "/?redirect-recovery=1",
+        destination: "/redirect-recovery",
         permanent: false,
       },
       {
