@@ -19,6 +19,12 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       {
+        // Recover clients that cached the previous malformed permanent redirect.
+        source: "/\\:path\\*",
+        destination: "/",
+        permanent: false,
+      },
+      {
         source: "/",
         has: [{ type: "query", key: "login", value: "success" }],
         destination: "/login?login=success",
