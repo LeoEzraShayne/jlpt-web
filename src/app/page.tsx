@@ -234,8 +234,10 @@ export default function Home() {
                 适合想把 JLPT 语法用于表达的学习者
               </h2>
               <p className="mt-5 text-lg leading-8 text-muted-foreground">
-                如果你正在准备 N1～N4，能读懂中文语法解释，却经常在写作或会话中想不起怎么用，
-                文法トレーニング可以把每天的学习拆成可执行的小任务。
+                <span className="block xl:whitespace-nowrap">
+                  如果你正在准备 N1～N4，能读懂中文语法解释，却经常在写作或会话中想不起怎么用，
+                </span>
+                <span className="block">文法トレーニング可以把每天的学习拆成可执行的小任务。</span>
               </p>
             </div>
             <ul className="grid gap-4 sm:grid-cols-2">
