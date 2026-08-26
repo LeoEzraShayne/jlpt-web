@@ -342,7 +342,7 @@ export function StudyWorkspace({ sessionId }: { sessionId: string }) {
                   <div className="mt-4 rounded-xl bg-destructive/10 p-4 text-sm text-destructive">
                     <p className="flex items-start gap-2">
                       <TriangleAlert className="mt-0.5 size-4 shrink-0" />
-                      {job.errorMessage || "批改失败"}
+                      {reviewFailureMessage(job)}
                     </p>
                     <Button
                       type="button"
@@ -408,6 +408,13 @@ function RecallPolicyMessage({
     </p>
   );
 }
+
+function reviewFailureMessage(job: AiReviewJob) {
+  if (["AI_TIMEOUT", "AI_NETWORK_ERROR"].includes(job.errorCode ?? ""))
+    return "AI 批改响应超时，请稍后重新批改。";
+  return "AI 批改服务暂时不可用，请稍后重新批改。";
+}
+
 function Hint({ label, value }: { label: string; value: string }) {
   return (
     <div>
