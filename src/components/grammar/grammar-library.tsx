@@ -158,11 +158,11 @@ export function GrammarLibrary() {
                       {item.chineseExplanation}
                     </p>
                     <div className="mt-4 md:mt-auto md:pt-3">
-                      <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
-                        <span className="whitespace-nowrap rounded-full bg-secondary px-3 py-1 font-medium text-secondary-foreground">
+                      <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-1 text-[11px] sm:gap-2 sm:text-xs">
+                        <span className="truncate whitespace-nowrap rounded-full bg-secondary px-2 py-1 font-medium text-secondary-foreground sm:px-3">
                           {statusSummary(progress)}
                         </span>
-                        <span className="whitespace-nowrap rounded-full bg-primary/10 px-3 py-1 font-medium text-primary">
+                        <span className="whitespace-nowrap rounded-full bg-primary/10 px-2 py-1 font-medium text-primary sm:px-3">
                           {progress?.lastScore != null
                             ? `最近 ${progress.lastScore} 分`
                             : "尚未练习"}
@@ -171,7 +171,7 @@ export function GrammarLibrary() {
                           asChild
                           size="sm"
                           variant={progress ? "outline" : "default"}
-                          className="rounded-full px-4"
+                          className="rounded-full px-2 text-[11px] sm:px-4 sm:text-xs"
                         >
                           <Link href={`/grammar/${item.id}`}>
                             {progress ? "查看并练习" : "开始学习"}

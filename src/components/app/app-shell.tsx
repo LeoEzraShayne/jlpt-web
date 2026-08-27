@@ -92,7 +92,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </Link>
           <div className="hidden lg:block" />
           <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
-            <FocusCycleCompact />
+            {pathname.startsWith("/study/") && <FocusCycleCompact />}
             <ThemePicker compact />
             <Button
               variant="ghost"
