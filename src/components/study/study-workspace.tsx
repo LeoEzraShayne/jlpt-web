@@ -163,29 +163,31 @@ export function StudyWorkspace({ sessionId }: { sessionId: string }) {
   return (
     <main className="min-h-screen min-w-0 max-w-full overflow-x-clip bg-background">
       <header className="border-b bg-card">
-        <div className="mx-auto flex h-16 min-w-0 max-w-5xl items-center justify-between gap-2 px-2 sm:px-4">
+        <div className="mx-auto flex h-16 min-w-0 max-w-5xl items-center gap-2 px-2 sm:px-4">
           <Button asChild variant="ghost" className="shrink-0 px-2 sm:px-4">
             <Link href="/today">
               <ArrowLeft />
               退出练习
             </Link>
           </Button>
-          <span className="min-w-0 truncate text-sm font-medium">
-            {session.mode === "LEARN"
-              ? "新语法学习"
-              : session.mode === "REVIEW"
-                ? "复习"
-                : "自由练习"}
-          </span>
-          <span className="shrink-0 rounded-full bg-secondary px-3 py-1 text-xs font-semibold text-secondary-foreground">
-            {grammar.level}
-          </span>
+          <div className="ml-auto flex shrink-0 items-center gap-3 sm:gap-4">
+            <span className="text-sm font-medium">
+              {session.mode === "LEARN"
+                ? "新语法学习"
+                : session.mode === "REVIEW"
+                  ? "复习"
+                  : "自由练习"}
+            </span>
+            <span className="rounded-full bg-secondary px-3 py-1 text-xs font-semibold text-secondary-foreground">
+              {grammar.level}
+            </span>
+          </div>
         </div>
       </header>
       <div className="mx-auto min-w-0 max-w-4xl px-4 py-7 sm:py-10">
         <div className="min-w-0 text-center">
           <h1 className="text-2xl font-bold sm:text-3xl">{grammar.title}</h1>
-          <p className="mt-2 text-muted-foreground">
+          <p className="mt-2 whitespace-nowrap text-[clamp(11px,3.45vw,16px)] text-muted-foreground">
             请先回忆含义和接续，再用它造一个自己的句子。
           </p>
         </div>
@@ -290,13 +292,14 @@ export function StudyWorkspace({ sessionId }: { sessionId: string }) {
             </CardHeader>
             <CardContent>
               <form className="min-w-0" onSubmit={submit}>
-                <div className="mb-3 flex flex-wrap gap-2">
+                <div className="mb-3 grid grid-cols-4 gap-1 sm:flex sm:flex-wrap sm:gap-2">
                   {scenes.map((value) => (
                     <Button
                       key={value}
                       type="button"
                       size="sm"
                       variant={scene === value ? "secondary" : "outline"}
+                      className="min-w-0 px-1 text-xs sm:px-2.5"
                       onClick={() => setScene(value)}
                     >
                       {value}

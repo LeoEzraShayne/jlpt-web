@@ -35,9 +35,9 @@ export function FocusCycleCard() {
             <p className="font-semibold">{isBreak ? "休息时间" : "整段专注"}</p>
             <time className="font-mono text-2xl font-bold tabular-nums">{formatFocusTime(remaining)}</time>
           </div>
-          <p className="mt-1 text-sm text-muted-foreground">{isBreak ? "休息结束后自动开始下一轮专注" : "跨任务累计专注 30 分钟，再休息 5 分钟"}</p>
         </div>
       </div>
+      <p className="mt-3 whitespace-nowrap text-[clamp(10px,3.2vw,14px)] text-muted-foreground">{isBreak ? "休息结束后自动开始下一轮专注" : "跨任务累计专注 30 分钟，再休息 5 分钟"}</p>
       <div className="mt-4 h-2 overflow-hidden rounded-full bg-muted" role="progressbar" aria-label="本轮剩余时间" aria-valuenow={Math.round(progress)} aria-valuemin={0} aria-valuemax={100}>
         <div className="h-full rounded-full bg-primary transition-[width] duration-1000" style={{ width: `${progress}%` }} />
       </div>
