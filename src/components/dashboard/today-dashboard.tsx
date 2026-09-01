@@ -118,7 +118,7 @@ export function TodayDashboard() {
         >
           <Metric
             icon={BookOpen}
-            label="今日新学"
+            label="待学新语法"
             value={data.summary.newCount}
           />
           <Metric
