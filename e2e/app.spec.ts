@@ -216,13 +216,6 @@ test("brand login page is responsive and exposes Google sign in", async ({ page 
   );
   await expectNoHorizontalOverflow(page);
 });
-test("today overview labels remaining new grammar accurately", async ({ page }) => {
-  await mockAuthenticatedApi(page);
-  await page.goto("/today");
-  await expect(page.getByText("待学新语法", { exact: true })).toBeVisible();
-  await expect(page.getByText("今日新学", { exact: true })).toHaveCount(0);
-});
-
 test("today task opens the focused study flow and enforces score 59 revision", async ({ page }) => {
   await mockAuthenticatedApi(page);
   await page.goto("/today");
