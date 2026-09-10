@@ -1,6 +1,8 @@
 export type ThemeId = "sunshine" | "coral" | "mint" | "ocean" | "violet";
 export type JlptLevel = "N1" | "N2" | "N3" | "N4";
 export type RecallRating = "FORGOT" | "FUZZY" | "REMEMBERED";
+export type StudyPlanMode = "SYSTEM" | "GAP_FILL";
+export type TrainingMode = "UNDERSTAND" | "SUBSTITUTE" | "COMBINE" | "TRANSFER";
 export type SessionMode = "LEARN" | "REVIEW" | "PRACTICE";
 
 export interface GrammarLevel {
@@ -18,6 +20,9 @@ export interface User {
   timezone: string;
   targetLevel: JlptLevel;
   colorTheme: ThemeId;
+  dailyMinutes?: number;
+  primaryShare?: number;
+  learningV2Enabled?: boolean;
 }
 
 export interface Progress {
@@ -25,6 +30,8 @@ export interface Progress {
   status: "NOT_STARTED" | "LEARNING" | "DUE" | "MASTERED" | "NEEDS_WORK";
   stage: number;
   masteryScore: number;
+  needsWork?: boolean;
+  masteryRuleVersion?: string;
   lastScore?: number | null;
   lastStudiedAt?: string | null;
   learningState?: {
@@ -73,7 +80,8 @@ export interface StudyPlan {
   targetDate: string;
   dailyMinutes: number;
   dailyNewLimit: number;
-  status: "ACTIVE" | "PAUSED" | "COMPLETED";
+  status: "ACTIVE" | "PAUSED" | "COMPLETED" | "ARCHIVED";
+  mode?: StudyPlanMode;
   totalGrammar: number;
   learnedGrammar: number;
   remainingGrammar: number;
@@ -84,6 +92,7 @@ export interface StudyPlan {
 export interface StudyTask {
   id: string;
   grammarId: string;
+  planId?: string | null;
   taskDate: string;
   type: "LEARN" | "REVIEW" | "PRACTICE";
   status: "PENDING" | "IN_PROGRESS" | "COMPLETED" | "SKIPPED";
@@ -96,6 +105,17 @@ export interface StudyTask {
 }
 
 export interface Dashboard {
+  levels?: Array<{
+    planId: string; level: JlptLevel; mode: StudyPlanMode; isPrimary: boolean;
+    totalGrammar: number; masteredGrammar: number; learnedGrammar: number;
+    newCount: number; reviewCount: number; completedCount: number; estimatedMinutes: number;
+  }>;
+  allocation?: {
+    primaryMinutes: number; foundationMinutes: number; spentMinutes: number;
+    remainingMinutes: number; overrunMinutes: number;
+    primaryPlannedMinutes: number; foundationPlannedMinutes: number;
+  };
+  backlog?: number;
   summary: {
     newCount: number;
     reviewCount: number;
@@ -163,6 +183,10 @@ export interface ReviewResult {
   alternativeSentence?: string | null;
   alternativeSentenceFurigana?: string | null;
   alternativeSentenceTranslationZh?: string | null;
+  contentResponse?: string | null;
+  diversityAdvice?: string | null;
+  nextPractice?: string | null;
+  scenarioTaskCompleted?: boolean | null;
   explanationZh: string;
   encouragement: string;
   usedTargetGrammar?: boolean | null;
@@ -202,6 +226,9 @@ export interface StudySession {
   id: string;
   grammarId: string;
   taskId?: string | null;
+  scenarioId?: string | null;
+  trainingMode?: TrainingMode | null;
+  trainingContext?: TrainingContext | null;
   mode: SessionMode;
   status: "ACTIVE" | "COMPLETED" | "ABANDONED";
   revealedAt?: string | null;
@@ -268,4 +295,42 @@ export interface CompletionNotice {
   submittedRating: RecallRating;
   effectiveRating: RecallRating;
   nextReviewOn: string;
+}
+
+export interface TrainingContext {
+  scenario?: { id: string; domain: string; objective: string; register: string; promptZh: string };
+  targetGrammarId?: string;
+  supportGrammar?: { id: string; title: string; level: JlptLevel } | null;
+  vocabulary?: Array<{ id: string; spelling: string; reading: string; glossZh?: string | null }>;
+  expression?: { id: string; sentence?: string; translationZh?: string | null } | null;
+  instructionZh?: string;
+}
+
+export interface StudyPlanList {
+  items: StudyPlan[];
+  nextCursor: string | null;
+}
+export interface VocabularyEntry {
+  id: string; word: string; reading: string; senseKey: string; partOfSpeech: string[];
+  glosses: Array<{language: string; text: string; type?: string | null}>;
+  chineseGloss: string | null; chineseGlossSource: string | null;
+  level: JlptLevel | null; levelSource: string | null;
+  sourceName: string; sourceUrl: string | null; sourceVersion: string;
+  license: string | null; validationStatus: string; ownerId: string | null;
+}
+export interface PersonalExpression {
+  id: string; grammarId: string; reviewId: string;
+  variant: "ORIGINAL" | "CORRECTION" | "ALTERNATIVE";
+  sentence: string; furigana: string | null; translationZh: string | null;
+  scenarioId: string | null; scene: string | null; note: string;
+  createdAt: string; updatedAt: string;
+}
+export interface ContentImport {
+  id: string; fileName: string; sourceName: string; sourceVersion: string;
+  status: string; summary: Record<string, unknown>; createdAt: string;
+}
+export interface ContentCandidate {
+  id: string; kind: "VOCABULARY" | "PHRASE"; word: string; reading: string;
+  senseKey: string; payload: Record<string, unknown>;
+  validationStatus: "PENDING" | "VALIDATED" | "REJECTED"; validationNotes: string;
 }
