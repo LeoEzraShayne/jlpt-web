@@ -14,7 +14,7 @@ maintenance database `postgres`; only localhost/loopback hosts accepted). The te
 database URL inherits its credentials/port/options and replaces only the database name.
 Other overrides: `REAL_API_PORT` (4617), `REAL_WEB_PORT` (3117), `REAL_QA_DIR` (sibling `../qa`).
 Pass Playwright options after the script, e.g. `--project=mobile-320`.
-Suggested npm script: `"test:e2e:real": "node scripts/real-stack/run.mjs"`.
+Package script: `npm run test:e2e:real` (with the same environment overrides).
 The regular Playwright config excludes this suite, preserving the existing 135 tests.
 
 The runner refuses occupied ports and `.env` files, creates a random
