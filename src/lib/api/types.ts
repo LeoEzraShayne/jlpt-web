@@ -113,9 +113,9 @@ export interface Dashboard {
   allocation?: {
     primaryMinutes: number; foundationMinutes: number; spentMinutes: number;
     remainingMinutes: number; overrunMinutes: number;
-    primaryPlannedMinutes: number; foundationPlannedMinutes: number;
+    primaryPlannedMinutes: number; foundationPlannedMinutes: number; reservedMinutes?: number;
   };
-  backlog?: number;
+  backlog?: { count: number; overdueCount: number };
   summary: {
     newCount: number;
     reviewCount: number;
@@ -241,6 +241,11 @@ export interface StudySession {
     effectiveRating: RecallRating;
     nextReviewOn: string;
     intervalDays: number;
+    evidenceVersion?: string;
+    dueReview?: boolean;
+    assessmentAvailable?: boolean;
+    eligibleMasteryReview?: boolean;
+    nextReviewStillDue?: boolean;
     stabilityEstimateDays: number | null;
     difficultyEstimate: number | null;
     algorithmVersion: string;
@@ -298,12 +303,27 @@ export interface CompletionNotice {
 }
 
 export interface TrainingContext {
-  scenario?: { id: string; domain: string; objective: string; register: string; promptZh: string };
-  targetGrammarId?: string;
-  supportGrammar?: { id: string; title: string; level: JlptLevel } | null;
-  vocabulary?: Array<{ id: string; spelling: string; reading: string; glossZh?: string | null }>;
-  expression?: { id: string; sentence?: string; translationZh?: string | null } | null;
+  version?: "training-v1";
   instructionZh?: string;
+  scenario?: {
+    version: "scenario-v1"; id: string; scenarioId: string; taskId: string;
+    objectiveId: string; domain: string; objective: string; register: string; promptZh: string;
+  } | null;
+  words?: Array<{
+    id: string; word: string; reading: string; chineseGloss: string | null;
+    glosses: Array<{ language: string; text: string }>;
+    sourceName: string; sourceVersion: string;
+  }>;
+  supportingGrammar?: { id: string; title: string; level: JlptLevel } | null;
+  expressions?: Array<{
+    id: string; hidden?: boolean; sentence?: string; furigana?: string | null;
+    translationZh?: string | null; provenance?: unknown;
+  }>;
+  phrases?: Array<{
+    id: string; hidden?: boolean; word?: string; reading?: string;
+    payload?: { gloss?: string; [key: string]: unknown };
+  }>;
+  referenceHidden?: boolean;
 }
 
 export interface StudyPlanList {
