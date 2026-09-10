@@ -412,23 +412,21 @@ function PlanForecastCard() {
             </p>
           </div>
         </div>
-        <div className="overflow-x-auto">
-          <div className="min-w-[360px] text-sm">
-            <div className="grid grid-cols-[1.3fr_repeat(3,1fr)] border-b pb-2 text-xs text-muted-foreground">
-              <span>日期</span><span>复习</span><span>新学</span><span>预计</span>
-            </div>
-            {days.map((day) => (
-              <div
-                key={day.date}
-                className="grid grid-cols-[1.3fr_repeat(3,1fr)] border-b py-2 last:border-0"
-              >
-                <span>{formatStudyDate(day.date)}</span>
-                <span>{day.reviewCount} 项</span>
-                <span>{day.newCount} 项</span>
-                <span>{day.estimatedMinutes} 分钟</span>
-              </div>
-            ))}
+        <div className="min-w-0 text-sm tabular-nums">
+          <div className="grid grid-cols-[1.2fr_0.8fr_0.8fr_1.2fr] gap-x-1 border-b pb-2 text-xs text-muted-foreground">
+            <span>日期</span><span>复习</span><span>新学</span><span className="text-right">预计</span>
           </div>
+          {days.map((day) => (
+            <div
+              key={day.date}
+              className="grid grid-cols-[1.2fr_0.8fr_0.8fr_1.2fr] gap-x-1 border-b py-2 last:border-0"
+            >
+              <span>{formatStudyDate(day.date)}</span>
+              <span>{day.reviewCount} 项</span>
+              <span>{day.newCount} 项</span>
+              <span className="text-right">{day.estimatedMinutes} 分钟</span>
+            </div>
+          ))}
         </div>
         <p className="text-xs leading-5 text-muted-foreground">
           根据当前状态估算，假设每次复习均能记住；实际安排会持续调整。

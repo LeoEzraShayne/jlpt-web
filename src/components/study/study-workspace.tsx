@@ -10,22 +10,22 @@ import {
   TriangleAlert,
 } from "lucide-react";
 import Link from "next/link";
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import useSWR, { useSWRConfig } from "swr";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { ErrorState } from "@/components/shared/error-state";
+import { FuriganaText } from "@/components/shared/furigana-text";
 import { LoadingState } from "@/components/shared/loading-state";
 import { ReviewResultCard } from "./review-result-card";
+import { DefaultStudyButton } from "./default-study-button";
 import { FocusCycleCard } from "@/components/focus/focus-cycle-display";
 import { apiFetcher, apiRequest, ApiError } from "@/lib/api/client";
 import { apiKeys } from "@/lib/api/keys";
 import type { AiReviewJob, RecallRating, ReviewResult, StudySession } from "@/lib/api/types";
 import { saveCompletionNotice } from "@/lib/study-display";
-
-const scenes = ["生命安全", "工作责任", "社会问题", "自由造句"];
 
 export function StudyWorkspace({ sessionId }: { sessionId: string }) {
   const router = useRouter();
@@ -34,13 +34,14 @@ export function StudyWorkspace({ sessionId }: { sessionId: string }) {
     apiKeys.session(sessionId),
     apiFetcher,
   );
-  const [showHint, setShowHint] = useState(false);
+  const [showHint, setShowHint] = useState<boolean | null>(null);
   const [sentence, setSentence] = useState("");
-  const [scene, setScene] = useState(scenes[3]);
+  const [previousCorrection, setPreviousCorrection] = useState<ReviewResult | null>(null);
   const [submittedReviewId, setSubmittedReviewId] = useState<string | null>();
   const [pollInterval, setPollInterval] = useState(500);
   const [submitting, setSubmitting] = useState(false);
   const [completing, setCompleting] = useState(false);
+  const completionPending = useRef(false);
   const [message, setMessage] = useState("");
   const reviewId =
     submittedReviewId === undefined
@@ -83,21 +84,38 @@ export function StudyWorkspace({ sessionId }: { sessionId: string }) {
     );
   const session = sessionSWR.data;
   const grammar = session.grammar;
+  const hintVisible = showHint ?? session.mode === "LEARN";
   const job = reviewSWR.data;
   const result = job?.result;
+  const correction = result ?? previousCorrection;
+  const reviewing = Boolean(
+    reviewId && (!job || ["QUEUED", "PROCESSING"].includes(job.status)),
+  );
+  const submitDisabled = !sentence.trim() || submitting || reviewing || Boolean(result);
   const allowedRatings = result?.recallPolicy?.allowedRatings ?? [];
   async function reveal() {
     setShowHint(true);
-    if (!session.revealedAt) {
-      await apiRequest(`/study-sessions/${sessionId}/reveal`, {
+    if (session.mode !== "REVIEW" && session.revealedAt) return;
+    try {
+      const { data } = await apiRequest<Omit<StudySession, "grammar" | "attempts">>(
+        `/study-sessions/${sessionId}/reveal`, {
         method: "POST",
       });
-      void sessionSWR.mutate();
+      // Reveal returns session fields only; preserve loaded grammar and attempts.
+      await sessionSWR.mutate(
+        (current) => ({ ...(current ?? session), ...data }),
+        { revalidate: false },
+      );
+    } catch (cause) {
+      setShowHint(false);
+      setMessage(
+        cause instanceof ApiError ? cause.message : "提示打开失败，请重试",
+      );
     }
   }
   async function submit(event: FormEvent) {
     event.preventDefault();
-    if (!sentence.trim() || submitting) return;
+    if (submitDisabled) return;
     setSubmitting(true);
     setMessage("");
     try {
@@ -105,7 +123,7 @@ export function StudyWorkspace({ sessionId }: { sessionId: string }) {
         "/sentence-reviews",
         {
           method: "POST",
-          body: JSON.stringify({ sessionId, sentence: sentence.trim(), scene }),
+          body: JSON.stringify({ sessionId, sentence: sentence.trim() }),
         },
       );
       setPollInterval(500);
@@ -125,7 +143,8 @@ export function StudyWorkspace({ sessionId }: { sessionId: string }) {
     void reviewSWR.mutate();
   }
   async function complete(rating: RecallRating, includeAiResult = true) {
-    if (completing) return;
+    if (completionPending.current) return;
+    completionPending.current = true;
     setCompleting(true);
     setMessage("");
     try {
@@ -153,12 +172,14 @@ export function StudyWorkspace({ sessionId }: { sessionId: string }) {
         cause instanceof ApiError ? cause.message : "完成失败，请重试",
       );
       setCompleting(false);
+      completionPending.current = false;
     }
   }
   function revise() {
+    setPreviousCorrection(result ?? null);
     setSubmittedReviewId(null);
-    setSentence(result?.correctedSentence ?? sentence);
-    setMessage("请修改句子后再次提交批改。");
+    setSentence("");
+    setMessage("请重新写一句，再提交批改。");
   }
   return (
     <main className="min-h-screen min-w-0 max-w-full overflow-x-clip bg-background">
@@ -199,15 +220,17 @@ export function StudyWorkspace({ sessionId }: { sessionId: string }) {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => (showHint ? setShowHint(false) : void reveal())}
+                onClick={() =>
+                  hintVisible ? setShowHint(false) : void reveal()
+                }
               >
-                {showHint ? <EyeOff /> : <Eye />}
-                {showHint ? "隐藏提示" : "查看提示"}
+                {hintVisible ? <EyeOff /> : <Eye />}
+                {hintVisible ? "隐藏提示" : "查看提示"}
               </Button>
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {showHint ? (
+            {hintVisible ? (
               <div className="min-w-0 space-y-4">
                 <Hint label="中文解释" value={grammar.chineseExplanation} />
                 <Hint
@@ -228,9 +251,120 @@ export function StudyWorkspace({ sessionId }: { sessionId: string }) {
             )}
           </CardContent>
         </Card>
-        {result ? (
+        <Card className="mt-6 min-w-0 warm-shadow">
+          <CardHeader>
+            <CardTitle>造一个日语句子</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form className="min-w-0" onSubmit={submit}>
+              {correction && (
+                <div className="mb-4 min-w-0" role="status">
+                  <p className="text-sm font-medium text-muted-foreground">
+                    {result ? "AI 修改后的句子" : "上次 AI 修改后的句子"}
+                  </p>
+                  <p
+                    lang="ja"
+                    className="mt-2 whitespace-pre-wrap break-words text-base leading-8"
+                  >
+                    <FuriganaText annotated={correction.correctedSentenceFurigana} fallback={correction.correctedSentence} />
+                  </p>
+                  {correction.correctedSentenceTranslationZh && (
+                    <p className="mt-2 text-sm leading-7 text-muted-foreground">
+                      中文：{correction.correctedSentenceTranslationZh}
+                    </p>
+                  )}
+                </div>
+              )}
+              {!result && (
+                <>
+                  <Textarea
+                    aria-label="日语句子"
+                    value={sentence}
+                    onKeyDown={(event) => {
+                      if (
+                        event.key !== "Enter" ||
+                        event.shiftKey ||
+                        event.nativeEvent.isComposing ||
+                        event.nativeEvent.keyCode === 229
+                      )
+                        return;
+                      event.preventDefault();
+                      if (!event.repeat && !submitDisabled)
+                        event.currentTarget.form?.requestSubmit();
+                    }}
+                    onChange={(event) =>
+                      setSentence(event.target.value.slice(0, 150))
+                    }
+                    rows={6}
+                    placeholder={`请使用「${grammar.title}」造句`}
+                  />
+                  <div className="mt-2 flex flex-wrap justify-between gap-2 text-xs text-muted-foreground">
+                    <span>Enter 提交 · Shift+Enter 换行</span>
+                    <span>{sentence.length}/150</span>
+                  </div>
+                  <Button
+                    type="submit"
+                    size="lg"
+                    disabled={submitDisabled}
+                    className="mt-4 h-11 w-full"
+                  >
+                    {submitting || reviewing ? (
+                      <LoaderCircle className="animate-spin" />
+                    ) : (
+                      <Send />
+                    )}
+                    {reviewing
+                      ? "AI 正在批改…"
+                      : "提交给 AI 批改"}
+                  </Button>
+                  {job?.status === "FAILED" && (
+                    <div className="mt-4 rounded-xl bg-destructive/10 p-4 text-sm text-destructive">
+                      <p className="flex items-start gap-2">
+                        <TriangleAlert className="mt-0.5 size-4 shrink-0" />
+                        {reviewFailureMessage(job)}
+                      </p>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="mt-3"
+                        onClick={() => void retryJob()}
+                      >
+                        重新批改
+                      </Button>
+                      <p className="mt-3 text-xs text-muted-foreground">
+                        也可以不等待 AI，按这次真实回忆情况完成。
+                      </p>
+                      <div className="mt-2 grid grid-cols-3 gap-2">
+                        {[
+                          ["FORGOT", "忘记了"],
+                          ["FUZZY", "有些模糊"],
+                          ["REMEMBERED", "记住了"],
+                        ].map(([rating, label]) => (
+                          <Button
+                            key={rating}
+                            type="button"
+                            size="sm"
+                            variant="ghost"
+                            disabled={completing}
+                            onClick={() =>
+                              void complete(rating as RecallRating, false)
+                            }
+                          >
+                            {label}
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+            </form>
+          </CardContent>
+        </Card>
+        {result && (
           <div className="mt-6 min-w-0">
-            <ReviewResultCard result={result} />
+            <ReviewResultCard result={result} showCorrection={false} />
             <div className="mt-6 min-w-0 rounded-2xl border bg-card p-5">
               <h2 className="font-semibold">这次记得怎么样？</h2>
               <p className="mt-1 text-sm text-muted-foreground">
@@ -241,13 +375,16 @@ export function StudyWorkspace({ sessionId }: { sessionId: string }) {
                   <RecallPolicyMessage reason={result.recallPolicy.reason} />
                 )}
               {allowedRatings.length === 0 ? (
-                <Button className="mt-4 w-full" onClick={revise}>
-                  <RefreshCcw />
-                  修改后重新提交
-                </Button>
+                <div className="mt-4">
+                  <DefaultStudyButton disabled={completing} onClick={revise} title="修改后重新提交">
+                    <RefreshCcw />
+                    修改后重新提交
+                  </DefaultStudyButton>
+                </div>
               ) : (
-                <div className="mt-4 grid gap-3 sm:grid-cols-3">
+                <div className="mt-4 grid auto-cols-fr grid-flow-col gap-2 sm:gap-3">
                   <Button
+                    className="min-w-0 px-2 text-xs sm:text-sm"
                     variant="outline"
                     disabled={completing}
                     onClick={() => void complete("FORGOT")}
@@ -255,6 +392,7 @@ export function StudyWorkspace({ sessionId }: { sessionId: string }) {
                     忘记了
                   </Button>
                   <Button
+                    className="min-w-0 px-2 text-xs sm:text-sm"
                     variant="outline"
                     disabled={completing}
                     onClick={() => void complete("FUZZY")}
@@ -262,128 +400,33 @@ export function StudyWorkspace({ sessionId }: { sessionId: string }) {
                     有些模糊
                   </Button>
                   {allowedRatings.includes("REMEMBERED") && (
-                    <Button
-                      disabled={completing}
-                      onClick={() => void complete("REMEMBERED")}
-                    >
-                      {completing && <LoaderCircle className="animate-spin" />}
-                      记住了
-                    </Button>
+                    result.totalScore < 80 ? (
+                      <Button variant="outline" disabled={completing}
+                        onClick={() => void complete("REMEMBERED")}>
+                        记住了
+                      </Button>
+                    ) : (
+                      <DefaultStudyButton disabled={completing}
+                        onClick={() => void complete("REMEMBERED")} title="记住了">
+                        记住了
+                      </DefaultStudyButton>
+                    )
+                  )}
+                  {result.totalScore < 80 && (
+                    <DefaultStudyButton disabled={completing} onClick={revise} title="修改后重试">
+                      <RefreshCcw className="hidden sm:block" />
+                      修改后重试
+                    </DefaultStudyButton>
                   )}
                 </div>
               )}
               {result.totalScore < 80 && (
-                <Button
-                  className="mt-3 w-full"
-                  variant="ghost"
-                  disabled={completing}
-                  onClick={revise}
-                >
-                  <RefreshCcw />
-                  修改后重试（首次结果仍会保留）
-                </Button>
+                <p className="mt-2 text-xs text-muted-foreground">
+                  首次结果仍会保留
+                </p>
               )}
             </div>
           </div>
-        ) : (
-          <Card className="mt-6 min-w-0 warm-shadow">
-            <CardHeader>
-              <CardTitle>造一个日语句子</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <form className="min-w-0" onSubmit={submit}>
-                <div className="mb-3 grid grid-cols-4 gap-1 sm:flex sm:flex-wrap sm:gap-2">
-                  {scenes.map((value) => (
-                    <Button
-                      key={value}
-                      type="button"
-                      size="sm"
-                      variant={scene === value ? "secondary" : "outline"}
-                      className="min-w-0 px-1 text-xs sm:px-2.5"
-                      onClick={() => setScene(value)}
-                    >
-                      {value}
-                    </Button>
-                  ))}
-                </div>
-                <Textarea
-                  value={sentence}
-                  onChange={(event) =>
-                    setSentence(event.target.value.slice(0, 150))
-                  }
-                  rows={6}
-                  placeholder={`请使用「${grammar.title}」造句`}
-                />
-                <div className="mt-2 flex flex-wrap justify-between gap-2 text-xs text-muted-foreground">
-                  <span>AI 会检查语法、接续和自然度</span>
-                  <span>{sentence.length}/150</span>
-                </div>
-                <Button
-                  type="submit"
-                  size="lg"
-                  disabled={
-                    !sentence.trim() ||
-                    submitting ||
-                    Boolean(
-                      job && ["QUEUED", "PROCESSING"].includes(job.status),
-                    )
-                  }
-                  className="mt-4 h-11 w-full"
-                >
-                  {submitting ||
-                  job?.status === "QUEUED" ||
-                  job?.status === "PROCESSING" ? (
-                    <LoaderCircle className="animate-spin" />
-                  ) : (
-                    <Send />
-                  )}
-                  {job?.status === "QUEUED" || job?.status === "PROCESSING"
-                    ? "AI 正在批改…"
-                    : "提交给 AI 批改"}
-                </Button>
-                {job?.status === "FAILED" && (
-                  <div className="mt-4 rounded-xl bg-destructive/10 p-4 text-sm text-destructive">
-                    <p className="flex items-start gap-2">
-                      <TriangleAlert className="mt-0.5 size-4 shrink-0" />
-                      {reviewFailureMessage(job)}
-                    </p>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      className="mt-3"
-                      onClick={() => void retryJob()}
-                    >
-                      重新批改
-                    </Button>
-                    <p className="mt-3 text-xs text-muted-foreground">
-                      也可以不等待 AI，按这次真实回忆情况完成。
-                    </p>
-                    <div className="mt-2 grid grid-cols-3 gap-2">
-                      {[
-                        ["FORGOT", "忘记了"],
-                        ["FUZZY", "有些模糊"],
-                        ["REMEMBERED", "记住了"],
-                      ].map(([rating, label]) => (
-                        <Button
-                          key={rating}
-                          type="button"
-                          size="sm"
-                          variant="ghost"
-                          disabled={completing}
-                          onClick={() =>
-                            void complete(rating as RecallRating, false)
-                          }
-                        >
-                          {label}
-                        </Button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </form>
-            </CardContent>
-          </Card>
         )}
         {message && (
           <p className="mt-4 rounded-xl bg-secondary p-3 text-sm text-secondary-foreground">

@@ -8,7 +8,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FuriganaText } from "@/components/shared/furigana-text";
 import type { ReviewResult } from "@/lib/api/types";
 
-export function ReviewResultCard({ result }: { result: ReviewResult }) {
+export function ReviewResultCard({
+  result,
+  showCorrection = true,
+}: {
+  result: ReviewResult;
+  showCorrection?: boolean;
+}) {
   const scores = [
     ["语法使用", result.grammarScore, 30],
     ["接续正确", result.connectionScore, 20],
@@ -86,13 +92,16 @@ export function ReviewResultCard({ result }: { result: ReviewResult }) {
         title="中文说明"
         text={result.explanationZh}
       />
-      <Feedback
-        icon={WandSparkles}
-        title="修改建议"
-        text={result.correctedSentence}
-        translation={result.correctedSentenceTranslationZh}
-        japanese
-      />
+      {showCorrection && (
+        <Feedback
+          icon={WandSparkles}
+          title="修改建议"
+          text={result.correctedSentence}
+          annotated={result.correctedSentenceFurigana}
+          translation={result.correctedSentenceTranslationZh}
+          japanese
+        />
+      )}
       {result.alternativeSentence && (
         <Feedback
           icon={Sparkles}

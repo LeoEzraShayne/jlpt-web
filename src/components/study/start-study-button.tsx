@@ -1,7 +1,8 @@
 "use client";
 
 import { LoaderCircle, Play } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { useDefaultEnter } from "@/hooks/use-default-enter";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { useFocusCycle } from "@/components/focus/focus-cycle-provider";
@@ -18,6 +19,7 @@ export function StartStudyButton({
   buttonClassName,
   variant = "default",
   disabled = false,
+  defaultEnter = false,
 }: {
   grammarId: string;
   taskId?: string;
@@ -27,14 +29,19 @@ export function StartStudyButton({
   buttonClassName?: string;
   variant?: "default" | "outline";
   disabled?: boolean;
+  defaultEnter?: boolean;
 }) {
   const router = useRouter();
   const focus = useFocusCycle();
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const starting = useRef(false);
+  useDefaultEnter(buttonRef, defaultEnter);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
 
   async function start() {
-    if (pending || disabled) return;
+    if (starting.current || disabled) return;
+    starting.current = true;
     setPending(true);
     setError("");
     try {
@@ -50,6 +57,7 @@ export function StartStudyButton({
     } catch (cause) {
       setError(cause instanceof ApiError ? cause.message : "无法开始学习");
       setPending(false);
+      starting.current = false;
     }
   }
 
@@ -57,6 +65,9 @@ export function StartStudyButton({
     <div className={cn("min-w-0", className)}>
       {error && <p className="mb-2 text-xs text-destructive">{error}</p>}
       <Button
+        ref={buttonRef}
+        aria-keyshortcuts={defaultEnter ? "Enter" : undefined}
+        title={defaultEnter ? `${label}（Enter）` : undefined}
         onClick={start}
         disabled={pending || disabled}
         variant={variant}
