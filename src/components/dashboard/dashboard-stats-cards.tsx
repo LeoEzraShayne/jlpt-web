@@ -30,6 +30,7 @@ export function DashboardStatsCards({
       <StatsCard
         title="今日剩余"
         icon={BookOpen}
+        columns={3}
         className="xl:col-span-3"
         meta={`今日预算 ${minutes(budgetMinutes)}`}
         items={[
@@ -51,6 +52,7 @@ export function DashboardStatsCards({
       <StatsCard
         title="今日完成"
         icon={CheckCircle2}
+        columns={3}
         className="xl:col-span-3"
         items={[
           { label: "完成总数", value: stats.completedTotal },
@@ -137,6 +139,7 @@ function StatsCard({
   className,
   meta,
   items,
+  columns = 2,
   progress,
   children,
 }: {
@@ -145,6 +148,7 @@ function StatsCard({
   className?: string;
   meta?: string;
   items: StatItem[];
+  columns?: 2 | 3;
   progress?: DashboardStats["progress"];
   children?: ReactNode;
 }) {
@@ -172,7 +176,7 @@ function StatsCard({
             ))}
           </div>
         )}
-        <dl className="grid grid-cols-2 gap-x-5 gap-y-4">
+        <dl className={`grid grid-cols-2 gap-x-5 gap-y-4 ${columns === 3 ? "sm:grid-cols-3 md:grid-cols-2 xl:grid-cols-3" : ""}`}>
           {items.map((item) => (
             <div key={item.label} className="min-w-0 border-t border-border/60 pt-2.5">
               <dt className="flex items-center gap-1.5 text-xs leading-5 text-muted-foreground sm:text-sm">
