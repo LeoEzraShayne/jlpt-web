@@ -42,6 +42,10 @@ export function TrainingPanel({
 }) {
   const context = session.trainingContext;
   if (!context) return null;
+  // Existing sessions can contain separate senses of the same lexical form.
+  const words = (context.words ?? []).filter((word, index, all) =>
+    all.findIndex((other) => other.word === word.word && other.reading === word.reading) === index,
+  );
   const referencesHidden =
     session.mode === "REVIEW" && (!hintVisible || context.referenceHidden);
   const hasReferences = Boolean(
@@ -81,11 +85,11 @@ export function TrainingPanel({
             </span>
           </p>
         )}
-        {!!context.words?.length && (
+        {!!words.length && (
           <div>
             <h3 className="mb-2 text-sm font-semibold">可选重点词</h3>
             <div className="flex flex-col gap-2">
-              {context.words.map((word) => (
+              {words.map((word) => (
                 <TrainingWord key={word.id} word={word} />
               ))}
             </div>
@@ -198,9 +202,6 @@ function TrainingWord({
             .join("；")}
         </p>
       )}
-      <p className="mt-1 text-xs text-muted-foreground">
-        来源：{word.sourceName} · {word.sourceVersion}
-      </p>
       {message && (
         <p role="status" className="mt-1 text-xs">
           {message}

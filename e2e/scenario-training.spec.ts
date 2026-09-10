@@ -26,6 +26,10 @@ test("review hides personal references, reveals explicitly, and saves checked AI
     },
     words: [
       {
+        id: "v1-other-sense", word: "予定", reading: "よてい",
+        chineseGloss: "预定", glosses: [], sourceName: "JMdict", sourceVersion: "2026-09",
+      },
+      {
         id: "v1",
         word: "予定",
         reading: "よてい",
@@ -175,6 +179,9 @@ test("review hides personal references, reveals explicitly, and saves checked AI
   await expect(
     page.getByText("調査を踏まえて予定を変えます。", { exact: true }),
   ).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "收藏生词" })).toHaveCount(1);
+  await expect(page.getByText(/来源：JMdict/)).toHaveCount(0);
+  await expect(page.getByText(/2026-09/)).toHaveCount(0);
   expect(reveals).toBe(0);
   expect(expressionReads).toBe(0);
   await page.getByRole("button", { name: "查看参考表达（使用提示）" }).click();
