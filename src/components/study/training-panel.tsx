@@ -46,6 +46,11 @@ export function TrainingPanel({
   const words = (context.words ?? []).filter((word, index, all) =>
     all.findIndex((other) => other.word === word.word && other.reading === word.reading) === index,
   );
+  const wordGridColumns = words.length === 1
+    ? "grid-cols-1"
+    : words.length === 2 || words.length === 4
+      ? "grid-cols-1 sm:grid-cols-2"
+      : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3";
   const referencesHidden =
     session.mode === "REVIEW" && (!hintVisible || context.referenceHidden);
   const hasReferences = Boolean(
@@ -88,7 +93,7 @@ export function TrainingPanel({
         {!!words.length && (
           <div>
             <h3 className="mb-2 text-sm font-semibold">可选重点词</h3>
-            <div className="flex flex-col gap-2">
+            <div className={`grid gap-2 ${wordGridColumns}`}>
               {words.map((word) => (
                 <TrainingWord key={word.id} word={word} />
               ))}
@@ -179,7 +184,7 @@ function TrainingWord({
   }
   const glosses = Array.isArray(word.glosses) ? word.glosses : [];
   return (
-    <div className="rounded-lg border p-3 text-sm">
+    <div className="min-w-0 rounded-lg border p-3 text-sm wrap-anywhere">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <span>
           {word.word}（{word.reading}）
