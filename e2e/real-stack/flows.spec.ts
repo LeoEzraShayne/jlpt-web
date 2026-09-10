@@ -48,7 +48,7 @@ test('real plans preserve primary/shared budget, pause/resume, and generate toda
   await n2.getByRole('button', { name: '恢复计划' }).click();
   await expect(n2.getByText('进行中', { exact: true })).toBeVisible();
   await page.goto('/today');
-  await expect(page.getByLabel('今日时间分配')).toBeVisible();
+  await expect(page.getByLabel('剩余时间预算')).toBeVisible();
   const first = await apiData(page, '/dashboard/today');
   expect(first.allocation.primaryMinutes).toBe(24); expect(first.allocation.foundationMinutes).toBe(6);
   expect(first.tasks.length).toBeGreaterThan(0);
@@ -63,7 +63,7 @@ test('real plans preserve primary/shared budget, pause/resume, and generate toda
     await expect(plan.getByText('已暂停', { exact: true })).toBeVisible();
   }
   await page.goto('/today'); await expect(page).toHaveURL(/\/today$/);
-  await expect(page.getByLabel('今日时间分配')).toBeVisible();
+  await expect(page.getByLabel('剩余时间预算')).toBeVisible();
   expect((await apiData(page, '/study-plans')).items).toHaveLength(2);
   state = fixture('snapshot', userId);
   expect(state.plans.every((p: { status: string }) => p.status === 'PAUSED')).toBeTruthy();

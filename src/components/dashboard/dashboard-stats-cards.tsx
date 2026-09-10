@@ -1,13 +1,19 @@
-import { BookOpen, CheckCircle2, GraduationCap, RefreshCcw, type LucideIcon } from "lucide-react";
+import { BookOpen, CheckCircle2, ChevronDown, GraduationCap, RefreshCcw, type LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import type { DashboardStats } from "@/lib/dashboard-stats";
+import type { Dashboard } from "@/lib/api/types";
+
+const minutes = (value: number) => `${Number(value.toFixed(1))} 分钟`;
 
 interface DashboardStatsCardsProps {
   level: string;
   stats: DashboardStats;
   estimatedMinutes: number;
   recommendedTask?: ReactNode;
+  budgetMinutes: number;
+  allocation?: Dashboard["allocation"];
+  levels?: Dashboard["levels"];
 }
 
 export function DashboardStatsCards({
@@ -15,6 +21,9 @@ export function DashboardStatsCards({
   stats,
   estimatedMinutes,
   recommendedTask,
+  budgetMinutes,
+  allocation,
+  levels,
 }: DashboardStatsCardsProps) {
   return (
     <section aria-label="今日学习概览" className="grid min-w-0 gap-4 md:grid-cols-2 xl:grid-cols-6">
@@ -23,7 +32,7 @@ export function DashboardStatsCards({
         title="今日剩余"
         icon={BookOpen}
         className={recommendedTask ? "xl:col-span-2" : "xl:col-span-3"}
-        meta={`计划内复习共剩 ${stats.plannedReviewRemaining} 项`}
+        meta={`今日预算 ${minutes(budgetMinutes)}`}
         items={[
           { label: "待开始复习", value: stats.pendingReview },
           { label: "待开始新语法", value: stats.pendingNew },
@@ -32,14 +41,22 @@ export function DashboardStatsCards({
             value: stats.inProgressReview + stats.inProgressNew,
             detail: `复习 ${stats.inProgressReview} · 新学 ${stats.inProgressNew}`,
           },
-          { label: "剩余预计时间", value: `${estimatedMinutes} 分钟` },
+          { label: "剩余任务用时", value: minutes(estimatedMinutes) },
         ]}
-      />
+      >
+        {allocation && <div aria-label="剩余时间预算" className="mt-4 rounded-xl bg-muted/60 p-3">
+          <dl className="grid grid-cols-2 gap-x-5">
+            <div><dt className="text-xs text-muted-foreground">可再安排时间</dt><dd className="mt-1 text-lg font-semibold tabular-nums">{minutes(allocation.remainingMinutes)}</dd></div>
+            <div><dt className="text-xs text-muted-foreground">练习预留</dt><dd className="mt-1 text-lg font-semibold tabular-nums">{minutes(allocation.reservedMinutes ?? 0)}</dd></div>
+          </dl>
+          <p className="mt-2 text-xs leading-5 text-muted-foreground">可再安排时间已扣除实际用时、练习预留及待办安排。</p>
+        </div>}
+        <AllocationDetails allocation={allocation} levels={levels} />
+      </StatsCard>
       <StatsCard
         title="今日完成"
         icon={CheckCircle2}
         className={recommendedTask ? "xl:col-span-2" : "xl:col-span-3"}
-        meta={`已完成用时 ${stats.studyMinutesToday} 分钟`}
         items={[
           { label: "完成总数", value: stats.completedTotal },
           { label: "完成复习", value: stats.completedReview },
@@ -50,11 +67,21 @@ export function DashboardStatsCards({
             detail: "已包含在完成复习中",
           },
         ]}
-      />
+      >
+        <div className="mt-4 rounded-xl bg-muted/60 p-3">
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
+            <span className="text-xs text-muted-foreground">今日实际用时</span>
+            <strong className="text-lg tabular-nums">{minutes(allocation?.spentMinutes ?? stats.studyMinutesToday)}</strong>
+          </div>
+          <p className="mt-2 text-xs leading-5 text-muted-foreground">包含已完成、进行中及额外练习的实际用时。</p>
+          {allocation && allocation.overrunMinutes > 0 && <p role="status" className="mt-2 text-xs font-medium text-destructive">实际已超出今日预算 {minutes(allocation.overrunMinutes)}</p>}
+        </div>
+      </StatsCard>
       <StatsCard
         title="复习总账"
         icon={RefreshCcw}
         className="xl:col-span-3"
+        meta="启用计划合计"
         items={[
           {
             label: "逾期待复习",
@@ -65,6 +92,7 @@ export function DashboardStatsCards({
             value: stats.dueTodayReview,
           },
           { label: "未来 7 天复习", value: stats.upcomingReview },
+          { label: "未排入今日", value: stats.totalUnscheduled, detail: "保留在积压中，后续安排" },
         ]}
       />
       <StatsCard
@@ -84,6 +112,26 @@ export function DashboardStatsCards({
   );
 }
 
+function AllocationDetails({ allocation, levels }: Pick<Dashboard, "allocation" | "levels">) {
+  if (!allocation && !levels?.length) return null;
+  return <details className="group mt-3 border-t border-border/60 pt-3">
+    <summary className="flex cursor-pointer list-none items-center justify-between gap-2 rounded text-xs font-medium text-muted-foreground hover:text-foreground focus-visible:outline-2 focus-visible:outline-ring [&::-webkit-details-marker]:hidden">
+      级别与时间分配<ChevronDown className="size-4 transition-transform group-open:rotate-180" />
+    </summary>
+    <div className="mt-3 space-y-3 text-xs leading-5">
+      {allocation && <div className="space-y-1 text-muted-foreground">
+        <p>主目标：份额 {minutes(allocation.primaryMinutes)} · 已安排 {minutes(allocation.primaryPlannedMinutes)}</p>
+        <p>基础合计：份额 {minutes(allocation.foundationMinutes)} · 已安排 {minutes(allocation.foundationPlannedMinutes)}</p>
+        <p>空余份额可互借，安排时间可超过原份额。</p>
+      </div>}
+      {levels?.map(item => <div key={item.planId} className="border-t border-border/60 pt-2">
+        <div className="flex flex-wrap justify-between gap-x-3"><strong>{item.level} · {item.isPrimary ? "主目标" : "基础"}</strong><span className="text-muted-foreground">{item.reviewCount + item.newCount + item.completedCount === 0 ? "今日未安排" : `待办约 ${minutes(item.estimatedMinutes)}`}</span></div>
+        {item.reviewCount + item.newCount + item.completedCount > 0 && <p className="text-muted-foreground">待复习 {item.reviewCount} · 待新学 {item.newCount} · 已完成 {item.completedCount}</p>}
+      </div>)}
+    </div>
+  </details>;
+}
+
 interface StatItem {
   label: string;
   value: number | string;
@@ -98,6 +146,7 @@ function StatsCard({
   meta,
   items,
   progress,
+  children,
 }: {
   title: string;
   icon: LucideIcon;
@@ -105,9 +154,10 @@ function StatsCard({
   meta?: string;
   items: StatItem[];
   progress?: DashboardStats["progress"];
+  children?: ReactNode;
 }) {
   return (
-    <Card className={`min-w-0 border border-border/60 shadow-none ring-0 [--card-spacing:--spacing(5)] ${className ?? ""}`}>
+    <Card aria-label={title} className={`min-w-0 border border-border/60 shadow-none ring-0 [--card-spacing:--spacing(5)] ${className ?? ""}`}>
       <CardContent>
         <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
           <h2 className="flex items-center gap-2.5 text-base font-semibold">
@@ -142,6 +192,7 @@ function StatsCard({
             </div>
           ))}
         </dl>
+        {children}
       </CardContent>
     </Card>
   );

@@ -274,14 +274,21 @@ test("today shows retained spend and permits primary new work despite foundation
 }, testInfo) => {
   const api = await mockApi(page);
   await page.goto("/today");
-  await expect(page.getByLabel("今日时间分配")).toContainText("已使用 10");
-  await expect(page.getByLabel("今日时间分配")).toContainText("剩余 16");
+  await expect(page.getByLabel("今日时间分配")).toHaveCount(0);
+  await expect(page.getByLabel("今日完成")).toContainText("今日实际用时10 分钟");
+  await expect(page.getByLabel("剩余时间预算")).toContainText("可再安排时间16 分钟");
+  const details = page.locator("details").filter({ hasText: "级别与时间分配" });
+  await expect(details).not.toHaveAttribute("open", "");
+  await details.locator("summary").click();
+  await expect(details).toHaveAttribute("open", "");
+  await expect(details).toContainText("主目标：份额");
+  await details.locator("summary").click();
   await expect(
     page.getByRole("button", { name: "开始学习", exact: true }).first(),
   ).toBeEnabled();
   await expect(page.getByText(/还有 12 项逾期/)).toBeVisible();
   await page.reload();
-  await expect(page.getByLabel("今日时间分配")).toContainText("已使用 10");
+  await expect(page.getByLabel("今日完成")).toContainText("今日实际用时10 分钟");
   await expectNoHorizontalOverflow(page);
   expect(api.errors).toEqual([]);
   await page.screenshot({

@@ -25,8 +25,6 @@ import {
   recallLabels,
 } from "@/lib/study-display";
 
-const showMinutes = (value: number) => Number(value.toFixed(1));
-
 export function TodayDashboard() {
   const [completionNotice, setCompletionNotice] = useState<ReturnType<
     typeof consumeCompletionNotice
@@ -64,7 +62,8 @@ export function TodayDashboard() {
     : undefined;
   return (
     <div className="min-w-0 max-w-full">
-      <div className="mb-7">
+      <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+        <div>
         <h1 className="text-3xl font-bold tracking-tight md:text-4xl">
           你好，{user?.displayName}
         </h1>
@@ -77,10 +76,12 @@ export function TodayDashboard() {
           <strong className="text-foreground">
             {data.estimatedMinutes} 分钟
           </strong>
-          <span className="text-muted-foreground">
-            {` · 今日预算 ${data.planning.budgetMinutes} 分钟`}
-          </span>
         </p>
+        </div>
+        <nav aria-label="学习管理" className="flex flex-wrap gap-x-4 gap-y-2 text-sm">
+          <Link href="/plans" className="text-muted-foreground underline-offset-4 hover:text-foreground hover:underline">管理各级别计划</Link>
+          <Link href="/library" className="text-muted-foreground underline-offset-4 hover:text-foreground hover:underline">词汇与表达库</Link>
+        </nav>
       </div>
       {completionNotice && (
         <div className="mb-5 flex items-start gap-3 rounded-2xl border border-primary/25 bg-secondary/50 p-4">
@@ -107,19 +108,14 @@ export function TodayDashboard() {
           </button>
         </div>
       )}
-      <div className="mb-5 flex flex-wrap gap-3 text-sm"><Link href="/plans" className="text-primary underline">管理各级别计划</Link><Link href="/library" className="text-primary underline">词汇与表达库</Link></div>
-      {data.allocation && <section aria-label="今日时间分配" className="mb-5 rounded-xl border p-4 text-sm">
-        <p>主目标份额 {showMinutes(data.allocation.primaryMinutes)} 分钟 · 基础合计 {showMinutes(data.allocation.foundationMinutes)} 分钟</p>
-        <p className="mt-2 text-muted-foreground">今日安排：主目标 {showMinutes(data.allocation.primaryPlannedMinutes)} · 基础 {showMinutes(data.allocation.foundationPlannedMinutes)} 分钟</p>
-        <p className="mt-2 text-muted-foreground">已使用 {showMinutes(data.allocation.spentMinutes)} · 进行中预留 {showMinutes(data.allocation.reservedMinutes ?? 0)} · 剩余 {showMinutes(data.allocation.remainingMinutes)} 分钟</p>
-        {data.allocation.overrunMinutes > 0 && <p role="status" className="mt-2">实际已超出今日预算 {showMinutes(data.allocation.overrunMinutes)} 分钟</p>}
-      </section>}
-      {data.levels && <div className="mb-5 grid gap-3 sm:grid-cols-2">{data.levels.map(level => <div key={level.planId} className="rounded-xl border p-3 text-sm"><strong>{level.level} {level.isPrimary ? "· 主目标" : "· 基础"}</strong><p className="mt-1 text-muted-foreground">复习 {level.reviewCount} · 新学 {level.newCount} · 已完成 {level.completedCount} · 预计 {level.estimatedMinutes} 分钟</p></div>)}</div>}
       {stats.totalUnscheduled > 0 && <PlanningWarning stats={stats} />}
       <DashboardStatsCards
         level={plan?.level ?? user?.targetLevel ?? "N1"}
         stats={stats}
         estimatedMinutes={data.estimatedMinutes}
+        budgetMinutes={data.planning.budgetMinutes}
+        allocation={data.allocation}
+        levels={data.levels}
         recommendedTask={nextTask ? <RecommendedTask task={nextTask} /> : undefined}
       />
       <section className="mt-9 min-w-0">
