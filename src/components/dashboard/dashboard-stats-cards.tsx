@@ -1,29 +1,28 @@
-import { BookOpen, CheckCircle2, GraduationCap, RefreshCcw } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { BookOpen, CheckCircle2, GraduationCap, RefreshCcw, type LucideIcon } from "lucide-react";
+import type { ReactNode } from "react";
+import { Card, CardContent } from "@/components/ui/card";
 import type { DashboardStats } from "@/lib/dashboard-stats";
 
 interface DashboardStatsCardsProps {
   level: string;
   stats: DashboardStats;
   estimatedMinutes: number;
-  hasRecommendedTask?: boolean;
+  recommendedTask?: ReactNode;
 }
 
 export function DashboardStatsCards({
   level,
   stats,
   estimatedMinutes,
-  hasRecommendedTask = false,
+  recommendedTask,
 }: DashboardStatsCardsProps) {
-  const summaryColumns = hasRecommendedTask
-    ? "md:col-span-1 xl:col-span-2"
-    : "md:col-span-1 xl:col-span-3";
   return (
-    <>
+    <section aria-label="今日学习概览" className="grid min-w-0 gap-4 md:grid-cols-2 xl:grid-cols-6">
+      {recommendedTask && <div className="min-w-0 md:col-span-2 xl:col-span-2">{recommendedTask}</div>}
       <StatsCard
-        className={summaryColumns}
-        icon={BookOpen}
         title="今日剩余"
+        icon={BookOpen}
+        className={recommendedTask ? "xl:col-span-2" : "xl:col-span-3"}
         meta={`计划内复习共剩 ${stats.plannedReviewRemaining} 项`}
         items={[
           { label: "待开始复习", value: stats.pendingReview },
@@ -37,9 +36,9 @@ export function DashboardStatsCards({
         ]}
       />
       <StatsCard
-        className={summaryColumns}
-        icon={CheckCircle2}
         title="今日完成"
+        icon={CheckCircle2}
+        className={recommendedTask ? "xl:col-span-2" : "xl:col-span-3"}
         meta={`已完成用时 ${stats.studyMinutesToday} 分钟`}
         items={[
           { label: "完成总数", value: stats.completedTotal },
@@ -53,9 +52,9 @@ export function DashboardStatsCards({
         ]}
       />
       <StatsCard
-        className="md:col-span-1 xl:col-span-3"
-        icon={RefreshCcw}
         title="复习总账"
+        icon={RefreshCcw}
+        className="xl:col-span-3"
         items={[
           {
             label: "逾期待复习",
@@ -69,18 +68,19 @@ export function DashboardStatsCards({
         ]}
       />
       <StatsCard
-        className="md:col-span-1 xl:col-span-3"
-        icon={GraduationCap}
         title={`${level} 总体进度`}
+        icon={GraduationCap}
+        className="xl:col-span-3"
         meta={`共 ${stats.progress.total} 个语法`}
+        progress={stats.progress}
         items={[
-          { label: "较稳定", value: stats.progress.mastered },
-          { label: "巩固中", value: stats.progress.learning },
-          { label: "需要加强", value: stats.progress.needsWork },
-          { label: "尚未学习", value: stats.progress.notStarted },
+          { label: "较稳定", value: stats.progress.mastered, color: "bg-success" },
+          { label: "巩固中", value: stats.progress.learning, color: "bg-primary" },
+          { label: "需要加强", value: stats.progress.needsWork, color: "bg-primary/35" },
+          { label: "尚未学习", value: stats.progress.notStarted, color: "bg-muted-foreground/25" },
         ]}
       />
-    </>
+    </section>
   );
 }
 
@@ -88,47 +88,57 @@ interface StatItem {
   label: string;
   value: number | string;
   detail?: string;
+  color?: string;
 }
 
 function StatsCard({
-  className,
-  icon: Icon,
   title,
+  icon: Icon,
+  className,
   meta,
   items,
+  progress,
 }: {
-  className?: string;
-  icon: typeof BookOpen;
   title: string;
+  icon: LucideIcon;
+  className?: string;
   meta?: string;
   items: StatItem[];
+  progress?: DashboardStats["progress"];
 }) {
   return (
-    <Card className={`min-w-0 warm-shadow ${className ?? ""}`}>
-      <CardHeader className="flex flex-row items-center gap-2">
-        <span className="grid size-8 shrink-0 place-items-center rounded-full bg-secondary text-secondary-foreground">
-          <Icon className="size-4" />
-        </span>
-        <CardTitle>{title}</CardTitle>
-        {meta ? (
-          <span className="ml-auto text-xs text-muted-foreground">{meta}</span>
-        ) : null}
-      </CardHeader>
+    <Card className={`min-w-0 border border-border/60 shadow-none ring-0 [--card-spacing:--spacing(5)] ${className ?? ""}`}>
       <CardContent>
-        <dl className="grid grid-cols-2 gap-x-4 gap-y-3">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+          <h2 className="flex items-center gap-2.5 text-base font-semibold">
+            <span className="grid size-9 place-items-center rounded-full bg-secondary text-secondary-foreground">
+              <Icon className="size-4" />
+            </span>
+            {title}
+          </h2>
+          {meta && <span className="text-xs leading-5 text-muted-foreground">{meta}</span>}
+        </div>
+        {progress && progress.total > 0 && (
+          <div aria-hidden="true" className="mb-4 flex h-1.5 overflow-hidden rounded-full bg-muted">
+            {[
+              [progress.mastered, "bg-success"],
+              [progress.learning, "bg-primary"],
+              [progress.needsWork, "bg-primary/35"],
+              [progress.notStarted, "bg-muted-foreground/25"],
+            ].map(([count, color], index) => (
+              <span key={index} className={String(color)} style={{ width: `${Number(count) / progress.total * 100}%` }} />
+            ))}
+          </div>
+        )}
+        <dl className="grid grid-cols-2 gap-x-5 gap-y-4">
           {items.map((item) => (
-            <div key={item.label} className="min-w-0 border-t pt-2">
-              <dt className="text-xs leading-5 text-muted-foreground">
+            <div key={item.label} className="min-w-0 border-t border-border/60 pt-2.5">
+              <dt className="flex items-center gap-1.5 text-xs leading-5 text-muted-foreground sm:text-sm">
+                {item.color && <span aria-hidden="true" className={`size-1.5 shrink-0 rounded-full ${item.color}`} />}
                 {item.label}
               </dt>
-              <dd className="mt-0.5 text-xl font-semibold tabular-nums">
-                {item.value}
-              </dd>
-              {item.detail ? (
-                <p className="mt-0.5 text-[11px] leading-4 text-muted-foreground">
-                  {item.detail}
-                </p>
-              ) : null}
+              <dd className="mt-1 text-2xl font-semibold tracking-tight tabular-nums">{item.value}</dd>
+              {item.detail && <p className="mt-1 text-xs leading-5 text-muted-foreground">{item.detail}</p>}
             </div>
           ))}
         </dl>

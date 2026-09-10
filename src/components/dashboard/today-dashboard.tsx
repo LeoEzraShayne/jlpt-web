@@ -55,7 +55,7 @@ export function TodayDashboard() {
   const data = todaySWR.data;
   const plan = planSWR.data;
   const stats = getDashboardStats(data);
-  const pending = data.tasks.filter((task) => task.status !== "COMPLETED");
+  const pending = data.tasks.filter((task) => !["COMPLETED", "SKIPPED"].includes(task.status));
   const reviews = pending.filter((task) => task.type === "REVIEW");
   const newGrammar = pending.filter((task) => task.type === "LEARN");
   const nextTask = data.nextTaskId
@@ -103,31 +103,18 @@ export function TodayDashboard() {
           </button>
         </div>
       )}
-      {stats.totalUnscheduled > 0 && (
-        <PlanningWarning stats={stats} />
-      )}
-      <section
-        className="grid min-w-0 gap-4 md:grid-cols-2 xl:grid-cols-6"
-        aria-label="今日学习概览"
-      >
-        {nextTask && (
-          <div className="min-w-0 md:col-span-2 xl:col-span-2">
-            <RecommendedTask task={nextTask} />
-          </div>
-        )}
-        <DashboardStatsCards
-          level={plan.level}
-          stats={stats}
-          estimatedMinutes={data.estimatedMinutes}
-          hasRecommendedTask={Boolean(nextTask)}
-        />
-      </section>
+      {stats.totalUnscheduled > 0 && <PlanningWarning stats={stats} />}
+      <DashboardStatsCards
+        level={plan.level}
+        stats={stats}
+        estimatedMinutes={data.estimatedMinutes}
+        recommendedTask={nextTask ? <RecommendedTask task={nextTask} /> : undefined}
+      />
       <section className="mt-9 min-w-0">
         <div className="mb-4 flex items-center justify-between gap-3">
           <h2 className="text-xl font-bold">今日任务</h2>
           <span className="shrink-0 text-sm text-muted-foreground">
-            {data.tasks.filter((task) => task.status === "COMPLETED").length} /{" "}
-            {data.tasks.length} 完成
+            {data.tasks.filter((task) => task.status === "COMPLETED").length} / {data.tasks.length} 完成
           </span>
         </div>
         {pending.length ? (
@@ -205,7 +192,7 @@ function PlanningWarning({ stats }: { stats: DashboardStats }) {
     ? splitCounts.join("、")
     : `${stats.totalUnscheduled} 项到期`;
   return (
-    <div className="mb-5 flex items-start gap-1.5 rounded-xl bg-muted/60 px-4 py-3 text-sm text-muted-foreground">
+    <div className="mb-5 flex items-start gap-2 rounded-lg border border-border/60 bg-muted/40 px-3 py-2.5 text-xs leading-5 text-muted-foreground">
       <Info className="mt-0.5 size-4 shrink-0" />
       <span>
         还有 {countLabel} 复习未排入今日计划，新语法已自动减少。
@@ -216,6 +203,7 @@ function PlanningWarning({ stats }: { stats: DashboardStats }) {
     </div>
   );
 }
+
 
 function TaskGroup({
   title,
