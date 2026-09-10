@@ -16,7 +16,7 @@ import { LoadStatus } from "./load-status";
 import { usePaged } from "@/hooks/use-paged";
 const statusLabel: Record<string, string> = {
   PENDING: "待核对", VALIDATED: "已核对", REJECTED: "有误",
-  COMMITTED: "已提交", PREVIEWED: "已预览",
+  COMMITTED: "已提交", PREVIEW: "待核对", PREVIEWED: "已预览",
 };
 const example = JSON.stringify(
   {
