@@ -12,21 +12,19 @@ import { useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ThemePicker } from "@/components/theme/theme-picker";
-import { authUrl, ApiError } from "@/lib/api/client";
-import { useCurrentPlan, useMe } from "@/hooks/use-api";
+import { authUrl } from "@/lib/api/client";
+import { usePlans, useMe } from "@/hooks/use-api";
 
 export function LoginView() {
   const router = useRouter();
   const params = useSearchParams();
   const me = useMe();
-  const plan = useCurrentPlan(Boolean(me.data));
+  const plan = usePlans(Boolean(me.data));
   useEffect(() => {
-    if (plan.data) router.replace(params.get("next") || "/today");
-    if (
-      plan.error instanceof ApiError &&
-      plan.error.code === "PLAN_NOT_INITIALIZED"
-    )
-      router.replace("/onboarding");
+    if (plan.data) {
+      const next = params.get("next");
+      router.replace(plan.data.items.length ? (next?.startsWith("/") && !next.startsWith("//") ? next : "/today") : "/onboarding");
+    }
   }, [params, plan.data, plan.error, router]);
   return (
     <main className="relative min-h-screen overflow-x-clip bg-background px-4 py-5 sm:px-5 sm:py-8">

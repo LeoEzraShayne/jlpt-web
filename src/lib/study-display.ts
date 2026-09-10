@@ -2,6 +2,7 @@ import type {
   CompletionNotice,
   RecallRating,
   StudyTask,
+  StudySession,
 } from "@/lib/api/types";
 
 export const COMPLETION_NOTICE_KEY = "jlpt:completion-notice:v1";
@@ -31,16 +32,18 @@ export function formatStudyDate(dateKey: string, includeYear = false) {
   return includeYear ? `${year}年${month}月${day}日` : `${month}月${day}日`;
 }
 
-export function saveCompletionNotice(notice: CompletionNotice) {
+type DetailedCompletionNotice = CompletionNotice & Partial<NonNullable<StudySession["reviewOutcome"]>>;
+
+export function saveCompletionNotice(notice: DetailedCompletionNotice) {
   window.sessionStorage.setItem(COMPLETION_NOTICE_KEY, JSON.stringify(notice));
 }
 
-export function consumeCompletionNotice(): CompletionNotice | null {
+export function consumeCompletionNotice(): DetailedCompletionNotice | null {
   const raw = window.sessionStorage.getItem(COMPLETION_NOTICE_KEY);
   window.sessionStorage.removeItem(COMPLETION_NOTICE_KEY);
   if (!raw) return null;
   try {
-    return JSON.parse(raw) as CompletionNotice;
+    return JSON.parse(raw) as DetailedCompletionNotice;
   } catch {
     return null;
   }

@@ -16,15 +16,16 @@ import { ErrorState } from "@/components/shared/error-state";
 import { LoadingState } from "@/components/shared/loading-state";
 import { StartStudyButton } from "@/components/study/start-study-button";
 import { DashboardStatsCards } from "@/components/dashboard/dashboard-stats-cards";
-import { useCurrentPlan, useMe, useToday } from "@/hooks/use-api";
+import { usePlans, useMe, useToday } from "@/hooks/use-api";
 import type { StudyTask } from "@/lib/api/types";
 import { getDashboardStats, type DashboardStats } from "@/lib/dashboard-stats";
 import {
   consumeCompletionNotice,
   formatStudyDate,
-  getNewGrammarDescription,
   recallLabels,
 } from "@/lib/study-display";
+
+const showMinutes = (value: number) => Number(value.toFixed(1));
 
 export function TodayDashboard() {
   const [completionNotice, setCompletionNotice] = useState<ReturnType<
@@ -38,7 +39,7 @@ export function TodayDashboard() {
     return () => window.clearTimeout(timer);
   }, []);
   const { data: user } = useMe();
-  const planSWR = useCurrentPlan();
+  const planSWR = usePlans();
   const todaySWR = useToday();
   if (todaySWR.isLoading || planSWR.isLoading)
     return <LoadingState label="正在安排今日任务…" />;
@@ -53,7 +54,7 @@ export function TodayDashboard() {
       />
     );
   const data = todaySWR.data;
-  const plan = planSWR.data;
+  const plan = planSWR.data.items.find(item => item.level === user?.targetLevel);
   const stats = getDashboardStats(data);
   const pending = data.tasks.filter((task) => !["COMPLETED", "SKIPPED"].includes(task.status));
   const reviews = pending.filter((task) => task.type === "REVIEW");
@@ -90,7 +91,10 @@ export function TodayDashboard() {
               ? `已记录为“${recallLabels[completionNotice.effectiveRating]}”`
               : `你选择了“${recallLabels[completionNotice.submittedRating]}”，系统按“${recallLabels[completionNotice.effectiveRating]}”安排`}
             <span className="text-muted-foreground">
-              {` · 预计 ${formatStudyDate(completionNotice.nextReviewOn)} 再次复习`}
+              {completionNotice.nextReviewStillDue
+                ? " · 下次复习日期保持不变，内容仍待复习"
+                : ` · 预计 ${formatStudyDate(completionNotice.nextReviewOn)} 再次复习`}
+              {completionNotice.assessmentAvailable === false && " · 本次缺少合格评分，未增加掌握证据"}
             </span>
           </p>
           <button
@@ -103,9 +107,17 @@ export function TodayDashboard() {
           </button>
         </div>
       )}
+      <div className="mb-5 flex flex-wrap gap-3 text-sm"><Link href="/plans" className="text-primary underline">管理各级别计划</Link><Link href="/library" className="text-primary underline">词汇与表达库</Link></div>
+      {data.allocation && <section aria-label="今日时间分配" className="mb-5 rounded-xl border p-4 text-sm">
+        <p>主目标份额 {showMinutes(data.allocation.primaryMinutes)} 分钟 · 基础合计 {showMinutes(data.allocation.foundationMinutes)} 分钟</p>
+        <p className="mt-2 text-muted-foreground">今日安排：主目标 {showMinutes(data.allocation.primaryPlannedMinutes)} · 基础 {showMinutes(data.allocation.foundationPlannedMinutes)} 分钟</p>
+        <p className="mt-2 text-muted-foreground">已使用 {showMinutes(data.allocation.spentMinutes)} · 进行中预留 {showMinutes(data.allocation.reservedMinutes ?? 0)} · 剩余 {showMinutes(data.allocation.remainingMinutes)} 分钟</p>
+        {data.allocation.overrunMinutes > 0 && <p role="status" className="mt-2">实际已超出今日预算 {showMinutes(data.allocation.overrunMinutes)} 分钟</p>}
+      </section>}
+      {data.levels && <div className="mb-5 grid gap-3 sm:grid-cols-2">{data.levels.map(level => <div key={level.planId} className="rounded-xl border p-3 text-sm"><strong>{level.level} {level.isPrimary ? "· 主目标" : "· 基础"}</strong><p className="mt-1 text-muted-foreground">复习 {level.reviewCount} · 新学 {level.newCount} · 已完成 {level.completedCount} · 预计 {level.estimatedMinutes} 分钟</p></div>)}</div>}
       {stats.totalUnscheduled > 0 && <PlanningWarning stats={stats} />}
       <DashboardStatsCards
-        level={plan.level}
+        level={plan?.level ?? user?.targetLevel ?? "N1"}
         stats={stats}
         estimatedMinutes={data.estimatedMinutes}
         recommendedTask={nextTask ? <RecommendedTask task={nextTask} /> : undefined}
@@ -122,22 +134,22 @@ export function TodayDashboard() {
             {reviews.length > 0 && (
               <TaskGroup
                 title="先完成复习"
-                description={`完成这 ${data.requiredReviewRemaining} 项后解锁今日新语法`}
+                description="各组完成今日安排的必做复习后，解锁组内新语法"
                 tasks={reviews}
               />
             )}
             {newGrammar.length > 0 && (
               <TaskGroup
                 title="今日新语法"
-                description={getNewGrammarDescription(data)}
+                description="按所在组复习进度解锁；基础积压不占用主目标份额"
                 tasks={newGrammar}
               />
             )}
           </div>
         ) : (
           <EmptyState
-            title="今天的任务完成了"
-            description="做得很好，明天继续保持这个节奏。"
+            title={planSWR.data.items.some(item => item.status === "ACTIVE") ? "今天的任务完成了" : "当前没有进行中的计划"}
+            description="你仍可查看历史、手动练习，或在计划页调整安排。"
           />
         )}
       </section>
@@ -195,7 +207,7 @@ function PlanningWarning({ stats }: { stats: DashboardStats }) {
     <div className="mb-5 flex items-start gap-2 rounded-lg border border-border/60 bg-muted/40 px-3 py-2.5 text-xs leading-5 text-muted-foreground">
       <Info className="mt-0.5 size-4 shrink-0" />
       <span>
-        还有 {countLabel} 复习未排入今日计划，新语法已自动减少。
+        还有 {countLabel} 复习保留在积压中，后续按每日预算安排。
         <Link className="ml-1 font-medium text-primary hover:underline" href="/review">
           查看队列
         </Link>
@@ -237,7 +249,7 @@ function TaskCard({ task }: { task: StudyTask }) {
     <Card className="h-auto min-w-0 warm-shadow md:h-full md:min-h-56">
       <CardContent className="flex min-w-0 flex-col md:h-full">
         <span className="w-fit rounded-full bg-secondary px-3 py-1 text-xs font-medium text-secondary-foreground">
-          {task.type === "LEARN"
+          {task.grammar.level} · {task.type === "LEARN"
             ? "新语法"
             : task.priorityGroup === "OVERDUE"
               ? "逾期复习"

@@ -68,6 +68,7 @@ async function mockStudyApi(page: Page) {
     const path = url.pathname;
     let data: unknown = {};
     if (path.endsWith("/me")) data = user;
+    else if (path.endsWith("/study-plans")) data = { items: [plan], nextCursor: null };
     else if (path.endsWith("/study-plans/current")) data = plan;
     else if (path.endsWith("/study-sessions/review/reveal")) {
       revealCount += 1;

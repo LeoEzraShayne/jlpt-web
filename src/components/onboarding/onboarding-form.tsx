@@ -4,6 +4,8 @@ import { CalendarDays, Clock3, LoaderCircle, Sparkles } from "lucide-react";
 import Image from "next/image";
 import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useSWRConfig } from "swr";
+import { apiKeys } from "@/lib/api/keys";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ErrorState } from "@/components/shared/error-state";
@@ -11,7 +13,7 @@ import { LoadingState } from "@/components/shared/loading-state";
 import { LevelSelector } from "@/components/shared/level-selector";
 import { DurationPicker } from "@/components/shared/duration-picker";
 import { PlanDateRange } from "@/components/shared/plan-date-range";
-import { useCurrentPlan } from "@/hooks/use-api";
+import { usePlans } from "@/hooks/use-api";
 import { apiRequest, ApiError } from "@/lib/api/client";
 import { fallbackGrammarLevels } from "@/lib/jlpt";
 import type { JlptLevel, StudyPlan } from "@/lib/api/types";
@@ -22,7 +24,8 @@ const today = new Intl.DateTimeFormat("en-CA", {
 
 export function OnboardingForm() {
   const router = useRouter();
-  const currentPlan = useCurrentPlan();
+  const { mutate } = useSWRConfig();
+  const currentPlan = usePlans();
   const [level, setLevel] = useState<JlptLevel>("N1");
   const [startDate, setStartDate] = useState(today);
   const [targetDate, setTargetDate] = useState("2026-12-06");
@@ -31,13 +34,14 @@ export function OnboardingForm() {
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
   useEffect(() => {
-    if (currentPlan.data) router.replace("/today");
+    if (currentPlan.data?.items.length) router.replace("/today");
   }, [currentPlan.data, router]);
   async function submit(event: FormEvent) {
     event.preventDefault();
     setSubmitting(true);
     setError("");
     try {
+      await apiRequest("/me/preferences", { method: "PUT", body: JSON.stringify({ targetLevel: level, dailyMinutes, primaryShare: 80 }) });
       const response = await apiRequest<StudyPlan>("/study-plans", {
         method: "POST",
         body: JSON.stringify({
@@ -48,7 +52,8 @@ export function OnboardingForm() {
           dailyNewLimit,
         }),
       });
-      await currentPlan.mutate(response.data, { revalidate: false });
+      await mutate(apiKeys.me);
+      await currentPlan.mutate({ items: [response.data], nextCursor: null }, { revalidate: false });
       router.replace("/today");
     } catch (cause) {
       setError(
@@ -57,19 +62,13 @@ export function OnboardingForm() {
       setSubmitting(false);
     }
   }
-  if (currentPlan.isLoading || currentPlan.data)
+  if (currentPlan.isLoading || Boolean(currentPlan.data?.items.length))
     return (
       <main className="soft-grid min-h-screen overflow-x-clip px-4 py-8 sm:py-14">
         <LoadingState label="正在确认学习计划…" />
       </main>
     );
-  if (
-    currentPlan.error &&
-    !(
-      currentPlan.error instanceof ApiError &&
-      currentPlan.error.code === "PLAN_NOT_INITIALIZED"
-    )
-  )
+  if (currentPlan.error)
     return (
       <main className="soft-grid min-h-screen overflow-x-clip px-4 py-8 sm:py-14">
         <div className="mx-auto max-w-3xl">

@@ -6,14 +6,17 @@ import {
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FuriganaText } from "@/components/shared/furigana-text";
+import { SaveExpression } from "./save-expression";
 import type { ReviewResult } from "@/lib/api/types";
 
 export function ReviewResultCard({
   result,
   showCorrection = true,
+  reviewId,
 }: {
   result: ReviewResult;
   showCorrection?: boolean;
+  reviewId?: string;
 }) {
   const scores = [
     ["语法使用", result.grammarScore, 30],
@@ -61,6 +64,7 @@ export function ReviewResultCard({
           </div>
         </CardContent>
       </Card>
+      {result.contentResponse && <Feedback icon={MessageCircleMore} title="内容回应" text={result.contentResponse} />}
       {result.errorSpans.length > 0 && (
         <Card className="min-w-0">
           <CardHeader>
@@ -95,7 +99,7 @@ export function ReviewResultCard({
       {showCorrection && (
         <Feedback
           icon={WandSparkles}
-          title="修改建议"
+          title="原句纠错"
           text={result.correctedSentence}
           annotated={result.correctedSentenceFurigana}
           translation={result.correctedSentenceTranslationZh}
@@ -105,13 +109,16 @@ export function ReviewResultCard({
       {result.alternativeSentence && (
         <Feedback
           icon={Sparkles}
-          title="另一种自然表达"
+          title="拓展示例"
           text={result.alternativeSentence}
           annotated={result.alternativeSentenceFurigana}
           translation={result.alternativeSentenceTranslationZh}
           japanese
         />
       )}
+      {result.diversityAdvice && <Feedback icon={Sparkles} title="表达变化建议" text={result.diversityAdvice} />}
+      {result.nextPractice && <Feedback icon={WandSparkles} title="后续练习" text={result.nextPractice} />}
+      {reviewId && <SaveExpression reviewId={reviewId} result={result} />}
     </div>
   );
 }
@@ -141,7 +148,7 @@ function Feedback({
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+        <CardTitle role="heading" aria-level={2} className="flex items-center gap-2">
           <Icon className="size-5 text-primary" />
           {title}
         </CardTitle>

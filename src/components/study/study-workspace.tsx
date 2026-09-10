@@ -19,6 +19,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ErrorState } from "@/components/shared/error-state";
 import { FuriganaText } from "@/components/shared/furigana-text";
 import { LoadingState } from "@/components/shared/loading-state";
+import { TrainingPanel } from "./training-panel";
 import { ReviewResultCard } from "./review-result-card";
 import { DefaultStudyButton } from "./default-study-button";
 import { FocusCycleCard } from "@/components/focus/focus-cycle-display";
@@ -84,7 +85,7 @@ export function StudyWorkspace({ sessionId }: { sessionId: string }) {
     );
   const session = sessionSWR.data;
   const grammar = session.grammar;
-  const hintVisible = showHint ?? session.mode === "LEARN";
+  const hintVisible = session.mode === "REVIEW" && session.trainingContext?.referenceHidden ? false : (showHint ?? session.mode === "LEARN");
   const job = reviewSWR.data;
   const result = job?.result;
   const correction = result ?? previousCorrection;
@@ -94,18 +95,18 @@ export function StudyWorkspace({ sessionId }: { sessionId: string }) {
   const submitDisabled = !sentence.trim() || submitting || reviewing || Boolean(result);
   const allowedRatings = result?.recallPolicy?.allowedRatings ?? [];
   async function reveal() {
-    setShowHint(true);
-    if (session.mode !== "REVIEW" && session.revealedAt) return;
+    if (session.mode !== "REVIEW" && session.revealedAt) { setShowHint(true); return; }
     try {
-      const { data } = await apiRequest<Omit<StudySession, "grammar" | "attempts">>(
+      const { data } = await apiRequest<Partial<StudySession>>(
         `/study-sessions/${sessionId}/reveal`, {
         method: "POST",
       });
-      // Reveal returns session fields only; preserve loaded grammar and attempts.
+      // Only the explicit reveal response may expose review reference content.
       await sessionSWR.mutate(
         (current) => ({ ...(current ?? session), ...data }),
         { revalidate: false },
       );
+      setShowHint(true);
     } catch (cause) {
       setShowHint(false);
       setMessage(
@@ -213,6 +214,7 @@ export function StudyWorkspace({ sessionId }: { sessionId: string }) {
           </p>
         </div>
         <FocusCycleCard />
+        <TrainingPanel session={session} hintVisible={hintVisible} reveal={reveal} />
         <Card className="mt-7 min-w-0 warm-shadow">
           <CardHeader>
             <CardTitle className="flex min-w-0 flex-wrap items-center justify-between gap-2">
@@ -333,7 +335,7 @@ export function StudyWorkspace({ sessionId }: { sessionId: string }) {
                         重新批改
                       </Button>
                       <p className="mt-3 text-xs text-muted-foreground">
-                        也可以不等待 AI，按这次真实回忆情况完成。
+                        也可以按真实回忆情况完成。缺少合格评分时，本次不增加掌握证据或延长间隔。
                       </p>
                       <div className="mt-2 grid grid-cols-3 gap-2">
                         {[
@@ -364,7 +366,7 @@ export function StudyWorkspace({ sessionId }: { sessionId: string }) {
         </Card>
         {result && (
           <div className="mt-6 min-w-0">
-            <ReviewResultCard result={result} showCorrection={false} />
+            <ReviewResultCard result={result} reviewId={reviewId} showCorrection={false} />
             <div className="mt-6 min-w-0 rounded-2xl border bg-card p-5">
               <h2 className="font-semibold">这次记得怎么样？</h2>
               <p className="mt-1 text-sm text-muted-foreground">

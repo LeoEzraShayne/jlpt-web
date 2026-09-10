@@ -1,7 +1,6 @@
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { OnboardingForm } from "./onboarding-form";
-import { ApiError } from "@/lib/api/client";
 import type { StudyPlan } from "@/lib/api/types";
 
 const mocks = vi.hoisted(() => ({
@@ -16,7 +15,7 @@ vi.mock("next/navigation", () => ({
 }));
 
 vi.mock("@/hooks/use-api", () => ({
-  useCurrentPlan: () => mocks.planState,
+  usePlans: () => mocks.planState,
 }));
 
 vi.mock("@/lib/api/client", async (importOriginal) => ({
@@ -44,12 +43,8 @@ describe("OnboardingForm", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.planState = {
-      data: undefined,
-      error: new ApiError(
-        "Study plan not initialized",
-        404,
-        "PLAN_NOT_INITIALIZED",
-      ),
+      data: { items: [], nextCursor: null },
+      error: undefined,
       isLoading: false,
       mutate: mocks.mutate,
     };
@@ -64,16 +59,28 @@ describe("OnboardingForm", () => {
     );
 
     await waitFor(() =>
-      expect(mocks.mutate).toHaveBeenCalledWith(plan, {
+      expect(mocks.mutate).toHaveBeenCalledWith({ items: [plan], nextCursor: null }, {
         revalidate: false,
       }),
     );
+    expect(mocks.apiRequest.mock.calls[0]).toEqual(["/me/preferences", expect.objectContaining({ method: "PUT", body: expect.stringContaining('"targetLevel":"N1"') })]);
     expect(mocks.replace).toHaveBeenCalledWith("/today");
+  });
+
+  it("sets the selected level as primary before creating the first plan", async () => {
+    render(<OnboardingForm />);
+    fireEvent.click(screen.getByRole("button", { name: /^N2/ }));
+    fireEvent.click(screen.getByRole("button", { name: "生成我的学习计划" }));
+    await waitFor(() => expect(mocks.apiRequest).toHaveBeenCalledTimes(2));
+    expect(mocks.apiRequest.mock.calls[0][0]).toBe("/me/preferences");
+    expect(JSON.parse(mocks.apiRequest.mock.calls[0][1].body).targetLevel).toBe("N2");
+    expect(mocks.apiRequest.mock.calls[1][0]).toBe("/study-plans");
+    expect(JSON.parse(mocks.apiRequest.mock.calls[1][1].body).level).toBe("N2");
   });
 
   it("redirects an existing plan instead of showing setup again", async () => {
     mocks.planState = {
-      data: plan,
+      data: { items: [{ ...plan, status: "PAUSED" }], nextCursor: null },
       error: undefined,
       isLoading: false,
       mutate: mocks.mutate,

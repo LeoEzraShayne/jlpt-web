@@ -1,6 +1,8 @@
 "use client";
 
 import { ArrowLeft, BookOpenText, GitCompareArrows } from "lucide-react";
+import { useState } from "react";
+import { apiRequest } from "@/lib/api/client";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,6 +14,8 @@ import { GrammarStatus } from "./grammar-status";
 import { formatStudyDate } from "@/lib/study-display";
 
 export function GrammarDetail({ id }: { id: string }) {
+  const [message, setMessage] = useState("");
+  const [saving, setSaving] = useState(false);
   const swr = useGrammarDetail(id);
   if (swr.isLoading) return <LoadingState />;
   if (swr.error || !swr.data)
@@ -54,6 +58,7 @@ export function GrammarDetail({ id }: { id: string }) {
             <span className="text-xs text-muted-foreground">当前状态</span>
             <GrammarStatus progress={progress} />
           </div>
+          {progress?.status === "MASTERED" && progress.masteryRuleVersion !== "mastery-v2" && <p className="mt-2 text-xs text-muted-foreground">历史规则下的掌握状态，待后续复习重新确认。</p>}
           <p className="mt-3 text-sm text-muted-foreground">
             {progress?.learningState?.nextReviewOn
               ? `预计 ${formatStudyDate(progress.learningState.nextReviewOn)} 复习`
@@ -122,6 +127,13 @@ export function GrammarDetail({ id }: { id: string }) {
               <p className="text-sm leading-6 text-muted-foreground">
                 先主动回忆，再写出自己的句子，AI 会检查接续与表达自然度。
               </p>
+              <Button className="mt-4 w-full" variant="outline" disabled={saving} onClick={async () => {
+                setSaving(true);
+                try { await apiRequest(`/grammar-points/${id}/needs-work`, { method: "PUT", body: JSON.stringify({ needsWork: !progress?.needsWork }) }); await swr.mutate(); setMessage("已更新加强标记；未学内容会安排首次检查。"); }
+                catch (error) { setMessage(error instanceof Error ? error.message : "更新失败"); }
+                finally { setSaving(false); }
+              }}>{progress?.needsWork ? "取消加强标记" : "标记需加强"}</Button>
+              {message && <p role="status" className="mt-2 text-xs">{message}</p>}
               <StartStudyButton
                 className="mt-5"
                 grammarId={item.id}

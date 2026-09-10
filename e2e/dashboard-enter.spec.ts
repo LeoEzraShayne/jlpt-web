@@ -21,6 +21,7 @@ async function mockDashboard(page: Page, state: "ready" | "empty" | "locked" = "
     }
     let data: unknown = {};
     if (path.endsWith("/me")) data = { id: "u1", displayName: "测试用户", colorTheme: "sunshine", role: "USER" };
+    if (path.endsWith("/study-plans")) data = { items: [{ id: "p1", level: "N1", dailyMinutes: 60, status: "ACTIVE" }], nextCursor: null };
     if (path.endsWith("/study-plans/current")) data = { id: "p1", level: "N1", dailyMinutes: 60, status: "ACTIVE" };
     if (path.endsWith("/dashboard/today")) data = {
       tasks, nextTaskId: tasks[1]?.id, estimatedMinutes: 6, requiredReviewRemaining: tasks.length, newLearningUnlocked: false,

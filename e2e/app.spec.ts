@@ -94,7 +94,8 @@ async function mockAuthenticatedApi(
     let data: unknown = {};
     let meta: unknown;
     if (path.endsWith("/me")) data = user;
-    else if (path.endsWith("/study-plans/current/forecast")) { data = []; meta = { algorithmVersion: "adaptive-v1", isEstimate: true, assumption: "REMEMBERED", projectedCompletionDate: "2026-09-30", targetDate: "2026-12-06", remainingNewAfterHorizon: 39, planAtRisk: false }; }
+    else if (path.endsWith("/study-plans")) data = method === "POST" ? plan : { items: overrides.onboardingWithoutPlan && new URL(page.url()).pathname === "/onboarding" ? [] : [plan], nextCursor: null };
+    else if (/\/study-plans\/[^/]+\/forecast$/.test(path)) { data = []; meta = { algorithmVersion: "adaptive-v1", isEstimate: true, assumption: "REMEMBERED", projectedCompletionDate: "2026-09-30", targetDate: "2026-12-06", remainingNewAfterHorizon: 39, planAtRisk: false }; }
     else if (path.endsWith("/study-plans/current")) {
       if (overrides.onboardingWithoutPlan && new URL(page.url()).pathname === "/onboarding") {
         await route.fulfill({
@@ -344,7 +345,7 @@ test("today prioritizes review, locks new learning, and keeps task actions align
   await expect(page.getByRole("heading", { name: "今日新语法" })).toBeVisible();
   await expect(page.locator('[aria-label="先完成复习任务列表"]').getByRole("button", { name: "开始复习" })).toHaveCount(1);
   await expect(page.getByRole("button", { name: "先完成复习" })).toBeDisabled();
-  await expect(page.getByText("先巩固到期内容，再学习新语法", { exact: true })).toBeVisible();
+  await expect(page.getByText("按所在组复习进度解锁；基础积压不占用主目标份额", { exact: true })).toBeVisible();
   await expect(page.getByText("逾期待复习", { exact: true })).toBeVisible();
   const reviewCard = page.getByRole("heading", { name: reviewGrammar.title }).last().locator("..");
   const estimate = reviewCard.getByText("预计 6 分钟");
@@ -460,12 +461,9 @@ test("daily new grammar limit supports up to ten", async ({ page }) => {
   await page.goto("/onboarding");
   await expect(page.getByLabel("每日新语法数量")).toHaveAttribute("max", "10");
   await page.goto("/profile");
-  const actionButtons = page.locator('[aria-label="学习计划操作"] button');
-  await expect(actionButtons).toHaveCount(3);
-  const actionBoxes = await actionButtons.evaluateAll((buttons) => buttons.map((button) => button.getBoundingClientRect().toJSON()));
-  expect(new Set(actionBoxes.map((box) => Math.round(box.y))).size).toBe(1);
-  await page.getByRole("button", { name: "调整计划" }).click();
-  await expect(page.locator('input[type="range"]')).toHaveAttribute("max", "10");
+  const panel = page.getByLabel("N1 学习计划", { exact: true });
+  await panel.getByRole("button", { name: "调整计划" }).click();
+  await expect(page.getByLabel("N1 每日新语法上限")).toHaveAttribute("max", "10");
   await expectNoHorizontalOverflow(page);
 });
 test("plan settings expose a date range and clear hour-minute duration", async ({ page }) => {

@@ -23,6 +23,7 @@ async function mockStudy(page: Page, rememberedAllowed = true, score = 100) {
       id: "u1", displayName: "测试用户", email: "test@example.com",
       role: "USER", timezone: "Asia/Tokyo", targetLevel: "N1", colorTheme: "sunshine",
     };
+    else if (path.endsWith("/study-plans")) data = { items: [{ id: "p1", level: "N1", status: "ACTIVE" }], nextCursor: null };
     else if (path.endsWith("/study-plans/current")) data = {
       id: "p1", level: "N1", status: "ACTIVE", dailyMinutes: 60,
     };

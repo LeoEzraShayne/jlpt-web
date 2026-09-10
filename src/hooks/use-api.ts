@@ -7,7 +7,19 @@ import type { Dashboard, ForecastDay, GrammarLevel, GrammarPoint, JlptLevel, Rev
 
 export const useMe = () => useSWR<User>(apiKeys.me, apiFetcher, { shouldRetryOnError: false });
 export const useCurrentPlan = (enabled = true) => useSWR<StudyPlan>(enabled ? apiKeys.plan : null, apiFetcher, { shouldRetryOnError: false });
-export const usePlans = (enabled = true) => useSWR<StudyPlanList>(enabled ? apiKeys.plans : null, apiFetcher, { shouldRetryOnError: false });
+export const usePlans = (enabled = true) => useSWR<StudyPlanList>(enabled ? `${apiKeys.plans}?scope=all&limit=100` : null, async (path: string) => {
+  const first = await apiFetcher<StudyPlanList>(path);
+  const items = [...first.items];
+  const seen = new Set<string>();
+  let cursor = first.nextCursor;
+  while (cursor && !seen.has(cursor)) {
+    seen.add(cursor);
+    const page = await apiFetcher<StudyPlanList>(`${path}&cursor=${encodeURIComponent(cursor)}`);
+    items.push(...page.items);
+    cursor = page.nextCursor;
+  }
+  return { items, nextCursor: null };
+}, { shouldRetryOnError: false });
 export const useVocabulary = (query = "", level?: JlptLevel) => useSWR<VocabularyEntry[]>(apiKeys.vocabulary(query, level), apiFetcher, { keepPreviousData: true });
 export const useExpressions = () => useSWR<PersonalExpression[]>(apiKeys.expressions, apiFetcher);
 export const useToday = () => useSWR<Dashboard>(apiKeys.today, apiFetcher);

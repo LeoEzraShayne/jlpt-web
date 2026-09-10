@@ -28,9 +28,10 @@ const groups: Array<{
   { key: "UPCOMING", title: "未来 7 天", tone: "bg-yellow-50 text-yellow-700" },
 ];
 
-const getKey = (index: number, previous: QueuePage | null) => {
+const getKey = (index: number, previous: QueuePage | null, level: string) => {
   if (previous && !previous.meta.nextCursor) return null;
   const params = new URLSearchParams({ limit: "50", upcomingDays: "7" });
+  if (level) params.set("level", level);
   if (index > 0 && previous?.meta.nextCursor)
     params.set("cursor", previous.meta.nextCursor);
   return `/review-queue?${params.toString()}`;
@@ -42,8 +43,9 @@ async function fetchQueue(path: string): Promise<QueuePage> {
 }
 
 export function ReviewQueue() {
+  const [level, setLevel] = useState("");
   const [showUpcoming, setShowUpcoming] = useState(false);
-  const swr = useSWRInfinite<QueuePage>(getKey, fetchQueue);
+  const swr = useSWRInfinite<QueuePage>((index, previous) => getKey(index, previous, level), fetchQueue);
   const items = swr.data?.flatMap((page) => page.items) ?? [];
   const meta = swr.data?.[0]?.meta;
   const counts = meta?.counts ?? { overdue: 0, dueToday: 0, upcoming: 0 };
@@ -64,6 +66,7 @@ export function ReviewQueue() {
         title="复习队列"
         description={`当前有 ${dueCount} 个到期语法，系统已按逾期和薄弱程度排好顺序。`}
       />
+      <label className="mb-5 block text-sm">级别筛选<select aria-label="复习级别" className="ml-3 rounded-lg border bg-background p-2" value={level} onChange={event => setLevel(event.target.value)}><option value="">全部启用计划</option>{["N1", "N2", "N3", "N4"].map(value => <option key={value}>{value}</option>)}</select></label>
       {priority && (
         <Card className="mb-7 border-primary/40 warm-shadow">
           <CardContent className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
