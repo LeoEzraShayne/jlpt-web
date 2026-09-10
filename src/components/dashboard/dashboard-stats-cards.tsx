@@ -41,15 +41,11 @@ export function DashboardStatsCards({
             detail: `复习 ${stats.inProgressReview} · 新学 ${stats.inProgressNew}`,
           },
           { label: "剩余任务用时", value: minutes(estimatedMinutes) },
+          { label: "可再安排时间", value: allocation ? minutes(allocation.remainingMinutes) : "—" },
+          { label: "练习预留", value: allocation ? minutes(allocation.reservedMinutes ?? 0) : "—" },
         ]}
       >
-        {allocation && <div aria-label="剩余时间预算" className="mt-4 rounded-xl bg-muted/60 p-3">
-          <dl className="grid grid-cols-2 gap-x-5">
-            <div><dt className="text-xs text-muted-foreground">可再安排时间</dt><dd className="mt-1 text-lg font-semibold tabular-nums">{minutes(allocation.remainingMinutes)}</dd></div>
-            <div><dt className="text-xs text-muted-foreground">练习预留</dt><dd className="mt-1 text-lg font-semibold tabular-nums">{minutes(allocation.reservedMinutes ?? 0)}</dd></div>
-          </dl>
-          <p className="mt-2 text-xs leading-5 text-muted-foreground">可再安排时间已扣除实际用时、练习预留及待办安排。</p>
-        </div>}
+        {allocation && <p className="mt-3 text-xs leading-5 text-muted-foreground">可再安排时间已扣除实际用时、练习预留及待办安排。</p>}
         <AllocationDetails allocation={allocation} levels={levels} />
       </StatsCard>
       <StatsCard
@@ -65,16 +61,12 @@ export function DashboardStatsCards({
             value: stats.caughtUpOverdue,
             detail: "已包含在完成复习中",
           },
+          { label: "今日实际用时", value: minutes(allocation?.spentMinutes ?? stats.studyMinutesToday) },
+          { label: "超出今日预算", value: minutes(allocation?.overrunMinutes ?? Math.max(0, stats.studyMinutesToday - budgetMinutes)) },
         ]}
       >
-        <div className="mt-4 rounded-xl bg-muted/60 p-3">
-          <div className="flex flex-wrap items-baseline justify-between gap-2">
-            <span className="text-xs text-muted-foreground">今日实际用时</span>
-            <strong className="text-lg tabular-nums">{minutes(allocation?.spentMinutes ?? stats.studyMinutesToday)}</strong>
-          </div>
-          <p className="mt-2 text-xs leading-5 text-muted-foreground">包含已完成、进行中及额外练习的实际用时。</p>
-          {allocation && allocation.overrunMinutes > 0 && <p role="status" className="mt-2 text-xs font-medium text-destructive">实际已超出今日预算 {minutes(allocation.overrunMinutes)}</p>}
-        </div>
+        <p className="mt-3 text-xs leading-5 text-muted-foreground">实际用时包含已完成、进行中及额外练习。</p>
+        {allocation && allocation.overrunMinutes > 0 && <p role="status" className="mt-2 text-xs font-medium text-destructive">实际已超出今日预算 {minutes(allocation.overrunMinutes)}</p>}
       </StatsCard>
       {recommendedTask && <div className="min-w-0 md:col-span-2 xl:col-span-2">{recommendedTask}</div>}
       <StatsCard

@@ -276,7 +276,7 @@ test("today shows retained spend and permits primary new work despite foundation
   await page.goto("/today");
   await expect(page.getByLabel("今日时间分配")).toHaveCount(0);
   await expect(page.getByLabel("今日完成")).toContainText("今日实际用时10 分钟");
-  await expect(page.getByLabel("剩余时间预算")).toContainText("可再安排时间16 分钟");
+  await expect(page.getByLabel("今日剩余")).toContainText("可再安排时间16 分钟");
   const details = page.locator("details").filter({ hasText: "级别与时间分配" });
   await expect(details).not.toHaveAttribute("open", "");
   await details.locator("summary").click();
