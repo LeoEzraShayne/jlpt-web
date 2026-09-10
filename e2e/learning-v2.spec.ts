@@ -324,7 +324,7 @@ test("private imports require source confirmation before validation and explicit
   await expect(validation).toBeDisabled();
   await page.getByRole("checkbox").check();
   await validation.click();
-  await expect(page.getByText("词汇 · VALIDATED")).toBeVisible();
+  await expect(page.getByText("词汇 · 已核对")).toBeVisible();
   await page.getByRole("button", { name: "提交已校验内容" }).click();
   await expect(page.getByText(/已提交通过校验的内容/)).toBeVisible();
   expect(

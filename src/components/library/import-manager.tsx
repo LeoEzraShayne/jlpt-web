@@ -14,6 +14,10 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { LoadStatus } from "./load-status";
 import { usePaged } from "@/hooks/use-paged";
+const statusLabel: Record<string, string> = {
+  PENDING: "待核对", VALIDATED: "已核对", REJECTED: "有误",
+  COMMITTED: "已提交", PREVIEWED: "已预览",
+};
 const example = JSON.stringify(
   {
     fileName: "私人词表.json",
@@ -89,8 +93,8 @@ export function ImportManager() {
               onChange={async (event) => {
                 const file = event.target.files?.[0];
                 if (!file) return;
-                if (file.size > 5_000_000) {
-                  setMessage("文件过大，请拆分到 5 MB 以内。");
+                if (file.size > 2_000_000) {
+                  setMessage("文件过大，请拆分到 2 MB 以内。");
                   return;
                 }
                 try {
@@ -139,7 +143,7 @@ export function ImportManager() {
             className="h-auto whitespace-normal break-words text-left"
             onClick={() => setSelected(item.id)}
           >
-            {item.fileName} · {item.status}
+            {item.fileName} · {statusLabel[item.status] ?? "处理中"}
           </Button>
         ))}
       </div>
@@ -286,7 +290,7 @@ function Candidate({
         </CardTitle>
         <CardDescription>
           {item.kind === "PHRASE" ? "短句素材" : "词汇"} ·{" "}
-          {item.validationStatus}
+          {statusLabel[item.validationStatus] ?? "待核对"}
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-3">
