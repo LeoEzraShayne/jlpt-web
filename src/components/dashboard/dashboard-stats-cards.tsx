@@ -27,11 +27,10 @@ export function DashboardStatsCards({
 }: DashboardStatsCardsProps) {
   return (
     <section aria-label="今日学习概览" className="grid min-w-0 gap-4 md:grid-cols-2 xl:grid-cols-6">
-      {recommendedTask && <div className="min-w-0 md:col-span-2 xl:col-span-2">{recommendedTask}</div>}
       <StatsCard
         title="今日剩余"
         icon={BookOpen}
-        className={recommendedTask ? "xl:col-span-2" : "xl:col-span-3"}
+        className="xl:col-span-3"
         meta={`今日预算 ${minutes(budgetMinutes)}`}
         items={[
           { label: "待开始复习", value: stats.pendingReview },
@@ -56,7 +55,7 @@ export function DashboardStatsCards({
       <StatsCard
         title="今日完成"
         icon={CheckCircle2}
-        className={recommendedTask ? "xl:col-span-2" : "xl:col-span-3"}
+        className="xl:col-span-3"
         items={[
           { label: "完成总数", value: stats.completedTotal },
           { label: "完成复习", value: stats.completedReview },
@@ -77,10 +76,11 @@ export function DashboardStatsCards({
           {allocation && allocation.overrunMinutes > 0 && <p role="status" className="mt-2 text-xs font-medium text-destructive">实际已超出今日预算 {minutes(allocation.overrunMinutes)}</p>}
         </div>
       </StatsCard>
+      {recommendedTask && <div className="min-w-0 md:col-span-2 xl:col-span-2">{recommendedTask}</div>}
       <StatsCard
         title="复习总账"
         icon={RefreshCcw}
-        className="xl:col-span-3"
+        className={recommendedTask ? "xl:col-span-2" : "xl:col-span-3"}
         meta="启用计划合计"
         items={[
           {
@@ -98,7 +98,7 @@ export function DashboardStatsCards({
       <StatsCard
         title={`${level} 总体进度`}
         icon={GraduationCap}
-        className="xl:col-span-3"
+        className={recommendedTask ? "xl:col-span-2" : "xl:col-span-3"}
         meta={`共 ${stats.progress.total} 个语法`}
         progress={stats.progress}
         items={[
