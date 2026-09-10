@@ -21,6 +21,7 @@ import { FuriganaText } from "@/components/shared/furigana-text";
 import { LoadingState } from "@/components/shared/loading-state";
 import { TrainingPanel } from "./training-panel";
 import { ReviewResultCard } from "./review-result-card";
+import { SaveExpression } from "./save-expression";
 import { DefaultStudyButton } from "./default-study-button";
 import { FocusCycleCard } from "@/components/focus/focus-cycle-display";
 import { apiFetcher, apiRequest, ApiError } from "@/lib/api/client";
@@ -366,67 +367,70 @@ export function StudyWorkspace({ sessionId }: { sessionId: string }) {
         </Card>
         {result && (
           <div className="mt-6 min-w-0">
-            <ReviewResultCard result={result} reviewId={reviewId} showCorrection={false} />
-            <div className="mt-6 min-w-0 rounded-2xl border bg-card p-5">
-              <h2 className="font-semibold">这次记得怎么样？</h2>
-              <p className="mt-1 text-sm text-muted-foreground">
-                系统会结合你的真实回忆和本次目标语法表现安排复习。
-              </p>
-              {result.recallPolicy &&
-                result.recallPolicy.reason !== "NONE" && (
-                  <RecallPolicyMessage reason={result.recallPolicy.reason} />
-                )}
-              {allowedRatings.length === 0 ? (
-                <div className="mt-4">
-                  <DefaultStudyButton disabled={completing} onClick={revise} title="修改后重新提交">
-                    <RefreshCcw />
-                    修改后重新提交
-                  </DefaultStudyButton>
-                </div>
-              ) : (
-                <div className="mt-4 grid auto-cols-fr grid-flow-col gap-2 sm:gap-3">
-                  <Button
-                    className="min-w-0 px-2 text-xs sm:text-sm"
-                    variant="outline"
-                    disabled={completing}
-                    onClick={() => void complete("FORGOT")}
-                  >
-                    忘记了
-                  </Button>
-                  <Button
-                    className="min-w-0 px-2 text-xs sm:text-sm"
-                    variant="outline"
-                    disabled={completing}
-                    onClick={() => void complete("FUZZY")}
-                  >
-                    有些模糊
-                  </Button>
-                  {allowedRatings.includes("REMEMBERED") && (
-                    result.totalScore < 80 ? (
-                      <Button variant="outline" disabled={completing}
-                        onClick={() => void complete("REMEMBERED")}>
-                        记住了
-                      </Button>
-                    ) : (
-                      <DefaultStudyButton disabled={completing}
-                        onClick={() => void complete("REMEMBERED")} title="记住了">
-                        记住了
-                      </DefaultStudyButton>
-                    )
-                  )}
-                  {result.totalScore < 80 && (
-                    <DefaultStudyButton disabled={completing} onClick={revise} title="修改后重试">
-                      <RefreshCcw className="hidden sm:block" />
-                      修改后重试
-                    </DefaultStudyButton>
-                  )}
-                </div>
-              )}
-              {result.totalScore < 80 && (
-                <p className="mt-2 text-xs text-muted-foreground">
-                  首次结果仍会保留
+            <ReviewResultCard result={result} showCorrection={false} />
+            <div className={`mt-6 grid min-w-0 gap-4 ${reviewId ? "md:grid-cols-2" : ""}`}>
+              {reviewId && <SaveExpression reviewId={reviewId} result={result} />}
+              <div className="flex min-w-0 flex-col rounded-2xl border bg-card p-5">
+                <h2 className="font-semibold">这次记得怎么样？</h2>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  系统会结合你的真实回忆和本次目标语法表现安排复习。
                 </p>
-              )}
+                {result.recallPolicy &&
+                  result.recallPolicy.reason !== "NONE" && (
+                    <RecallPolicyMessage reason={result.recallPolicy.reason} />
+                  )}
+                {allowedRatings.length === 0 ? (
+                  <div className="mt-auto pt-4">
+                    <DefaultStudyButton disabled={completing} onClick={revise} title="修改后重新提交">
+                      <RefreshCcw />
+                      修改后重新提交
+                    </DefaultStudyButton>
+                  </div>
+                ) : (
+                  <div className="mt-auto grid auto-cols-fr grid-flow-col gap-2 pt-4 sm:gap-3">
+                    <Button
+                      className="min-w-0 px-2 text-xs sm:text-sm"
+                      variant="outline"
+                      disabled={completing}
+                      onClick={() => void complete("FORGOT")}
+                    >
+                      忘记了
+                    </Button>
+                    <Button
+                      className="min-w-0 px-2 text-xs sm:text-sm"
+                      variant="outline"
+                      disabled={completing}
+                      onClick={() => void complete("FUZZY")}
+                    >
+                      有些模糊
+                    </Button>
+                    {allowedRatings.includes("REMEMBERED") && (
+                      result.totalScore < 80 ? (
+                        <Button variant="outline" disabled={completing}
+                          onClick={() => void complete("REMEMBERED")}>
+                          记住了
+                        </Button>
+                      ) : (
+                        <DefaultStudyButton disabled={completing}
+                          onClick={() => void complete("REMEMBERED")} title="记住了">
+                          记住了
+                        </DefaultStudyButton>
+                      )
+                    )}
+                    {result.totalScore < 80 && (
+                      <DefaultStudyButton disabled={completing} onClick={revise} title="修改后重试">
+                        <RefreshCcw className="hidden sm:block" />
+                        修改后重试
+                      </DefaultStudyButton>
+                    )}
+                  </div>
+                )}
+                {result.totalScore < 80 && (
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    首次结果仍会保留
+                  </p>
+                )}
+              </div>
             </div>
           </div>
         )}

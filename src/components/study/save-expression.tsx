@@ -37,7 +37,7 @@ export function SaveExpression({
   return (
     <section
       aria-label="收藏常用表达"
-      className="flex flex-col gap-3 rounded-xl border p-4"
+      className="flex min-w-0 flex-col gap-3 rounded-2xl border p-5"
     >
       <h3 className="font-semibold">收藏想熟练使用的表达</h3>
       <label className="text-sm">
