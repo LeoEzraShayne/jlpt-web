@@ -6,17 +6,14 @@ import {
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FuriganaText } from "@/components/shared/furigana-text";
-import { SaveExpression } from "./save-expression";
 import type { ReviewResult } from "@/lib/api/types";
 
 export function ReviewResultCard({
   result,
   showCorrection = true,
-  reviewId,
 }: {
   result: ReviewResult;
   showCorrection?: boolean;
-  reviewId?: string;
 }) {
   const scores = [
     ["语法使用", result.grammarScore, 30],
@@ -68,7 +65,7 @@ export function ReviewResultCard({
       {result.errorSpans.length > 0 && (
         <Card className="min-w-0">
           <CardHeader>
-            <CardTitle>需要调整的地方</CardTitle>
+            <CardTitle role="heading" aria-level={2}>需要调整的地方</CardTitle>
           </CardHeader>
           <CardContent className="min-w-0 space-y-3">
             {result.errorSpans.map((span, index) => (
@@ -116,9 +113,6 @@ export function ReviewResultCard({
           japanese
         />
       )}
-      {result.diversityAdvice && <Feedback icon={Sparkles} title="表达变化建议" text={result.diversityAdvice} />}
-      {result.nextPractice && <Feedback icon={WandSparkles} title="后续练习" text={result.nextPractice} />}
-      {reviewId && <SaveExpression reviewId={reviewId} result={result} />}
     </div>
   );
 }

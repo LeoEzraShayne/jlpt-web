@@ -202,14 +202,10 @@ test("review hides personal references, reveals explicitly, and saves checked AI
   await page.getByRole("button", { name: "提交给 AI 批改" }).click();
   await expect(page.getByRole("heading", { name: "内容回应" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "拓展示例" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "后续练习" })).toBeVisible();
-  await page.getByLabel("收藏表达来源").selectOption("ALTERNATIVE");
-  await page.getByLabel("收藏表达备注").fill("工作汇报常用");
-  await page.getByRole("button", { name: "收藏表达", exact: true }).click();
-  await expect(page.getByText("已收藏到个人常用表达库")).toBeVisible();
-  expect(saves).toEqual([
-    { reviewId: "review1", variant: "ALTERNATIVE", note: "工作汇报常用" },
-  ]);
+  await expect(page.getByRole("heading", { name: "后续练习" })).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "表达变化建议" })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "收藏表达", exact: true })).toHaveCount(0);
+  expect(saves).toEqual([]);
   expect(expressionReads).toBe(0);
   await expectNoHorizontalOverflow(page);
   expect(errors).toEqual([]);

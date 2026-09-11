@@ -70,7 +70,7 @@ test('real plans preserve primary/shared budget, pause/resume, and generate toda
   await healthy(page, errors, `real-all-paused-${info.project.name}.png`);
 });
 
-test('real job polling, four-part feedback, expression save, and hidden review evidence', async ({ page }, info) => {
+test('real job polling, compact feedback, existing expressions, and hidden review evidence', async ({ page }, info) => {
   const errors = watch(page); const userId = await login(page);
   await page.goto('/today');
   await page.getByRole('button', { name: '开始学习', exact: true }).first().click();
@@ -83,13 +83,13 @@ test('real job polling, four-part feedback, expression save, and hidden review e
   await page.getByRole('button', { name: '提交给 AI 批改' }).click();
   const job = (await (await submitted).json()).data;
   fixture('result', job.reviewId);
-  for (const heading of ['内容回应', '拓展示例', '后续练习'])
+  for (const heading of ['内容回应', '拓展示例'])
     await expect(page.getByRole('heading', { name: heading })).toBeVisible();
   await expect(page.getByText('目标语法使用正确。', { exact: true })).toBeVisible();
-  await page.getByLabel('收藏表达来源').selectOption('ALTERNATIVE');
-  await page.getByLabel('收藏表达备注').fill('真实接口保存');
-  await page.getByRole('button', { name: '收藏表达', exact: true }).click();
-  await expect(page.getByText('已收藏到个人常用表达库')).toBeVisible();
+  await expect(page.getByRole('heading', { name: '后续练习' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: '收藏表达', exact: true })).toHaveCount(0);
+  // Existing expression records remain available even though practice no longer shows the form.
+  await apiData(page, '/expressions', { reviewId: job.reviewId, variant: 'ALTERNATIVE', note: '真实接口保存' });
   let state = fixture('snapshot', userId);
   expect(state.expressions).toHaveLength(1); expect(state.expressions[0].note).toBe('真实接口保存');
   await healthy(page, errors, `real-feedback-${info.project.name}.png`);

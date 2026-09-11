@@ -21,7 +21,6 @@ import { FuriganaText } from "@/components/shared/furigana-text";
 import { LoadingState } from "@/components/shared/loading-state";
 import { TrainingPanel } from "./training-panel";
 import { ReviewResultCard } from "./review-result-card";
-import { SaveExpression } from "./save-expression";
 import { DefaultStudyButton } from "./default-study-button";
 import { FocusCycleCard } from "@/components/focus/focus-cycle-display";
 import { apiFetcher, apiRequest, ApiError } from "@/lib/api/client";
@@ -368,8 +367,7 @@ export function StudyWorkspace({ sessionId }: { sessionId: string }) {
         {result && (
           <div className="mt-6 min-w-0">
             <ReviewResultCard result={result} showCorrection={false} />
-            <div className={`mt-6 grid min-w-0 gap-4 ${reviewId ? "md:grid-cols-2" : ""}`}>
-              {reviewId && <SaveExpression reviewId={reviewId} result={result} />}
+            <div className="mt-6 min-w-0">
               <div className="flex min-w-0 flex-col rounded-2xl border bg-card p-5">
                 <h2 className="font-semibold">这次记得怎么样？</h2>
                 <p className="mt-1 text-sm text-muted-foreground">
