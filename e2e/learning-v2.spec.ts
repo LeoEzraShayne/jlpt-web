@@ -248,7 +248,7 @@ test("paused foundation plan without primary plan does not restart onboarding", 
   await expectNoHorizontalOverflow(page);
   expect(api.errors).toEqual([]);
 });
-test("create secondary plan preserves primary and edit global allocation independently", async ({
+test("create secondary plan preserves primary and edit primary independently", async ({
   page,
 }) => {
   const api = await mockApi(page);
@@ -262,9 +262,10 @@ test("create secondary plan preserves primary and edit global allocation indepen
   expect(api.writes[0].body.mode).toBe("GAP_FILL");
   expect(api.getUser().targetLevel).toBe("N1");
   await page.getByLabel("主目标", { exact: true }).selectOption("N2");
-  await page.getByLabel("主目标时间份额").fill("70");
+  await expect(page.getByLabel("主目标时间份额")).toHaveCount(0);
   await page.getByRole("button", { name: "保存每日安排" }).click();
-  await expect.poll(() => api.getUser().primaryShare).toBe(70);
+  await expect.poll(() => api.getUser().targetLevel).toBe("N2");
+  expect(api.getUser().primaryShare).toBe(80);
   expect(api.getUser().targetLevel).toBe("N2");
   await expectNoHorizontalOverflow(page);
   expect(api.errors).toEqual([]);
@@ -276,12 +277,12 @@ test("today shows retained spend and permits primary new work despite foundation
   await page.goto("/today");
   await expect(page.getByLabel("今日时间分配")).toHaveCount(0);
   await expect(page.getByLabel("今日完成")).toContainText("今日实际用时10 分钟");
-  await expect(page.getByLabel("今日剩余")).toContainText("可再安排时间16 分钟");
-  const details = page.locator("details").filter({ hasText: "级别与时间分配" });
+  await expect(page.getByText(/预算|可再安排时间|练习预留/)).toHaveCount(0);
+  const details = page.locator("details").filter({ hasText: "各级别今日安排" });
   await expect(details).not.toHaveAttribute("open", "");
   await details.locator("summary").click();
   await expect(details).toHaveAttribute("open", "");
-  await expect(details).toContainText("主目标：份额");
+  await expect(details).toContainText("主目标");
   await details.locator("summary").click();
   await expect(
     page.getByRole("button", { name: "开始学习", exact: true }).first(),

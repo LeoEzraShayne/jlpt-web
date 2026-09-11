@@ -49,7 +49,7 @@ export function PlanForecastCard({ planId }: { planId: string }) {
             <p className="font-medium">
               {meta.projectedCompletionDate
                 ? `预计 ${formatStudyDate(meta.projectedCompletionDate, true)} 完成`
-                : "按当前时间暂时无法完成全部新语法"}
+                : "按当前节奏暂时无法完成全部新语法"}
             </p>
             <p className="mt-1 text-muted-foreground">
               目标日期：{formatStudyDate(meta.targetDate, true)}

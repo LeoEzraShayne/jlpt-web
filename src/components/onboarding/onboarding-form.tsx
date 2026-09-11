@@ -1,6 +1,6 @@
 "use client";
 
-import { CalendarDays, Clock3, LoaderCircle, Sparkles } from "lucide-react";
+import { CalendarDays, BookOpen, LoaderCircle, Sparkles } from "lucide-react";
 import Image from "next/image";
 import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -11,7 +11,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ErrorState } from "@/components/shared/error-state";
 import { LoadingState } from "@/components/shared/loading-state";
 import { LevelSelector } from "@/components/shared/level-selector";
-import { DurationPicker } from "@/components/shared/duration-picker";
 import { PlanDateRange } from "@/components/shared/plan-date-range";
 import { usePlans } from "@/hooks/use-api";
 import { apiRequest, ApiError } from "@/lib/api/client";
@@ -29,7 +28,6 @@ export function OnboardingForm() {
   const [level, setLevel] = useState<JlptLevel>("N1");
   const [startDate, setStartDate] = useState(today);
   const [targetDate, setTargetDate] = useState("2026-12-06");
-  const [dailyMinutes, setDailyMinutes] = useState(20);
   const [dailyNewLimit, setDailyNewLimit] = useState(2);
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -41,14 +39,13 @@ export function OnboardingForm() {
     setSubmitting(true);
     setError("");
     try {
-      await apiRequest("/me/preferences", { method: "PUT", body: JSON.stringify({ targetLevel: level, dailyMinutes, primaryShare: 80 }) });
+      await apiRequest("/me/preferences", { method: "PUT", body: JSON.stringify({ targetLevel: level }) });
       const response = await apiRequest<StudyPlan>("/study-plans", {
         method: "POST",
         body: JSON.stringify({
           level,
           startDate: new Date(`${startDate}T12:00:00Z`).toISOString(),
           targetDate: new Date(`${targetDate}T12:00:00Z`).toISOString(),
-          dailyMinutes,
           dailyNewLimit,
         }),
       });
@@ -136,12 +133,11 @@ export function OnboardingForm() {
           <Card className="min-w-0 warm-shadow">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Clock3 className="size-5 text-primary" />
-                每日学习时间
+                <BookOpen className="size-5 text-primary" />
+                每日新学上限
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-5">
-              <DurationPicker value={dailyMinutes} onChange={setDailyMinutes} />
               <label className="block text-sm">
                 <span className="mb-2 block text-muted-foreground">
                   每天学习新语法上限：{dailyNewLimit} 个

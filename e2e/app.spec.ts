@@ -345,7 +345,7 @@ test("today prioritizes review, locks new learning, and keeps task actions align
   await expect(page.getByRole("heading", { name: "今日新语法" })).toBeVisible();
   await expect(page.locator('[aria-label="先完成复习任务列表"]').getByRole("button", { name: "开始复习" })).toHaveCount(1);
   await expect(page.getByRole("button", { name: "先完成复习" })).toBeDisabled();
-  await expect(page.getByText("按所在组复习进度解锁；基础积压不占用主目标份额", { exact: true })).toBeVisible();
+  await expect(page.getByText("先完成本组复习，再学习新语法", { exact: true })).toBeVisible();
   await expect(page.getByText("逾期待复习", { exact: true })).toBeVisible();
   const reviewCard = page.getByRole("heading", { name: reviewGrammar.title }).last().locator("..");
   const estimate = reviewCard.getByText("预计 6 分钟");
@@ -466,15 +466,15 @@ test("daily new grammar limit supports up to ten", async ({ page }) => {
   await expect(page.getByLabel("N1 每日新语法上限")).toHaveAttribute("max", "10");
   await expectNoHorizontalOverflow(page);
 });
-test("plan settings expose a date range and clear hour-minute duration", async ({ page }) => {
+test("plan settings expose dates and new-learning limits without time caps", async ({ page }) => {
   await mockAuthenticatedApi(page, { onboardingWithoutPlan: true });
   await page.goto("/onboarding");
   await expect(page.getByText("计划日期", { exact: true })).toBeVisible();
   await expect(page.getByLabel("计划开始日期")).toBeVisible();
   await expect(page.getByLabel("计划截止日期")).toBeVisible();
-  await page.getByLabel("每日学习小时").selectOption("1");
-  await page.getByLabel("每日学习分钟").selectOption("30");
-  await expect(page.getByText("每天计划学习 1 小时 30 分钟")).toBeVisible();
+  await expect(page.getByLabel("每日学习小时")).toHaveCount(0);
+  await expect(page.getByLabel("每日学习分钟")).toHaveCount(0);
+  await expect(page.getByLabel("每日新语法数量")).toBeVisible();
 });
 test("all main routes stay inside the viewport", async ({ page }) => {
   await mockAuthenticatedApi(page, { onboardingWithoutPlan: true });

@@ -11,7 +11,6 @@ interface DashboardStatsCardsProps {
   stats: DashboardStats;
   estimatedMinutes: number;
   recommendedTask?: ReactNode;
-  budgetMinutes: number;
   allocation?: Dashboard["allocation"];
   levels?: Dashboard["levels"];
 }
@@ -21,7 +20,6 @@ export function DashboardStatsCards({
   stats,
   estimatedMinutes,
   recommendedTask,
-  budgetMinutes,
   allocation,
   levels,
 }: DashboardStatsCardsProps) {
@@ -32,7 +30,6 @@ export function DashboardStatsCards({
         icon={BookOpen}
         columns={3}
         className="xl:col-span-3"
-        meta={`今日预算 ${minutes(budgetMinutes)}`}
         items={[
           { label: "待开始复习", value: stats.pendingReview },
           { label: "待开始新语法", value: stats.pendingNew },
@@ -42,12 +39,9 @@ export function DashboardStatsCards({
             detail: `复习 ${stats.inProgressReview} · 新学 ${stats.inProgressNew}`,
           },
           { label: "剩余任务用时", value: minutes(estimatedMinutes) },
-          { label: "可再安排时间", value: allocation ? minutes(allocation.remainingMinutes) : "—" },
-          { label: "练习预留", value: allocation ? minutes(allocation.reservedMinutes ?? 0) : "—" },
         ]}
       >
-        {allocation && <p className="mt-3 text-xs leading-5 text-muted-foreground">可再安排时间已扣除实际用时、练习预留及待办安排。</p>}
-        <AllocationDetails allocation={allocation} levels={levels} />
+        <AllocationDetails levels={levels} />
       </StatsCard>
       <StatsCard
         title="今日完成"
@@ -64,11 +58,9 @@ export function DashboardStatsCards({
             detail: "已包含在完成复习中",
           },
           { label: "今日实际用时", value: minutes(allocation?.spentMinutes ?? stats.studyMinutesToday) },
-          { label: "超出今日预算", value: minutes(allocation?.overrunMinutes ?? Math.max(0, stats.studyMinutesToday - budgetMinutes)) },
         ]}
       >
         <p className="mt-3 text-xs leading-5 text-muted-foreground">实际用时包含已完成、进行中及额外练习。</p>
-        {allocation && allocation.overrunMinutes > 0 && <p role="status" className="mt-2 text-xs font-medium text-destructive">实际已超出今日预算 {minutes(allocation.overrunMinutes)}</p>}
       </StatsCard>
       {recommendedTask && <div className="min-w-0 md:col-span-2 xl:col-span-2">{recommendedTask}</div>}
       <StatsCard
@@ -106,18 +98,13 @@ export function DashboardStatsCards({
   );
 }
 
-function AllocationDetails({ allocation, levels }: Pick<Dashboard, "allocation" | "levels">) {
-  if (!allocation && !levels?.length) return null;
+function AllocationDetails({ levels }: Pick<Dashboard, "levels">) {
+  if (!levels?.length) return null;
   return <details className="group mt-3 border-t border-border/60 pt-3">
     <summary className="flex cursor-pointer list-none items-center justify-between gap-2 rounded text-xs font-medium text-muted-foreground hover:text-foreground focus-visible:outline-2 focus-visible:outline-ring [&::-webkit-details-marker]:hidden">
-      级别与时间分配<ChevronDown className="size-4 transition-transform group-open:rotate-180" />
+      各级别今日安排<ChevronDown className="size-4 transition-transform group-open:rotate-180" />
     </summary>
     <div className="mt-3 space-y-3 text-xs leading-5">
-      {allocation && <div className="space-y-1 text-muted-foreground">
-        <p>主目标：份额 {minutes(allocation.primaryMinutes)} · 已安排 {minutes(allocation.primaryPlannedMinutes)}</p>
-        <p>基础合计：份额 {minutes(allocation.foundationMinutes)} · 已安排 {minutes(allocation.foundationPlannedMinutes)}</p>
-        <p>空余份额可互借，安排时间可超过原份额。</p>
-      </div>}
       {levels?.map(item => <div key={item.planId} className="border-t border-border/60 pt-2">
         <div className="flex flex-wrap justify-between gap-x-3"><strong>{item.level} · {item.isPrimary ? "主目标" : "基础"}</strong><span className="text-muted-foreground">{item.reviewCount + item.newCount + item.completedCount === 0 ? "今日未安排" : `待办约 ${minutes(item.estimatedMinutes)}`}</span></div>
         {item.reviewCount + item.newCount + item.completedCount > 0 && <p className="text-muted-foreground">待复习 {item.reviewCount} · 待新学 {item.newCount} · 已完成 {item.completedCount}</p>}

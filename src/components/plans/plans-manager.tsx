@@ -21,7 +21,6 @@ import {
 } from "@/components/ui/card";
 import { LoadingState } from "@/components/shared/loading-state";
 import { ErrorState } from "@/components/shared/error-state";
-import { DurationPicker } from "@/components/shared/duration-picker";
 import { PlanDateRange } from "@/components/shared/plan-date-range";
 import { PlanForecastCard } from "@/components/profile/plan-forecast-card";
 
@@ -58,11 +57,11 @@ export function PlansManager() {
       <div>
         <h2 className="text-xl font-bold">学习计划</h2>
         <p className="mt-2 text-sm text-muted-foreground">
-          每级别一个当前计划，共享每日时间。暂停后可随时恢复。
+          每级别一个当前计划，到期复习全部安排。暂停后可随时恢复。
         </p>
       </div>
       <Preferences
-        key={`${user.targetLevel}-${user.dailyMinutes}-${user.primaryShare}`}
+        key={user.targetLevel}
         user={user}
         onSaved={refresh}
       />
@@ -110,8 +109,6 @@ function Preferences({
   onSaved: () => Promise<void>;
 }) {
   const [target, setTarget] = useState(user.targetLevel);
-  const [minutes, setMinutes] = useState(user.dailyMinutes ?? 20);
-  const [share, setShare] = useState(user.primaryShare ?? 80);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   async function save(event: FormEvent) {
@@ -123,12 +120,10 @@ function Preferences({
         method: "PUT",
         body: JSON.stringify({
           targetLevel: target,
-          dailyMinutes: minutes,
-          primaryShare: share,
         }),
       });
       await onSaved();
-      setMessage("每日安排已保存，今天已使用的时间继续计入总量。");
+      setMessage("主目标已保存。");
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "保存失败");
     } finally {
@@ -140,7 +135,7 @@ function Preferences({
       <CardHeader>
         <CardTitle>统一每日安排</CardTitle>
         <CardDescription>
-          主目标优先推进，基础级别合计分享剩余份额，空余时间可互借。
+          启用计划的到期复习全部列出，新学按各计划的每日数量上限安排。
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -157,23 +152,6 @@ function Preferences({
                 <option key={level}>{level}</option>
               ))}
             </select>
-          </label>
-          <div>
-            <p className="mb-2 text-sm">每日总时间</p>
-            <DurationPicker value={minutes} onChange={setMinutes} />
-          </div>
-          <label className="text-sm">
-            主目标 {share}% · 基础合计 {100 - share}%
-            <input
-              aria-label="主目标时间份额"
-              className="mt-2 w-full accent-primary"
-              type="range"
-              min="0"
-              max="100"
-              step="5"
-              value={share}
-              onChange={(e) => setShare(Number(e.target.value))}
-            />
           </label>
           <Button disabled={busy} type="submit">
             保存每日安排
@@ -227,7 +205,7 @@ function LevelPlan({
             startDate: `${start}T12:00:00.000Z`,
             targetDate: `${end}T12:00:00.000Z`,
             dailyNewLimit: limit,
-            ...(!plan ? { level, dailyMinutes: user.dailyMinutes ?? 20 } : {}),
+            ...(!plan ? { level } : {}),
           };
       await apiRequest(plan ? apiKeys.planDetail(plan.id) : apiKeys.plans, {
         method: plan ? "PATCH" : "POST",

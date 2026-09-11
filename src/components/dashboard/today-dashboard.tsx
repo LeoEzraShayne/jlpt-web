@@ -113,7 +113,6 @@ export function TodayDashboard() {
         level={plan?.level ?? user?.targetLevel ?? "N1"}
         stats={stats}
         estimatedMinutes={data.estimatedMinutes}
-        budgetMinutes={data.planning.budgetMinutes}
         allocation={data.allocation}
         levels={data.levels}
         recommendedTask={nextTask ? <RecommendedTask task={nextTask} /> : undefined}
@@ -137,7 +136,7 @@ export function TodayDashboard() {
             {newGrammar.length > 0 && (
               <TaskGroup
                 title="今日新语法"
-                description="按所在组复习进度解锁；基础积压不占用主目标份额"
+                description="先完成本组复习，再学习新语法"
                 tasks={newGrammar}
               />
             )}
@@ -203,7 +202,7 @@ function PlanningWarning({ stats }: { stats: DashboardStats }) {
     <div className="mb-5 flex items-start gap-2 rounded-lg border border-border/60 bg-muted/40 px-3 py-2.5 text-xs leading-5 text-muted-foreground">
       <Info className="mt-0.5 size-4 shrink-0" />
       <span>
-        还有 {countLabel} 复习保留在积压中，后续按每日预算安排。
+        还有 {countLabel} 复习尚未完成，可在复习队列中查看。
         <Link className="ml-1 font-medium text-primary hover:underline" href="/review">
           查看队列
         </Link>
