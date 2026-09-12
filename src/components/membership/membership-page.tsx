@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useRef, useState } from "react";
 import useSWR from "swr";
 import { apiFetcher, apiRequest } from "@/lib/api/client";
-import type { BillingMarket, Catalog, ProductCode } from "@/lib/api/sentence-lab";
+import type { Catalog, ProductCode } from "@/lib/api/sentence-lab";
 import { useLocale } from "@/components/locale/locale-provider";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,23 +13,22 @@ import { billingError, useMembership, usePaymentSurface } from "./use-membership
 export function formatPrice(amount: number, currency: string, locale: string) { return new Intl.NumberFormat(locale, { style: "currency", currency }).format(currency === "JPY" ? amount : amount / 100); }
 export function MembershipPage() {
   const { locale, t } = useLocale();
-  const [market, setMarket] = useState<BillingMarket>("GLOBAL");
   const [pending, setPending] = useState<ProductCode | null>(null);
   const [error, setError] = useState("");
   const keys = useRef(new Map<string, string>());
   const lock = useRef(false);
   const membership = useMembership();
   const surface = usePaymentSurface();
-  const catalog = useSWR<Catalog>(`/billing/catalog?market=${market}`, apiFetcher, { shouldRetryOnError: false });
+  const catalog = useSWR<Catalog>("/billing/catalog?market=GLOBAL", apiFetcher, { shouldRetryOnError: false });
   const date = (value: string) => new Date(value).toLocaleString(locale === "en" ? "en-US" : "zh-CN");
   async function checkout(productCode: ProductCode) {
     if (lock.current || surface !== "web" || !catalog.data?.salesEnabled) return;
     lock.current = true; setPending(productCode); setError("");
-    const key = `${market}:${productCode}`;
+    const key = productCode;
     const requestKey = keys.current.get(key) ?? crypto.randomUUID();
     keys.current.set(key, requestKey);
     try {
-      const { data } = await apiRequest<{ orderId: string; checkoutUrl: string }>("/billing/checkout", { method: "POST", body: JSON.stringify({ productCode, market, requestKey, locale }) });
+      const { data } = await apiRequest<{ orderId: string; checkoutUrl: string }>("/billing/checkout", { method: "POST", body: JSON.stringify({ productCode, market: "GLOBAL", requestKey, locale }) });
       const target = new URL(data.checkoutUrl);
       if (target.protocol !== "https:" || target.hostname !== "checkout.stripe.com") throw new Error("Invalid Checkout URL");
       window.location.assign(target.href);
@@ -57,8 +56,7 @@ export function MembershipPage() {
       </CardContent>
     </Card>}
     {surface === "android" ? <Card><CardHeader><CardTitle>{t("Android 购买")}</CardTitle><CardDescription>{t("请使用应用内 Google Play 购买入口。已有会员在所有设备生效。")}</CardDescription></CardHeader></Card> : surface === "web" && <>
-      <label className="flex items-center gap-3 text-sm">{t("购买市场")}<select aria-label={t("购买市场")} className="rounded-lg border bg-background p-2" value={market} disabled={!!pending} onChange={event => setMarket(event.target.value as BillingMarket)}><option value="GLOBAL">{t("全球 · 美元 USD")}</option><option value="JP">{t("日本 · 日元 JPY")}</option></select></label>
-      <p className="text-xs text-muted-foreground">{t("币种由购买市场决定，切换语言不会改变价格。")}</p>
+      <p className="text-xs text-muted-foreground">{t("Web 新购买统一以美元（USD）付款，切换语言不会改变价格。")}</p>
       {catalog.isLoading ? <LoadingState /> : catalog.error ? <ErrorState message={billingError(catalog.error, t)} onRetry={() => void catalog.mutate()} /> : catalog.data && <>
         {!catalog.data.salesEnabled && <p role="status" className="rounded-xl border p-4 text-sm">{t("购买尚未开放，请稍后再来。")}</p>}
         {catalog.data.launchEndsAt && <p className="text-sm">{t("美元首发价截止")} {date(catalog.data.launchEndsAt)}</p>}

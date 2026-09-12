@@ -16,16 +16,41 @@ describe("membership UI", () => {
   it("uses currency minor units correctly", () => {
     expect(formatPrice(99, "USD", "en")).toBe("$0.99");
     expect(formatPrice(6400, "USD", "en")).toBe("$64.00");
+    expect(formatPrice(9900, "USD", "en")).toBe("$99.00");
     expect(formatPrice(100, "JPY", "en")).toBe("¥100");
   });
-  it("keeps sales disabled and market independent from the interface language", async () => {
+  it("keeps sales disabled and new purchases in USD across interface languages", async () => {
     vi.mocked(apiFetcher).mockImplementation(async path => path === "/me/entitlements" ? membership : { market: "GLOBAL", salesEnabled: false, products: [{ productCode: "DAY_PASS", currency: "USD", amount: 99, durationSeconds: 86400 }] });
     mount(<MembershipPage />);
     expect(await screen.findByRole("button", { name: "使用 Stripe 安全支付" })).toBeDisabled();
     act(() => setLocale("en"));
-    expect(screen.getByLabelText("Purchase market")).toHaveValue("GLOBAL");
+    expect(screen.queryByRole("combobox")).not.toBeInTheDocument();
+    expect(screen.getByText("New web purchases are charged in USD worldwide. Changing language does not change prices.")).toBeInTheDocument();
+    expect(apiFetcher).toHaveBeenCalledWith("/billing/catalog?market=GLOBAL");
     expect(screen.getByRole("button", { name: "Pay securely with Stripe" })).toBeDisabled();
     expect(apiRequest).not.toHaveBeenCalled();
+  });
+  it.each(["zh", "en"] as const)("requests the global USD catalog and checkout in %s", async locale => {
+    act(() => setLocale(locale));
+    vi.mocked(apiFetcher).mockImplementation(async path => path === "/me/entitlements" ? membership : {
+      market: "GLOBAL", salesEnabled: true, products: [
+        { productCode: "DAY_PASS", currency: "USD", amount: 99, durationSeconds: 86400 },
+        { productCode: "YEAR_PASS", currency: "USD", amount: 9900, durationSeconds: 31536000 },
+      ],
+    });
+    vi.mocked(apiRequest).mockRejectedValueOnce(new ApiError("billing disabled", 503, "BILLING_DISABLED"));
+    mount(<MembershipPage />);
+    const buttons = await screen.findAllByRole("button", { name: locale === "en" ? "Pay securely with Stripe" : "使用 Stripe 安全支付" });
+    expect(screen.queryByRole("combobox")).not.toBeInTheDocument();
+    expect(screen.getByText(formatPrice(9900, "USD", locale))).toBeInTheDocument();
+    fireEvent.click(buttons[1]);
+    await waitFor(() => expect(apiRequest).toHaveBeenCalledTimes(1));
+    expect(apiFetcher).toHaveBeenCalledWith("/billing/catalog?market=GLOBAL");
+    expect(apiRequest).toHaveBeenCalledWith("/billing/checkout", { method: "POST", body: expect.any(String) });
+    expect(JSON.parse(vi.mocked(apiRequest).mock.calls[0][1]?.body as string)).toEqual({
+      productCode: "YEAR_PASS", market: "GLOBAL", locale, requestKey: expect.stringMatching(/^[0-9a-f-]{36}$/),
+    });
+    await screen.findByRole("alert");
   });
   it.each([false, true])("shows the actual enforcement state (%s) in the banner and membership page", async enforcementEnabled => {
     vi.mocked(apiFetcher).mockImplementation(async path => path === "/me/entitlements"
