@@ -1,3 +1,11 @@
+export interface LocalizedContent {
+  requestedLocale: "zh" | "en";
+  resolvedLocale: "zh" | "en" | null;
+  status: "ORIGINAL" | "VALIDATED" | "MISSING" | "STALE";
+  sourceHash: string;
+  fields: Partial<Record<"explanation" | "connectionRule" | "usageScene" | "commonErrors" | "translation" | "title" | "notes" | "domain" | "objective" | "register" | "prompt", string | null>> | null;
+}
+
 export type ThemeId = "sunshine" | "coral" | "mint" | "ocean" | "violet";
 export type JlptLevel = "N1" | "N2" | "N3" | "N4";
 export type RecallRating = "FORGOT" | "FUZZY" | "REMEMBERED";
@@ -48,12 +56,14 @@ export interface Progress {
 }
 
 export interface GrammarExample {
+  localized?: LocalizedContent;
   id: string;
   sentence: string;
   translation: string;
   sortOrder: number;
 }
 export interface GrammarPoint {
+  localized?: LocalizedContent;
   id: string;
   level: JlptLevel;
   title: string;
@@ -66,6 +76,7 @@ export interface GrammarPoint {
   progress?: Progress[];
   relationMembers?: Array<{
     group: {
+      localized?: LocalizedContent;
       id: string;
       title: string;
       notes: string;
@@ -163,6 +174,15 @@ export interface Dashboard {
 }
 
 export interface ReviewResult {
+  localizedFeedback?: {
+    explanation: string;
+    correctedSentenceTranslation: string | null;
+    alternativeSentenceTranslation?: string | null;
+    encouragement: string;
+    errorSpans: Array<{text: string; start: number; end: number; reason: string; replacement: string}>;
+    contentResponse?: string | null;
+  } | null;
+  explanationLocale?: "zh" | "en";
   id: string;
   totalScore: number;
   grammarScore: number;
@@ -225,6 +245,7 @@ export interface SentenceAttempt {
 }
 
 export interface StudySession {
+  explanationLocale?: "zh" | "en";
   id: string;
   grammarId: string;
   taskId?: string | null;
@@ -308,6 +329,7 @@ export interface TrainingContext {
   version?: "training-v1";
   instructionZh?: string;
   scenario?: {
+    localized?: LocalizedContent;
     version: "scenario-v1"; id: string; scenarioId: string; taskId: string;
     objectiveId: string; domain: string; objective: string; register: string; promptZh: string;
   } | null;
