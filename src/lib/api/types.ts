@@ -330,7 +330,19 @@ export interface StudyPlanList {
   items: StudyPlan[];
   nextCursor: string | null;
 }
+export interface VocabularyLearningState {
+  id: string;
+  vocabularyId: string;
+  knowledge: "UNKNOWN" | "KNOWN" | "REMEMBERED";
+  practiceEnabled: boolean;
+  paused: boolean;
+  manualRevision: number;
+  nextReviewAt: string | null;
+  lastPracticedAt: string | null;
+  lastOutcome: string | null;
+}
 export interface VocabularyEntry {
+  learning?: VocabularyLearningState | null;
   id: string; word: string; reading: string; senseKey: string; partOfSpeech: string[];
   glosses: Array<{language: string; text: string; type?: string | null}>;
   chineseGloss: string | null; chineseGlossSource: string | null;
