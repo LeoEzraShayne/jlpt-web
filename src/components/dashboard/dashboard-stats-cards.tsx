@@ -24,7 +24,7 @@ export function DashboardStatsCards({
   levels,
 }: DashboardStatsCardsProps) {
   return (
-    <section aria-label="今日学习概览" className="grid min-w-0 gap-4 md:grid-cols-2 xl:grid-cols-6">
+    <section aria-label="今日学习概览" className="contents md:grid md:min-w-0 md:gap-4 md:grid-cols-2 xl:grid-cols-6">
       <StatsCard
         title="今日剩余"
         icon={BookOpen}
@@ -62,7 +62,7 @@ export function DashboardStatsCards({
       >
         <p className="mt-3 text-xs leading-5 text-muted-foreground">实际用时包含已完成、进行中及额外练习。</p>
       </StatsCard>
-      {recommendedTask && <div className="min-w-0 md:col-span-2 xl:col-span-2">{recommendedTask}</div>}
+      {recommendedTask && <div className="-order-1 min-w-0 md:order-none md:col-span-2 xl:col-span-2">{recommendedTask}</div>}
       <StatsCard
         title="复习总账"
         icon={RefreshCcw}

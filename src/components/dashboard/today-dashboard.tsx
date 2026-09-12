@@ -27,7 +27,7 @@ import {
 } from "@/lib/study-display";
 
 export function TodayDashboard() {
-  return <><VocabularyTodaySummary /><GrammarTodayDashboard /></>;
+  return <div className="grid gap-4 md:block"><VocabularyTodaySummary /><GrammarTodayDashboard /></div>;
 }
 
 function GrammarTodayDashboard() {
@@ -66,8 +66,8 @@ function GrammarTodayDashboard() {
     ? pending.find((task) => task.id === data.nextTaskId)
     : undefined;
   return (
-    <div className="min-w-0 max-w-full">
-      <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+    <div className="contents md:block md:min-w-0 md:max-w-full">
+      <div className="order-first mb-2 flex flex-wrap items-end justify-between gap-4 md:order-none md:mb-6">
         <div>
         <h1 className="text-3xl font-bold tracking-tight md:text-4xl">
           你好，{user?.displayName}
