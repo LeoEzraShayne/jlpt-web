@@ -1,12 +1,14 @@
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { SWRConfig } from "swr";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { apiFetcher, apiRequest } from "@/lib/api/client";
+import { ApiError, apiFetcher, apiRequest } from "@/lib/api/client";
 import { VocabularyPracticeWorkspace } from "./practice-workspace";
 import { PracticeFeedback } from "./practice-feedback";
 import type { VocabularyPractice } from "./types";
 
-vi.mock("@/lib/api/client", () => ({ apiFetcher: vi.fn(), apiRequest: vi.fn(), ApiError: class extends Error {} }));
+vi.mock("@/lib/api/client", async importOriginal => ({
+  ...await importOriginal<typeof import("@/lib/api/client")>(), apiFetcher: vi.fn(), apiRequest: vi.fn(),
+}));
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
 const fixture = (overrides: Partial<VocabularyPractice> = {}): VocabularyPractice => ({
   id: "p1", vocabularyId: "v1", grammarId: null, linkedStudySessionId: null,
@@ -58,11 +60,11 @@ describe("vocabulary evidence boundaries", () => {
     expect(screen.queryByText(errorCode, { exact: false })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /重试生成|重试批改/ })).not.toBeInTheDocument();
   });
-  it("replays the original UUID and sentence after an uncertain submission", async () => {
+  it.each(["REQUEST_TIMEOUT", "NETWORK_ERROR"])("replays the original UUID and sentence after %s", async code => {
     const practice = fixture(); mount(practice);
     const input = await screen.findByLabelText("日语句子");
     fireEvent.change(input, { target: { value: "  予定があります。  " } });
-    vi.mocked(apiRequest).mockRejectedValueOnce(new Error("请求超时"));
+    vi.mocked(apiRequest).mockRejectedValueOnce(new ApiError("请求超时", 0, code));
     fireEvent.click(screen.getByRole("button", { name: "提交句子" }));
     await waitFor(() => expect(screen.getByRole("button", { name: "重试提交原句" })).toBeEnabled());
     expect(input).toBeDisabled();
@@ -72,6 +74,39 @@ describe("vocabulary evidence boundaries", () => {
     const calls = vi.mocked(apiRequest).mock.calls;
     expect(calls[1][1]?.body).toBe(calls[0][1]?.body);
     expect(JSON.parse(calls[0][1]?.body as string)).toEqual({ sentence: "予定があります。", requestKey: expect.stringMatching(/^[0-9a-f-]{36}$/) });
+  });
+  it.each([
+    ["DAILY_TASK_LIMIT", "READY"],
+    ["TASK_REVIEW_LIMIT", "COMPLETED"],
+  ] as const)("keeps a rejected %s draft editable with one membership notice and a fresh UUID", async (code, status) => {
+    const practice = fixture({ status, ...(status === "COMPLETED" ? { answer: "前の文です。" } : {}) });
+    mount(practice);
+    if (status === "COMPLETED") fireEvent.click(await screen.findByRole("button", { name: "修改后重新提交" }));
+    const input = await screen.findByLabelText("日语句子");
+    const draft = "  明日は予定があります。  ";
+    fireEvent.change(input, { target: { value: draft } });
+    vi.mocked(apiRequest).mockRejectedValueOnce(new ApiError("quota", 402, code));
+    fireEvent.click(screen.getByRole("button", { name: "提交句子" }));
+    const membership = await screen.findByRole("link", { name: "查看会员与额度" });
+    expect(membership).toHaveAttribute("href", "/membership");
+    expect(membership).toHaveAttribute("target", "_blank");
+    expect(screen.getAllByRole("alert")).toHaveLength(1);
+    expect(screen.getByRole("alert")).toHaveTextContent("草稿仍在当前页面");
+    expect(input).toHaveValue(draft);
+    expect(input).toBeEnabled();
+    expect(screen.queryByRole("button", { name: "重试提交原句" })).not.toBeInTheDocument();
+    expect(screen.queryByText(/提交内容已锁定/)).not.toBeInTheDocument();
+    // Re-enter after upgrading: unchanged drafts also require a new admission key.
+    const nextDraft = status === "READY" ? draft : "明日は会議があります。";
+    fireEvent.change(input, { target: { value: nextDraft } });
+    vi.mocked(apiRequest).mockResolvedValueOnce({ data: { ...practice, status: "ASSESSING", answer: nextDraft.trim() } });
+    fireEvent.click(screen.getByRole("button", { name: "提交句子" }));
+    await screen.findByText(/句子已保存/);
+    const [first, second] = vi.mocked(apiRequest).mock.calls.map(call => JSON.parse(call[1]?.body as string));
+    expect(first.sentence).toBe(draft.trim());
+    expect(second.sentence).toBe(nextDraft.trim());
+    expect(second.requestKey).toMatch(/^[0-9a-f-]{36}$/);
+    expect(second.requestKey).not.toBe(first.requestKey);
   });
   it("describes alternate expressions as unverified, with reading untested", () => {
     render(<PracticeFeedback practice={fixture({ status: "COMPLETED", result: {

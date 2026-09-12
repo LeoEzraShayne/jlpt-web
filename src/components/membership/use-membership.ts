@@ -21,8 +21,8 @@ export function quotaErrorCode(error: unknown) { return error instanceof ApiErro
 export function billingError(error: unknown, t: <T>(value: T) => T) {
   if (!(error instanceof ApiError)) return t("操作失败，请重试");
   const messages: Record<string, string> = {
-    DAILY_TASK_LIMIT: "今天的免费任务已用完。输入和复习安排已保留。",
-    TASK_REVIEW_LIMIT: "本任务的三次成功批改已用完。输入和练习记录已保留。",
+    DAILY_TASK_LIMIT: "今天的免费任务已用完。草稿仍在当前页面，复习安排未改变。",
+    TASK_REVIEW_LIMIT: "本任务的三次成功批改已用完。草稿仍在当前页面，批改历史未改变。",
     BILLING_DISABLED: "购买尚未开放，请稍后再来。",
     PAYMENT_UNAVAILABLE: "支付暂时不可用，请稍后重试。",
     REQUEST_IN_PROGRESS: "请求正在处理中，请稍后刷新状态。",

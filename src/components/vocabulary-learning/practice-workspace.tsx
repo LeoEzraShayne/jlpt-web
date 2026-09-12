@@ -55,11 +55,17 @@ export function VocabularyPracticeWorkspace({ id }: { id: string }) {
       })).data, { revalidate: false });
       setRevising(false);
     } catch (e) {
-      setQuotaCode(quotaErrorCode(e));
-      setError(billingError(e, t));
+      const rejectedQuota = quotaErrorCode(e);
+      setQuotaCode(rejectedQuota);
       setActionErrorCode(e instanceof ApiError ? e.code : "");
-      // Fetch persisted evidence after a timeout/conflict before showing another action.
-      await swr.mutate().catch(() => undefined);
+      if (rejectedQuota) {
+        // Admission was rejected: no attempt exists for this UUID. Keep the editable draft.
+        if (action === "answer") setSubmission(undefined);
+      } else {
+        setError(billingError(e, t));
+        // An uncertain response must retain its answer and UUID while checking persisted evidence.
+        await swr.mutate().catch(() => undefined);
+      }
     } finally { lock.current = false; setBusy(false); }
   }
   if (swr.isLoading) return <LoadingState label={t("正在恢复词汇练习…")} />;
@@ -74,7 +80,7 @@ export function VocabularyPracticeWorkspace({ id }: { id: string }) {
   return <div className="mx-auto min-w-0 max-w-3xl space-y-5 break-words">
     <QuotaNotice code={quotaCode} /><nav className="flex flex-wrap gap-4 text-sm"><Link href="/today" className="underline">{t("返回今日")}</Link><Link href="/vocabulary-learning" className="underline">{t("学习清单")}</Link>{practice.linkedStudySessionId && <Link href={`/study/${encodeURIComponent(practice.linkedStudySessionId)}`} className="underline">{t("返回关联语法练习")}</Link>}</nav>
     <div><h1 className="text-2xl font-bold">{t("词汇造句练习")}</h1><p className="mt-2 text-sm text-muted-foreground">{t("根据中文场景写一句自然的日语，逐步练习这个释义。")}</p></div>
-    {!terminalMessage && (error || swr.error) && <div role="alert" className="rounded-xl border p-3 text-sm"><p>{t(error || swr.error.message)}</p><Button size="sm" variant="outline" className="mt-2" disabled={busy} onClick={() => void swr.mutate()}>{t("刷新练习状态")}</Button></div>}
+    {!terminalMessage && !quotaCode && (error || swr.error) && <div role="alert" className="rounded-xl border p-3 text-sm"><p>{t(error || swr.error.message)}</p><Button size="sm" variant="outline" className="mt-2" disabled={busy} onClick={() => void swr.mutate()}>{t("刷新练习状态")}</Button></div>}
     {!terminalMessage && isPracticePending(practice) && <div role="status" className="rounded-xl bg-secondary p-4 text-sm">{t(practice.status === "ASSESSING" ? "句子已保存，正在批改…" : "正在准备场景…")} {t("可以离开，稍后会恢复进度。")}</div>}
     {terminalMessage && <div role="alert" className="space-y-3 rounded-xl border p-4 text-sm"><p>{t(terminalMessage)}</p><Link href="/vocabulary-learning" className="inline-block underline underline-offset-4">{t("返回词汇学习清单")}</Link></div>}
     {!terminalMessage && practice.status === "FAILED" && <Card><CardContent className="space-y-3"><p role="alert">{t(practice.answer ? "批改暂时失败，已保留原句。" : "场景生成暂时失败。")}{t("本次未完成，请稍后重试。")}</p><Button disabled={busy} onClick={() => void act("retry")}>{t("重试")}{t(practice.answer ? "批改" : "生成")}</Button></CardContent></Card>}
