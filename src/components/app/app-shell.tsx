@@ -47,7 +47,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             alt=""
             className="size-10 shrink-0"
           />
-          <span className="text-sm">JLPT Sentence Lab</span>
+          <span className="text-sm">{t("日语造句实验室")}</span>
         </Link>
         <nav className="space-y-2" aria-label={t("主导航")}>
           {navItems.map(({ href, label, icon: Icon }) => {
@@ -89,7 +89,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               className="size-6 shrink-0"
             />
             <span className="truncate text-sm sm:text-base">
-              JLPT Sentence Lab
+              {t("日语造句实验室")}
             </span>
           </Link>
           <div className="hidden lg:block" />

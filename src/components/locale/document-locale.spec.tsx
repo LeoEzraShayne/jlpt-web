@@ -25,7 +25,7 @@ describe("saved document language", () => {
     await waitFor(() => expect(document.title).toBe("Orders | JLPT Sentence Lab"));
     expect(tree.container.querySelector('[lang="ja"]')).toHaveTextContent("予定があります。");
     act(() => setLocale("zh"));
-    await waitFor(() => expect(document.title).toBe("订单记录 | JLPT Sentence Lab"));
+    await waitFor(() => expect(document.title).toBe("订单记录 | 日语造句实验室"));
   });
   it("shows saved English bootstrap copy before hydration with no text mismatch", async () => {
     act(() => setLocale("zh"));

@@ -19,8 +19,8 @@ export function PublicHeader() {
     <header className="border-b bg-background/95 backdrop-blur">
       <div className="mx-auto flex max-w-[76rem] flex-wrap items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
         <Link href="/" className="flex min-w-0 items-center gap-3 font-semibold">
-          <Image src="/logo.svg" width={36} height={36} alt={t("JLPT Sentence Lab标志")} />
-          <span className="truncate">{t("JLPT Sentence Lab")}</span>
+          <Image src="/logo.svg" width={36} height={36} alt={t("日语造句实验室标志")} />
+          <span className="truncate">{t("日语造句实验室")}</span>
         </Link>
         <nav className="hidden items-center gap-5 text-sm text-muted-foreground md:flex" aria-label={t("公开页面导航")}>
           {publicLinks.map((item) => (

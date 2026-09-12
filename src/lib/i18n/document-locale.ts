@@ -1,6 +1,6 @@
 import type { AppLocale } from "@/lib/api/sentence-lab";
 
-const brand = "JLPT Sentence Lab";
+const brands = { zh: "日语造句实验室", en: "JLPT Sentence Lab" };
 const titles: Record<string, { zh: string; en: string }> = {
   "/": { zh: "日语语法与词汇练习", en: "Japanese grammar & vocabulary practice" },
   "/login": { zh: "Google 登录", en: "Google sign-in" },
@@ -22,6 +22,7 @@ const titles: Record<string, { zh: string; en: string }> = {
   "/vocabulary-practice": { zh: "词汇造句练习", en: "Vocabulary sentence practice" },
 };
 export function localizedDocumentTitle(pathname: string, locale: AppLocale) {
+  const brand = brands[locale];
   const title = titles[pathname] ?? titles[`/${pathname.split("/")[1]}`];
   return title ? `${title[locale]} | ${brand}` : brand;
 }
