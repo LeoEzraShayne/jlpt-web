@@ -1,4 +1,6 @@
 "use client";
+import { localizedText } from "@/lib/i18n/content";
+import { useExplanationLocale } from "@/hooks/use-explanation-locale";
 import { t } from "@/lib/i18n/locale-store";
 import { useLocale } from "@/components/locale/locale-provider";
 import {
@@ -159,6 +161,7 @@ function GrammarTodayDashboard() {
 }
 
 function RecommendedTask({ task }: { task: StudyTask }) {
+  const explanationLocale = useExplanationLocale();
   useLocale();
   const isReview = task.type === "REVIEW";
   const Icon = isReview ? RefreshCcw : Sparkles;
@@ -179,7 +182,7 @@ function RecommendedTask({ task }: { task: StudyTask }) {
           <h2
             className={`${isReview ? "mt-5 sm:mt-7" : "mt-1"} break-words text-2xl font-bold`}
           >
-            {task.grammar.title}
+            {explanationLocale === "en" ? task.grammar.displayTitle ?? task.grammar.title : task.grammar.title}
           </h2>
           {!isReview && (
             <p className="mt-1 text-sm text-muted-foreground">
@@ -246,6 +249,7 @@ function TaskGroup({
 }
 
 function TaskCard({ task }: { task: StudyTask }) {
+  const explanationLocale = useExplanationLocale();
   useLocale();
   return (
     <Card className="h-auto min-w-0 warm-shadow md:h-full md:min-h-56">
@@ -258,10 +262,10 @@ function TaskCard({ task }: { task: StudyTask }) {
               : "今日复习")}
         </span>
         <h3 className="mt-4 break-words text-xl font-semibold">
-          {task.grammar.title}
+          {explanationLocale === "en" ? task.grammar.displayTitle ?? task.grammar.title : task.grammar.title}
         </h3>
         <p className="mt-2 line-clamp-2 break-words text-sm text-muted-foreground">
-          {task.grammar.chineseExplanation}
+          {localizedText(task.grammar.localized, "explanation", task.grammar.chineseExplanation, explanationLocale)}
         </p>
         <TaskAction className="mt-4 md:mt-auto md:pt-5" task={task} />
       </CardContent>

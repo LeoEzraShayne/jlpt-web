@@ -1,5 +1,7 @@
 "use client";
 import { useEffect, useSyncExternalStore } from "react";
+import { usePathname } from "next/navigation";
+import { localizedDocumentTitle } from "@/lib/i18n/document-locale";
 import { apiRequest } from "@/lib/api/client";
 import { useMe } from "@/hooks/use-api";
 import { currentLocale, setLocale, subscribeLocale, translate } from "@/lib/i18n/locale-store";
@@ -10,6 +12,18 @@ export function useLocale() {
 }
 export function LocaleProvider({ children }: { children: React.ReactNode }) {
   const { data: me, mutate } = useMe();
+  const { locale } = useLocale();
+  const pathname = usePathname();
+  useEffect(() => {
+    const title = localizedDocumentTitle(pathname, locale);
+    const sync = () => { if (document.title !== title) document.title = title; };
+    sync();
+    // Next may apply streamed route metadata after this effect. Keep the title
+    // aligned with this mounted route without changing any page content.
+    const observer = new MutationObserver(sync);
+    observer.observe(document.head, { childList: true, subtree: true, characterData: true });
+    return () => observer.disconnect();
+  }, [locale, pathname]);
   useEffect(() => {
     let saved: string | null = null;
     try { saved = localStorage.getItem("jlpt-ui-locale"); } catch {}

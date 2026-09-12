@@ -1,4 +1,6 @@
 "use client";
+import { localizedText } from "@/lib/i18n/content";
+import { useExplanationLocale } from "@/hooks/use-explanation-locale";
 import { t } from "@/lib/i18n/locale-store";
 import { useLocale } from "@/components/locale/locale-provider";
 import { ChevronDown, ChevronUp, Clock3, RefreshCcw } from "lucide-react";
@@ -44,6 +46,7 @@ async function fetchQueue(path: string): Promise<QueuePage> {
 }
 
 export function ReviewQueue() {
+  const explanationLocale = useExplanationLocale();
   useLocale();
   const [level, setLevel] = useState("");
   const [showUpcoming, setShowUpcoming] = useState(false);
@@ -75,7 +78,7 @@ export function ReviewQueue() {
             <div className="min-w-0">
               <p className="text-sm font-semibold text-primary">{t("最优先复习")}</p>
               <h2 className="mt-1 break-words text-xl font-bold">
-                {priority.progress.grammar.title}
+                {explanationLocale === "en" ? priority.progress.grammar.displayTitle ?? priority.progress.grammar.title : priority.progress.grammar.title}
               </h2>
               <p className="mt-1 text-sm text-muted-foreground">
                 {priority.overdueDays > 0
@@ -156,6 +159,7 @@ function Group({
   items: ReviewSchedule[];
   onCollapse?: () => void;
 }) {
+  const explanationLocale = useExplanationLocale();
   useLocale();
   return (
     <section>
@@ -180,7 +184,7 @@ function Group({
                 </span>
                 <div className="min-w-0 flex-1">
                   <h3 className="break-words font-semibold leading-7">
-                    {item.progress.grammar.title}
+                    {explanationLocale === "en" ? item.progress.grammar.displayTitle ?? item.progress.grammar.title : item.progress.grammar.title}
                     <span
                       className={`ml-1 inline-flex whitespace-nowrap rounded-full px-2 py-0.5 align-middle text-xs font-normal leading-5 ${tone}`}
                     >
@@ -190,7 +194,7 @@ function Group({
                     </span>
                   </h3>
                   <p className="mt-1 line-clamp-2 break-words text-sm text-muted-foreground">
-                    {item.progress.grammar.chineseExplanation}
+                    {localizedText(item.progress.grammar.localized, "explanation", item.progress.grammar.chineseExplanation, explanationLocale)}
                   </p>
                 </div>
               </div>

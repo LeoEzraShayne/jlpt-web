@@ -163,3 +163,7 @@
 a, button, input, select, textarea, summary { -webkit-tap-highlight-color: transparent; }
 button:active:not(:disabled), a:active { opacity: .82; }
 html[lang="en"] .whitespace-nowrap { white-space: normal; }
+
+/* Bootstrap copy follows saved language before React hydrates; DOM text stays stable. */
+html:not([lang="en"]) [data-bootstrap-locale="en"],
+html[lang="en"] [data-bootstrap-locale="zh"] { display: none; }

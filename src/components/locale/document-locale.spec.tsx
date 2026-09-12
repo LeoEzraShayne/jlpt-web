@@ -1,0 +1,62 @@
+import { readFileSync } from "node:fs";
+import { act, cleanup, render, waitFor } from "@testing-library/react";
+import { renderToString } from "react-dom/server";
+import { hydrateRoot, type Root } from "react-dom/client";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { LoadingState } from "@/components/shared/loading-state";
+import { ErrorState } from "@/components/shared/error-state";
+import { localeBootstrapScript, localizedDocumentTitle } from "@/lib/i18n/document-locale";
+import { setLocale } from "@/lib/i18n/locale-store";
+import { BootstrapText } from "./bootstrap-text";
+import { LocaleProvider } from "./locale-provider";
+const fixture = vi.hoisted(() => ({ pathname: "/membership", me: { id: "u1", uiLocale: "en" }, mutate: vi.fn() }));
+vi.mock("next/navigation", () => ({ usePathname: () => fixture.pathname }));
+vi.mock("@/hooks/use-api", () => ({ useMe: () => ({ data: fixture.me, mutate: fixture.mutate }) }));
+afterEach(() => { cleanup(); document.querySelector("#bootstrap-test-css")?.remove(); act(() => setLocale("zh")); });
+describe("saved document language", () => {
+  it("uses localized route titles without changing Japanese content", async () => {
+    fixture.pathname = "/membership";
+    const tree = render(<LocaleProvider><p lang="ja">予定があります。</p></LocaleProvider>);
+    await waitFor(() => expect(document.title).toBe("Membership & allowance | JLPT Sentence Lab"));
+    document.title = "JLPT N1～N4 日语语法学习｜JLPT Sentence Lab";
+    await waitFor(() => expect(document.title).toBe("Membership & allowance | JLPT Sentence Lab"));
+    fixture.pathname = "/membership/orders";
+    tree.rerender(<LocaleProvider><p lang="ja">予定があります。</p></LocaleProvider>);
+    await waitFor(() => expect(document.title).toBe("Orders | JLPT Sentence Lab"));
+    expect(tree.container.querySelector('[lang="ja"]')).toHaveTextContent("予定があります。");
+    act(() => setLocale("zh"));
+    await waitFor(() => expect(document.title).toBe("订单记录 | JLPT Sentence Lab"));
+  });
+  it("shows saved English bootstrap copy before hydration with no text mismatch", async () => {
+    act(() => setLocale("zh"));
+    const ui = <><LoadingState label="正在准备学习空间…" /><ErrorState onRetry={() => undefined} /></>;
+    const html = renderToString(ui);
+    const container = document.createElement("div"); container.innerHTML = html; document.body.append(container);
+    const css = readFileSync("src/app/globals.css", "utf8");
+    const style = document.createElement("style"); style.id = "bootstrap-test-css"; style.textContent = css.slice(css.indexOf("/* Bootstrap copy follows")); document.head.append(style);
+    new Function("localStorage", "document", localeBootstrapScript)({ getItem: () => "en" }, document);
+    expect(container.querySelector('[data-bootstrap-locale="zh"]')).not.toBeVisible();
+    expect(container.querySelector('[data-bootstrap-locale="en"]')).toBeVisible();
+    expect(container.querySelector('[data-bootstrap-locale="en"]')).toHaveTextContent("Preparing your learning space…");
+    expect(container.querySelector('[role="alert"] [data-bootstrap-locale="en"]')).toBeVisible();
+    const beforeHydration = container.innerHTML;
+    const recover = vi.fn(); let root: Root;
+    await act(async () => { root = hydrateRoot(container, ui, { onRecoverableError: recover }); });
+    expect(recover).not.toHaveBeenCalled();
+    expect(container.innerHTML).toBe(beforeHydration);
+    await act(async () => root.unmount()); container.remove();
+  });
+  it("uses an English fallback for untranslated service errors and preserves Japanese", () => {
+    const chinese = render(<BootstrapText source="未收录的服务错误" untranslatedFallback="Something went wrong. Please try again." />);
+    expect(chinese.container.querySelector('[data-bootstrap-locale="en"]')).toHaveTextContent("Something went wrong. Please try again.");
+    chinese.unmount();
+    const japanese = render(<BootstrapText source="予定があります。" untranslatedFallback="Something went wrong. Please try again." />);
+    expect(japanese.container.querySelector('[data-bootstrap-locale="en"]')).toHaveTextContent("予定があります。");
+  });
+  it("defaults safely if storage is unavailable or contains an unknown locale", () => {
+    expect(() => new Function("localStorage", "document", localeBootstrapScript)({ getItem: () => { throw new Error("Blocked"); } }, document)).not.toThrow();
+    new Function("localStorage", "document", localeBootstrapScript)({ getItem: () => "unexpected" }, document);
+    expect(document.documentElement.lang).toBe("zh-CN");
+    expect(localizedDocumentTitle("/study/session-1", "en")).toBe("Grammar sentence practice | JLPT Sentence Lab");
+  });
+});
