@@ -1,5 +1,5 @@
 "use client";
-import { t } from "@/lib/i18n/locale-store";
+import { currentLocale, t } from "@/lib/i18n/locale-store";
 import { useLocale } from "@/components/locale/locale-provider";
 import { History, RotateCcw } from "lucide-react";
 import Link from "next/link";
@@ -65,7 +65,7 @@ export function HistoryList() {
                       {attempt.grammar?.title}
                     </h2>
                     <span className="mt-1 block text-xs text-muted-foreground">
-                      {new Date(attempt.createdAt).toLocaleString("zh-CN")}
+                      {new Date(attempt.createdAt).toLocaleString(currentLocale() === "en" ? "en-US" : "zh-CN")}
                     </span>
                   </div>
                 </div>

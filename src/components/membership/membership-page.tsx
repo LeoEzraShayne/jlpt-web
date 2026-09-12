@@ -48,6 +48,6 @@ export function MembershipPage() {
       </>}
     </>}
     {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
-    <p className="text-xs text-muted-foreground">{t("付款后由服务端核实并开通权益。Web 与 Android 共用账号、会员和学习记录。")}</p>
+    <p className="text-xs text-muted-foreground">{t("付款后由服务端核实并开通权益。在支持的设备上登录同一账号即可使用会员。")}</p>
   </div>;
 }

@@ -14,7 +14,7 @@ vi.mock("next/navigation", () => ({
   useRouter: () => ({ replace: mocks.replace }),
 }));
 
-vi.mock("@/hooks/use-api", () => ({
+vi.mock("@/hooks/use-api", () => ({ useMe: () => ({ data: null, mutate: vi.fn() }),
   usePlans: () => mocks.planState,
 }));
 

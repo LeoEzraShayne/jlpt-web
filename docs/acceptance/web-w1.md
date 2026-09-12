@@ -19,3 +19,10 @@ W2 integration work, not release acceptance:
 6. Live sales remain disabled until independent quality and full AI cost acceptance.
 
 No migrations or shared API types were authored by B. Main's shared-type commits were cherry-picked unchanged.
+
+## W2 follow-up 1
+- Public home/about/privacy now have full English visible content and actual Stripe/payment/privacy disclosures; tests scan visible public copy for untranslated Chinese.
+- Billing routes bypass plan onboarding while retaining authentication. Expired login redirects preserve order query parameters. Anonymous language choice carries through Google sign-in; onboarding exposes both language preferences.
+- Fixed dashboard statistics labels/details, public navigation, theme names and history dates. Mobile shell hides the interface label visually to leave brand space.
+- Paid historical orders do not claim entitlement synchronization when current membership is inactive. Web copy describes supported devices without claiming Android is already launched.
+- Validation: 50 tests pass; lint/typecheck and the public-page production build pass. Main agent performed shared-stack browser tests; pending issues continue through W2.

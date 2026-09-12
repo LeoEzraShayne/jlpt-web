@@ -1,4 +1,5 @@
 "use client";
+import { LanguagePicker } from "@/components/locale/language-picker";
 import { t } from "@/lib/i18n/locale-store";
 import { useLocale } from "@/components/locale/locale-provider";
 import { CalendarDays, BookOpen, LoaderCircle, Sparkles } from "lucide-react";
@@ -63,7 +64,7 @@ export function OnboardingForm() {
   }
   if (currentPlan.isLoading || Boolean(currentPlan.data?.items.length))
     return (
-      <main className="soft-grid min-h-screen overflow-x-clip px-4 py-8 sm:py-14">
+      <main className="soft-grid min-h-screen overflow-x-clip px-4 py-8 sm:py-14"><div className="mb-6 flex justify-end"><LanguagePicker explanations /></div>
         <LoadingState label={t("正在确认学习计划…")} />
       </main>
     );

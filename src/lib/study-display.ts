@@ -1,3 +1,4 @@
+import { t } from "@/lib/i18n/locale-store";
 import type {
   CompletionNotice,
   RecallRating,
@@ -29,7 +30,7 @@ export function getNewGrammarDescription({
 export function formatStudyDate(dateKey: string, includeYear = false) {
   const [year, month, day] = dateKey.split("-").map(Number);
   if (!year || !month || !day) return dateKey;
-  return includeYear ? `${year}年${month}月${day}日` : `${month}月${day}日`;
+  return t(includeYear ? `${year}年${month}月${day}日` : `${month}月${day}日`);
 }
 
 type DetailedCompletionNotice = CompletionNotice & Partial<NonNullable<StudySession["reviewOutcome"]>>;

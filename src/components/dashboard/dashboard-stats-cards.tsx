@@ -155,7 +155,7 @@ function StatsCard({
             </span>
             {t(title)}
           </h2>
-          {meta && <span className="text-xs leading-5 text-muted-foreground">{meta}</span>}
+          {meta && <span className="text-xs leading-5 text-muted-foreground">{t(meta)}</span>}
         </div>
         {progress && progress.total > 0 && (
           <div aria-hidden="true" className="mb-4 flex h-1.5 overflow-hidden rounded-full bg-muted">
@@ -171,13 +171,13 @@ function StatsCard({
         )}
         <dl className={`grid grid-cols-2 gap-x-5 gap-y-4 ${columns === 3 ? "sm:grid-cols-3 md:grid-cols-2 xl:grid-cols-3" : ""}`}>
           {items.map((item) => (
-            <div key={item.label} className="min-w-0 border-t border-border/60 pt-2.5">
+            <div key={t(item.label)} className="min-w-0 border-t border-border/60 pt-2.5">
               <dt className="flex items-center gap-1.5 text-xs leading-5 text-muted-foreground sm:text-sm">
                 {item.color && <span aria-hidden="true" className={`size-1.5 shrink-0 rounded-full ${item.color}`} />}
-                {item.label}
+                {t(item.label)}
               </dt>
               <dd className="mt-1 text-2xl font-semibold tracking-tight tabular-nums">{item.value}</dd>
-              {item.detail && <p className="mt-1 text-xs leading-5 text-muted-foreground">{item.detail}</p>}
+              {item.detail && <p className="mt-1 text-xs leading-5 text-muted-foreground">{t(item.detail)}</p>}
             </div>
           ))}
         </dl>

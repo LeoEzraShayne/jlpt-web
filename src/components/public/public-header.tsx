@@ -1,4 +1,5 @@
 "use client";
+import { LanguagePicker } from "@/components/locale/language-picker";
 import { t } from "@/lib/i18n/locale-store";
 import { useLocale } from "@/components/locale/locale-provider";
 import Image from "next/image";
@@ -16,7 +17,7 @@ export function PublicHeader() {
   useLocale();
   return (
     <header className="border-b bg-background/95 backdrop-blur">
-      <div className="mx-auto flex max-w-[76rem] items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
+      <div className="mx-auto flex max-w-[76rem] flex-wrap items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
         <Link href="/" className="flex min-w-0 items-center gap-3 font-semibold">
           <Image src="/logo.svg" width={36} height={36} alt={t("JLPT Sentence Lab标志")} />
           <span className="truncate">{t("JLPT Sentence Lab")}</span>
@@ -24,13 +25,13 @@ export function PublicHeader() {
         <nav className="hidden items-center gap-5 text-sm text-muted-foreground md:flex" aria-label={t("公开页面导航")}>
           {publicLinks.map((item) => (
             <Link key={item.href} href={item.href} className="hover:text-foreground">
-              {item.label}
+              {t(item.label)}
             </Link>
           ))}
         </nav>
-        <Button asChild size="sm">
+        <div className="flex shrink-0 flex-wrap items-center justify-end gap-2"><LanguagePicker /><Button asChild size="sm">
           <Link href="/login">{t("登录学习")}</Link>
-        </Button>
+        </Button></div>
       </div>
     </header>
   );

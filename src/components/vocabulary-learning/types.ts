@@ -1,3 +1,4 @@
+import { currentLocale } from "@/lib/i18n/locale-store";
 import type { VocabularyEntry } from "@/lib/api/types";
 
 export type LearningAction = "UNKNOWN" | "PRACTICE" | "REMEMBERED" | "PAUSE" | "RESUME" | "STOP_PRACTICE";
@@ -47,7 +48,7 @@ export const outcomeLabels: Record<PracticeOutcome, string> = {
 export function reviewDate(value?: string | null) {
   if (!value) return "暂无安排";
   const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? "暂无安排" : date.toLocaleDateString("zh-CN");
+  return Number.isNaN(date.getTime()) ? "暂无安排" : date.toLocaleDateString(currentLocale() === "en" ? "en-US" : "zh-CN");
 }
 export function isPracticePending(practice?: VocabularyPractice) {
   return !!practice && ["QUEUED", "GENERATING", "ASSESSING"].includes(practice.status);

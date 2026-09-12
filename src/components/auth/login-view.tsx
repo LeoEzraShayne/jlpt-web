@@ -26,7 +26,8 @@ export function LoginView() {
   useEffect(() => {
     if (plan.data) {
       const next = params.get("next");
-      router.replace(plan.data.items.length ? (next?.startsWith("/") && !next.startsWith("//") ? next : "/today") : "/onboarding");
+      const safeNext = next?.startsWith("/") && !next.startsWith("//") ? next : null;
+      router.replace(safeNext && /^\/membership(?:[/?]|$)/.test(safeNext) ? safeNext : plan.data.items.length ? safeNext ?? "/today" : "/onboarding");
     }
   }, [params, plan.data, plan.error, router]);
   return (

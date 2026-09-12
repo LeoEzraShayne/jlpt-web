@@ -44,7 +44,7 @@ export function ThemePicker({ compact = false }: { compact?: boolean }) {
         {options.map((option) => (
           <DropdownMenuItem key={option.id} onClick={() => void choose(option.id)} className="gap-3">
             <span className="size-4 rounded-full border" style={{ backgroundColor: option.color }} />
-            <span className="flex-1">{option.name}</span>
+            <span className="flex-1">{t(option.name)}</span>
             {theme === option.id && <Check className="size-4" />}
           </DropdownMenuItem>
         ))}

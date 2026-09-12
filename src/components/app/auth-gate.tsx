@@ -15,20 +15,21 @@ export function AuthGate({ children, requirePlan = true }: { children: React.Rea
   const pathname = usePathname();
   const { setTheme } = useColorTheme();
   const me = useMe();
-  const plan = usePlans(Boolean(me.data) && requirePlan);
+  const needsPlan = requirePlan && !/^\/membership(?:\/|$)/.test(pathname);
+  const plan = usePlans(Boolean(me.data) && needsPlan);
 
   useEffect(() => {
-    if (me.error instanceof ApiError && me.error.status === 401) router.replace(`/login?next=${encodeURIComponent(pathname)}`);
+    if (me.error instanceof ApiError && me.error.status === 401) router.replace(`/login?next=${encodeURIComponent(window.location.pathname + window.location.search)}`);
   }, [me.error, pathname, router]);
   useEffect(() => { if (me.data?.colorTheme) setTheme(me.data.colorTheme); }, [me.data?.colorTheme, setTheme]);
   useEffect(() => {
-    if (requirePlan && plan.data?.items.length === 0) router.replace("/onboarding");
-  }, [plan.data, requirePlan, router]);
+    if (needsPlan && plan.data?.items.length === 0) router.replace("/onboarding");
+  }, [plan.data, needsPlan, router]);
 
-  if (me.isLoading || (requirePlan && me.data && plan.isLoading)) return <LoadingState label={t("正在准备学习空间…")} />;
+  if (me.isLoading || (needsPlan && me.data && plan.isLoading)) return <LoadingState label={t("正在准备学习空间…")} />;
   if (me.error) return me.error instanceof ApiError && me.error.status === 401 ? null : <ErrorState message={me.error.message} onRetry={() => void me.mutate()} />;
-  if (requirePlan && plan.data?.items.length === 0) return null;
-  if (requirePlan && plan.error) {
+  if (needsPlan && plan.data?.items.length === 0) return null;
+  if (needsPlan && plan.error) {
     return <ErrorState message={plan.error.message} onRetry={() => void plan.mutate()} />;
   }
   return <>{children}</>;
