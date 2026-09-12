@@ -96,8 +96,8 @@ function GrammarTodayDashboard() {
           <p className="min-w-0 flex-1 text-sm leading-6">
             {t(completionNotice.submittedRating ===
             completionNotice.effectiveRating
-              ? `已记录为“${recallLabels[completionNotice.effectiveRating]}”`
-              : `你选择了“${recallLabels[completionNotice.submittedRating]}”，系统按“${recallLabels[completionNotice.effectiveRating]}”安排`)}
+              ? `已记录为“${t(recallLabels[completionNotice.effectiveRating])}”`
+              : `你选择了“${t(recallLabels[completionNotice.submittedRating])}”，系统按“${t(recallLabels[completionNotice.effectiveRating])}”安排`)}
             <span className="text-muted-foreground">
               {t(completionNotice.nextReviewStillDue
                 ? " · 下次复习日期保持不变，内容仍待复习"

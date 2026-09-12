@@ -127,6 +127,7 @@ export function StudyWorkspace({ sessionId }: { sessionId: string }) {
     event.preventDefault();
     if (submitDisabled) return;
     setSubmitting(true);
+    setQuotaCode("");
     setMessage("");
     const pending = submissionKey.current?.sentence === sentence.trim() ? submissionKey.current : { sentence: sentence.trim(), key: crypto.randomUUID() };
     submissionKey.current = pending;
@@ -192,6 +193,8 @@ export function StudyWorkspace({ sessionId }: { sessionId: string }) {
     }
   }
   function revise() {
+    submissionKey.current = null;
+    setQuotaCode("");
     setPreviousCorrection(result ?? null);
     setSubmittedReviewId(null);
     setMessage(t("请重新写一句，再提交批改。"));
@@ -228,7 +231,7 @@ export function StudyWorkspace({ sessionId }: { sessionId: string }) {
         <QuotaNotice code={quotaCode} /><FocusCycleCard />
         <TrainingPanel session={session} hintVisible={hintVisible} reveal={reveal} />
         <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border p-3">
-          <p className="text-xs text-muted-foreground">{t("用当前语法练习到期的个人词汇，不影响语法正式复习。")}</p>
+          <p className="text-xs text-muted-foreground">{t("独立词汇练习计入每日免费任务总额度，不改变关联语法的正式复习记录。")}</p>
           <StartVocabularyPractice grammarId={grammar.id} studySessionId={sessionId} label={t("练习到期词汇")} />
         </div>
         <Card className="mt-7 min-w-0 warm-shadow">

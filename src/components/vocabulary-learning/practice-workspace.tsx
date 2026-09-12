@@ -40,7 +40,7 @@ export function VocabularyPracticeWorkspace({ id }: { id: string }) {
   const lock = useRef(false);
   async function act(action: "hint" | "answer" | "retry") {
     if (lock.current) return;
-    lock.current = true; setBusy(true); setError(""); setActionErrorCode("");
+    lock.current = true; setBusy(true); setError(""); setActionErrorCode(""); setQuotaCode("");
     let body: object = {};
     if (action === "answer") {
       // Retain the immutable answer and UUID after an uncertain network response.
