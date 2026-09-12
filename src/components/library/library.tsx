@@ -21,6 +21,7 @@ import { FuriganaText } from "@/components/shared/furigana-text";
 import { StartStudyButton } from "@/components/study/start-study-button";
 import { LibraryCardGrid } from "@/components/shared/library-card";
 import { WordCard, type Bookmark } from "./word-card";
+import { VocabularyLearningList } from "@/components/vocabulary-learning/learning-list";
 import { ImportManager } from "./import-manager";
 
 export function Library() {
@@ -42,12 +43,15 @@ export function Library() {
           onChange={(e) => setTab(e.target.value)}
         >
           <option value="vocabulary">词汇查询</option>
+          <option value="learning">词汇学习清单</option>
           <option value="bookmarks">生词收藏</option>
           <option value="expressions">常用表达</option>
           <option value="imports">私人资料导入</option>
         </select>
       </label>
-      {tab === "imports" ? (
+      {tab === "learning" ? (
+        <VocabularyLearningList />
+      ) : tab === "imports" ? (
         <ImportManager />
       ) : tab === "expressions" ? (
         <Expressions />

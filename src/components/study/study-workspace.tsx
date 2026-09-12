@@ -19,6 +19,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ErrorState } from "@/components/shared/error-state";
 import { FuriganaText } from "@/components/shared/furigana-text";
 import { LoadingState } from "@/components/shared/loading-state";
+import { StartVocabularyPractice } from "@/components/vocabulary-learning/start-practice-button";
 import { TrainingPanel } from "./training-panel";
 import { ReviewResultCard } from "./review-result-card";
 import { DefaultStudyButton } from "./default-study-button";
@@ -215,6 +216,10 @@ export function StudyWorkspace({ sessionId }: { sessionId: string }) {
         </div>
         <FocusCycleCard />
         <TrainingPanel session={session} hintVisible={hintVisible} reveal={reveal} />
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border p-3">
+          <p className="text-xs text-muted-foreground">用当前语法练习到期的个人词汇，不影响语法正式复习。</p>
+          <StartVocabularyPractice grammarId={grammar.id} studySessionId={sessionId} label="练习到期词汇" />
+        </div>
         <Card className="mt-7 min-w-0 warm-shadow">
           <CardHeader>
             <CardTitle className="flex min-w-0 flex-wrap items-center justify-between gap-2">

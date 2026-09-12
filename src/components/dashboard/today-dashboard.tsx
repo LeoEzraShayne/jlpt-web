@@ -15,6 +15,7 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { ErrorState } from "@/components/shared/error-state";
 import { LoadingState } from "@/components/shared/loading-state";
 import { StartStudyButton } from "@/components/study/start-study-button";
+import { VocabularyTodaySummary } from "@/components/vocabulary-learning/today-summary";
 import { DashboardStatsCards } from "@/components/dashboard/dashboard-stats-cards";
 import { usePlans, useMe, useToday } from "@/hooks/use-api";
 import type { StudyTask } from "@/lib/api/types";
@@ -26,6 +27,10 @@ import {
 } from "@/lib/study-display";
 
 export function TodayDashboard() {
+  return <><VocabularyTodaySummary /><GrammarTodayDashboard /></>;
+}
+
+function GrammarTodayDashboard() {
   const [completionNotice, setCompletionNotice] = useState<ReturnType<
     typeof consumeCompletionNotice
   >>(null);

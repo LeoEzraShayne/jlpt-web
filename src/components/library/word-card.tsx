@@ -1,7 +1,8 @@
 "use client";
 import { useState } from "react";
 import { apiRequest } from "@/lib/api/client";
-import type { VocabularyEntry } from "@/lib/api/types";
+import type { LearningVocabulary as VocabularyEntry } from "@/components/vocabulary-learning/types";
+import { LearningControls } from "@/components/vocabulary-learning/learning-controls";
 import { chineseMeaning, chineseParts } from "@/lib/vocabulary-display";
 import { LibraryCard } from "@/components/shared/library-card";
 import { CardContent } from "@/components/ui/card";
@@ -32,6 +33,7 @@ export function WordCard({word, bookmark, refresh}: {word: VocabularyEntry; book
       </div>
       <p className="mt-1 text-xs text-muted-foreground">{chineseParts(word.partOfSpeech)}</p>
       <p className="mt-2 line-clamp-2 text-sm leading-6" title={meaning}>{meaning}</p>
+      <LearningControls word={word} refresh={refresh} />
       <div className="mt-4 md:mt-auto md:pt-3">
         <div className="flex items-center justify-between gap-2">
           <span className="text-xs text-muted-foreground">{bookmark ? "已收藏" : "参考词汇"}</span>
