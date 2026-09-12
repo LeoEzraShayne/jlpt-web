@@ -63,6 +63,7 @@ export interface GrammarExample {
   sortOrder: number;
 }
 export interface GrammarPoint {
+  displayTitle?: string;
   localized?: LocalizedContent | null;
   id: string;
   level: JlptLevel;
