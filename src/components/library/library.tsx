@@ -19,6 +19,8 @@ import {
 import { EmptyState } from "@/components/shared/empty-state";
 import { FuriganaText } from "@/components/shared/furigana-text";
 import { StartStudyButton } from "@/components/study/start-study-button";
+import { LibraryCardGrid } from "@/components/shared/library-card";
+import { WordCard, type Bookmark } from "./word-card";
 import { ImportManager } from "./import-manager";
 
 export function Library() {
@@ -55,7 +57,7 @@ export function Library() {
     </div>
   );
 }
-type Bookmark = { id: string; note: string; vocabulary: VocabularyEntry };
+
 function Vocabulary({ bookmarks }: { bookmarks: boolean }) {
   const [query, setQuery] = useState("");
   const [search, setSearch] = useState("");
@@ -77,7 +79,7 @@ function Vocabulary({ bookmarks }: { bookmarks: boolean }) {
         >
           <input
             aria-label="搜索词汇"
-            className="min-w-0 flex-1 rounded-lg border bg-background p-2"
+            className="min-w-0 basis-full flex-1 rounded-lg border bg-background p-2 sm:basis-auto"
             placeholder="词形、读音或中文释义"
             maxLength={100}
             value={query}
@@ -108,7 +110,7 @@ function Vocabulary({ bookmarks }: { bookmarks: boolean }) {
           description="可尝试其他词形或读音。"
         />
       )}
-      <div className="grid min-w-0 gap-4 lg:grid-cols-2">
+      <LibraryCardGrid aria-label="词汇卡片列表">
         {swr.items.map((item) => (
           <WordCard
             key={item.id}
@@ -117,7 +119,7 @@ function Vocabulary({ bookmarks }: { bookmarks: boolean }) {
             refresh={() => swr.mutate()}
           />
         ))}
-      </div>
+      </LibraryCardGrid>
       {swr.more && (
         <Button
           variant="outline"
@@ -128,114 +130,6 @@ function Vocabulary({ bookmarks }: { bookmarks: boolean }) {
         </Button>
       )}
     </div>
-  );
-}
-function WordCard({
-  word,
-  bookmark,
-  refresh,
-}: {
-  word: VocabularyEntry;
-  bookmark?: Bookmark;
-  refresh: () => Promise<unknown>;
-}) {
-  const [note, setNote] = useState(bookmark?.note ?? "");
-  const [message, setMessage] = useState("");
-  const [busy, setBusy] = useState(false);
-  async function update(remove = false) {
-    setBusy(true);
-    try {
-      await apiRequest(`/vocabulary/${encodeURIComponent(word.id)}/bookmark`, {
-        method: remove ? "DELETE" : "PUT",
-        ...(!remove ? { body: JSON.stringify({ note }) } : {}),
-      });
-      await refresh();
-      setMessage(remove ? "已取消收藏" : "已保存生词收藏");
-    } catch (error) {
-      setMessage(error instanceof Error ? error.message : "保存失败");
-    } finally {
-      setBusy(false);
-    }
-  }
-  return (
-    <Card className="min-w-0">
-      <CardHeader>
-        <CardTitle>
-          {word.word} <span className="text-sm">{word.reading}</span>
-        </CardTitle>
-        <CardDescription>
-          {word.level ?? "未分级"} · {word.partOfSpeech.join("、")}
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-3">
-        <ul className="flex flex-col gap-1 text-sm">
-          {word.glosses.map((gloss, i) => (
-            <li key={i}>
-              [{gloss.language}] {gloss.text}
-            </li>
-          ))}
-        </ul>
-        {word.chineseGloss && (
-          <p className="text-sm">
-            中文补充：{word.chineseGloss}
-            <span className="block text-xs text-muted-foreground">
-              来源：{word.chineseGlossSource ?? "个人补充"}
-            </span>
-          </p>
-        )}
-        <p className="break-words text-xs text-muted-foreground">
-          词典：{word.sourceName} · {word.sourceVersion}
-          <br />
-          分级依据：{word.levelSource ?? "暂无"}
-          <br />
-          许可：{word.license ?? "私人资料"}
-          {word.sourceUrl && /^https?:\/\//.test(word.sourceUrl) && (
-            <>
-              {" "}
-              ·{" "}
-              <a
-                className="underline"
-                href={word.sourceUrl}
-                target="_blank"
-                rel="noreferrer"
-              >
-                查看来源
-              </a>
-            </>
-          )}
-        </p>
-        <label className="text-xs">
-          个人备注
-          <input
-            aria-label={`${word.word} 备注`}
-            maxLength={2000}
-            className="mt-1 w-full rounded-lg border bg-background p-2 text-sm"
-            value={note}
-            onChange={(e) => setNote(e.target.value)}
-          />
-        </label>
-        <div className="flex flex-wrap gap-2">
-          <Button size="sm" disabled={busy} onClick={() => void update()}>
-            {bookmark ? "保存备注" : "收藏生词"}
-          </Button>
-          {bookmark && (
-            <Button
-              size="sm"
-              variant="outline"
-              disabled={busy}
-              onClick={() => void update(true)}
-            >
-              取消收藏
-            </Button>
-          )}
-        </div>
-        {message && (
-          <p role="status" className="text-xs">
-            {message}
-          </p>
-        )}
-      </CardContent>
-    </Card>
   );
 }
 function Expressions() {

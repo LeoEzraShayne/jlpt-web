@@ -1,11 +1,12 @@
 "use client";
+import { LibraryCard, LibraryCardGrid } from "@/components/shared/library-card";
 
 import { Search } from "lucide-react";
 import Link from "next/link";
 import { useDeferredValue, useMemo, useState } from "react";
 import useSWRInfinite from "swr/infinite";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/shared/empty-state";
 import { ErrorState } from "@/components/shared/error-state";
 import { LoadingState } from "@/components/shared/loading-state";
@@ -136,17 +137,13 @@ export function GrammarLibrary() {
         />
       ) : items.length ? (
         <>
-          <div
-            className="grid min-w-0 items-stretch gap-4 md:grid-cols-2 xl:grid-cols-3"
+          <LibraryCardGrid
             aria-label="语法卡片列表"
           >
             {items.map((item) => {
               const progress = item.progress?.[0];
               return (
-                <Card
-                  key={item.id}
-                  className="min-w-0 warm-shadow md:h-full md:min-h-44"
-                >
+                <LibraryCard key={item.id}>
                   <CardContent className="flex min-w-0 flex-col md:h-full">
                     <div className="flex min-w-0 items-start justify-between gap-3">
                       <h2 className="min-w-0 text-lg font-semibold">
@@ -180,10 +177,10 @@ export function GrammarLibrary() {
                       </div>
                     </div>
                   </CardContent>
-                </Card>
+                </LibraryCard>
               );
             })}
-          </div>
+          </LibraryCardGrid>
           {hasMore && (
             <Button
               variant="outline"

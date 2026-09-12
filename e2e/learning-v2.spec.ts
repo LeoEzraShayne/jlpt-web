@@ -302,11 +302,13 @@ test("vocabulary provenance and personal bookmark notes stay usable on mobile", 
 }) => {
   const api = await mockApi(page);
   await page.goto("/library");
+  await page.getByText("释义详情、备注与来源", { exact: true }).click();
   await expect(page.getByText(/词典：JMdict/)).toBeVisible();
   await page.getByLabel("予定 备注").fill("工作中使用");
   await page.getByRole("button", { name: "收藏生词", exact: true }).click();
   await expect(page.getByRole("status")).toContainText("已保存生词收藏");
   await page.getByLabel("内容类型").selectOption("bookmarks");
+  await page.getByText("释义详情、备注与来源", { exact: true }).click();
   await expect(page.getByLabel("予定 备注")).toHaveValue("工作中使用");
   await page.getByRole("button", { name: "取消收藏", exact: true }).click();
   await expect(page.getByText("还没有收藏生词")).toBeVisible();
