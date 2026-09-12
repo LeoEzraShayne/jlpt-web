@@ -19,7 +19,8 @@ export type LearningSummary = {
 export type PracticeOutcome = "INDEPENDENT" | "PROMPTED" | "INCORRECT" | "UNVERIFIED";
 export type VocabularyPractice = {
   explanationLocale?: "zh" | "en";
-  reviewAttempts?: Array<{ id: string; ordinal: number; requestKey: string; status: "QUEUED" | "COMPLETED" | "FAILED"; answer: string; result: unknown; errorCode?: string | null; completedAt?: string | null }>;
+  localized?: { locale: "zh" | "en"; prompt?: string | null; meaningHint?: string | null; referenceTranslation?: string | null } | null;
+  reviewAttempts?: Array<{ id: string; ordinal: number; requestKey: string; status: "QUEUED" | "COMPLETED" | "FAILED"; answer: string; result: VocabularyPractice["result"]; errorCode?: string | null; completedAt?: string | null }>;
   id: string; vocabularyId: string; grammarId: string | null;
   linkedStudySessionId: string | null;
   status: "QUEUED" | "GENERATING" | "READY" | "ASSESSING" | "COMPLETED" | "FAILED";
@@ -27,9 +28,10 @@ export type VocabularyPractice = {
   createdAt: string; completedAt?: string | null; promptZh?: string;
   grammar?: { id: string; title: string } | null;
   hints: { meaning?: string; reading?: string; word?: string; chunks?: Array<{ id: string; text: string }> };
-  learningPreview?: { word: string; reading: string; chineseGloss: string; exampleSentence: string; exampleFurigana: string; exampleTranslationZh: string };
+  learningPreview?: { localized?: { locale: "zh" | "en"; meaning: string; exampleTranslation: string } | null; word: string; reading: string; chineseGloss: string; exampleSentence: string; exampleFurigana: string; exampleTranslationZh: string };
   answer?: string | null;
   result?: {
+    localizedFeedback?: { locale: "zh" | "en"; explanation: string; correctedTranslation: string; corrections: Array<{ text: string; replacement: string; reason: string }> } | null;
     outcome: PracticeOutcome; meaningCorrect: boolean | null; readingCorrect: boolean | null;
     usedTarget: boolean; targetCorrect: boolean | null; explanationZh: string;
     corrections: Array<{ text: string; replacement: string; reason: string }>;

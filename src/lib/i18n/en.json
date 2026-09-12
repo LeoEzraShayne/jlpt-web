@@ -791,5 +791,8 @@
   "功能问题、内容纠错或项目反馈可通过公开 GitHub 仓库提交。 请不要在公开 issue 中填写邮箱、账号信息、学习记录或其他个人敏感信息。": "Report feature problems, content corrections or project feedback through the public GitHub repository. Do not include email addresses, account details, learning records or other personal information in public issues.",
   "付款已确认，当前会员状态请在会员页面查看。": "Payment is confirmed. Check the membership page for your current membership status.",
   "付款后由服务端核实并开通权益。在支持的设备上登录同一账号即可使用会员。": "Membership is activated after server verification. Membership follows your account across supported devices.",
-  "独立词汇练习计入每日免费任务总额度，不改变关联语法的正式复习记录。": "A separate vocabulary practice uses one task from the combined daily free allowance. It does not change the linked grammar review."
+  "独立词汇练习计入每日免费任务总额度，不改变关联语法的正式复习记录。": "A separate vocabulary practice uses one task from the combined daily free allowance. It does not change the linked grammar review.",
+  "每次批改记录": "Assessment history",
+  "追加批改保留原始记忆证据，不重复更新复习安排。": "Further assessments preserve the original memory evidence and do not reschedule reviews again.",
+  "批改失败": "Assessment failed"
 }

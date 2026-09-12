@@ -26,3 +26,8 @@ No migrations or shared API types were authored by B. Main's shared-type commits
 - Fixed dashboard statistics labels/details, public navigation, theme names and history dates. Mobile shell hides the interface label visually to leave brand space.
 - Paid historical orders do not claim entitlement synchronization when current membership is inactive. Web copy describes supported devices without claiming Android is already launched.
 - Validation: 50 tests pass; lint/typecheck and the public-page production build pass. Main agent performed shared-stack browser tests; pending issues continue through W2.
+
+## W2 runtime vocabulary contract
+D confirmed `localized.{locale,prompt,meaningHint,referenceTranslation}`, `learningPreview.localized.{locale,meaning,exampleTranslation}` and `result.localizedFeedback.{locale,explanation,correctedTranslation,corrections}`. English session snapshots now consume these fields in practice and history; legacy sessions remain Chinese. UI does not materialize locked hints/references from supplemental translation fields. D's presenter must omit unauthorized translation fields server-side as agreed.
+
+`reviewAttempts[].result` uses the same normalized result shape as the top-level response. The expandable assessment history displays each answer and feedback without claiming a new memory schedule for each correction. First memory evidence remains server-owned.

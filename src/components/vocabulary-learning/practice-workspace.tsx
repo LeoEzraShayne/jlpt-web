@@ -13,7 +13,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LoadingState } from "@/components/shared/loading-state";
 import { ErrorState } from "@/components/shared/error-state";
 import { FuriganaText } from "@/components/shared/furigana-text";
+import { vocabularySnapshot } from "./localized-practice";
 import { ChunkScaffold } from "./chunk-scaffold";
+import { PracticeAttemptHistory } from "./attempt-history";
 import { PracticeFeedback } from "./practice-feedback";
 import { StartVocabularyPractice } from "./start-practice-button";
 import { isPracticePending, type VocabularyPractice } from "./types";
@@ -62,7 +64,7 @@ export function VocabularyPracticeWorkspace({ id }: { id: string }) {
   }
   if (swr.isLoading) return <LoadingState label={t("正在恢复词汇练习…")} />;
   if (!swr.data) return <ErrorState message={swr.error?.message} onRetry={() => void swr.mutate()} />;
-  const practice = swr.data;
+  const practice = vocabularySnapshot(swr.data);
   const terminalMessage = terminalFailureMessages[actionErrorCode || practice.errorCode || ""];
   const ready = (practice.status === "READY" || (practice.status === "COMPLETED" && revising)) && !terminalMessage;
   const complete = practice.status === "COMPLETED" && !revising;
@@ -91,6 +93,6 @@ export function VocabularyPracticeWorkspace({ id }: { id: string }) {
         {ready && <Button type="submit" disabled={busy || !(lockedAnswer ?? sentence).trim()}>{t(busy ? "正在保存…" : submission ? "重试提交原句" : "提交句子")}</Button>}
       </form>
     </CardContent></Card>}
-    {complete && <><PracticeFeedback practice={practice} /><Button variant="outline" onClick={() => { setSentence(practice.answer ?? ""); setSubmission(undefined); setRevising(true); setError(""); setQuotaCode(""); }}>{t("修改后重新提交")}</Button><p className="text-xs text-muted-foreground">{t("首次结果仍会保留")}</p><div className="flex flex-wrap items-center gap-4"><StartVocabularyPractice label={t("练习下一个到期词")} /><Link href={`/vocabulary-learning/${encodeURIComponent(practice.vocabularyId)}/history`} className="text-sm underline">{t("查看此释义历史")}</Link></div></>}
+    {complete && <><PracticeFeedback practice={practice} /><PracticeAttemptHistory practice={practice} /><Button variant="outline" onClick={() => { setSentence(practice.answer ?? ""); setSubmission(undefined); setRevising(true); setError(""); setQuotaCode(""); }}>{t("修改后重新提交")}</Button><p className="text-xs text-muted-foreground">{t("首次结果仍会保留")}</p><div className="flex flex-wrap items-center gap-4"><StartVocabularyPractice label={t("练习下一个到期词")} /><Link href={`/vocabulary-learning/${encodeURIComponent(practice.vocabularyId)}/history`} className="text-sm underline">{t("查看此释义历史")}</Link></div></>}
   </div>;
 }
