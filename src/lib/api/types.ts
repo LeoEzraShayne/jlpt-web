@@ -18,6 +18,8 @@ export interface User {
   avatarUrl?: string | null;
   role: "USER" | "ADMIN";
   timezone: string;
+  uiLocale?: "zh" | "en";
+  explanationLocale?: "zh" | "en";
   targetLevel: JlptLevel;
   colorTheme: ThemeId;
   dailyMinutes?: number;
