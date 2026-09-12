@@ -1,5 +1,6 @@
 "use client";
-
+import { t } from "@/lib/i18n/locale-store";
+import { useLocale } from "@/components/locale/locale-provider";
 import { CalendarDays, BookOpen, LoaderCircle, Sparkles } from "lucide-react";
 import Image from "next/image";
 import { FormEvent, useEffect, useState } from "react";
@@ -22,6 +23,7 @@ const today = new Intl.DateTimeFormat("en-CA", {
 }).format(new Date());
 
 export function OnboardingForm() {
+  useLocale();
   const router = useRouter();
   const { mutate } = useSWRConfig();
   const currentPlan = usePlans();
@@ -54,7 +56,7 @@ export function OnboardingForm() {
       router.replace("/today");
     } catch (cause) {
       setError(
-        cause instanceof ApiError ? cause.message : "计划生成失败，请重试",
+        cause instanceof ApiError ? cause.message : t("计划生成失败，请重试"),
       );
       setSubmitting(false);
     }
@@ -62,7 +64,7 @@ export function OnboardingForm() {
   if (currentPlan.isLoading || Boolean(currentPlan.data?.items.length))
     return (
       <main className="soft-grid min-h-screen overflow-x-clip px-4 py-8 sm:py-14">
-        <LoadingState label="正在确认学习计划…" />
+        <LoadingState label={t("正在确认学习计划…")} />
       </main>
     );
   if (currentPlan.error)
@@ -85,22 +87,20 @@ export function OnboardingForm() {
               src="/logo.svg"
               width={48}
               height={48}
-              alt="文法トレーニング"
+              alt={t("文法トレーニング")}
               className="size-10 shrink-0 sm:size-12"
             />
-            <h1 className="whitespace-nowrap text-2xl font-bold sm:text-3xl">生成你的 {level} 学习计划</h1>
+            <h1 className="whitespace-nowrap text-2xl font-bold sm:text-3xl">{t("生成你的")}{level} {t("学习计划")}</h1>
           </div>
           <p className="mt-2 text-muted-foreground">
-            先设定一个轻松可持续的节奏，之后随时可以调整。
-          </p>
+            {t("先设定一个轻松可持续的节奏，之后随时可以调整。")}</p>
         </div>
         <div className="mt-8 grid gap-5">
           <Card className="min-w-0 warm-shadow">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Sparkles className="size-5 text-primary" />
-                目标等级
-              </CardTitle>
+                {t("目标等级")}</CardTitle>
             </CardHeader>
             <CardContent>
               <LevelSelector
@@ -109,16 +109,14 @@ export function OnboardingForm() {
                 onChange={setLevel}
               />
               <p className="mt-3 text-sm text-muted-foreground">
-                已收录 N1～N4 共 223 条语法。
-              </p>
+                {t("已收录 N1～N4 共 223 条语法。")}</p>
             </CardContent>
           </Card>
           <Card className="min-w-0 warm-shadow">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <CalendarDays className="size-5 text-primary" />
-                计划日期
-              </CardTitle>
+                {t("计划日期")}</CardTitle>
             </CardHeader>
             <CardContent>
               <PlanDateRange
@@ -134,16 +132,14 @@ export function OnboardingForm() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <BookOpen className="size-5 text-primary" />
-                每日新学上限
-              </CardTitle>
+                {t("每日新学上限")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-5">
               <label className="block text-sm">
                 <span className="mb-2 block text-muted-foreground">
-                  每天学习新语法上限：{dailyNewLimit} 个
-                </span>
+                  {t("每天学习新语法上限：")}{dailyNewLimit} {t("个")}</span>
                 <input
-                  aria-label="每日新语法数量"
+                  aria-label={t("每日新语法数量")}
                   type="range"
                   min="1"
                   max="10"
@@ -159,7 +155,7 @@ export function OnboardingForm() {
         </div>
         {error && (
           <p className="mt-5 rounded-xl bg-destructive/10 p-3 text-sm text-destructive">
-            {error}
+            {t(error)}
           </p>
         )}
         <Button
@@ -169,8 +165,7 @@ export function OnboardingForm() {
           className="mt-6 h-12 w-full text-base"
         >
           {submitting && <LoaderCircle className="animate-spin" />}
-          生成我的学习计划
-        </Button>
+          {t("生成我的学习计划")}</Button>
       </form>
     </main>
   );

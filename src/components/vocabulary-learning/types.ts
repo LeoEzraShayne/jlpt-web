@@ -17,6 +17,8 @@ export type LearningSummary = {
 };
 export type PracticeOutcome = "INDEPENDENT" | "PROMPTED" | "INCORRECT" | "UNVERIFIED";
 export type VocabularyPractice = {
+  explanationLocale?: "zh" | "en";
+  reviewAttempts?: Array<{ id: string; ordinal: number; requestKey: string; status: "QUEUED" | "COMPLETED" | "FAILED"; answer: string; result: unknown; errorCode?: string | null; completedAt?: string | null }>;
   id: string; vocabularyId: string; grammarId: string | null;
   linkedStudySessionId: string | null;
   status: "QUEUED" | "GENERATING" | "READY" | "ASSESSING" | "COMPLETED" | "FAILED";

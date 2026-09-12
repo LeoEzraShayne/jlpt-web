@@ -1,4 +1,8 @@
 "use client";
+import { localizeGrammar } from "@/lib/i18n/content";
+import { useExplanationLocale } from "@/hooks/use-explanation-locale";
+import { t } from "@/lib/i18n/locale-store";
+import { useLocale } from "@/components/locale/locale-provider";
 import { LibraryCard, LibraryCardGrid } from "@/components/shared/library-card";
 
 import { Search } from "lucide-react";
@@ -41,10 +45,10 @@ interface GrammarPage {
   nextCursor?: string | null;
 }
 
-function grammarKey(level: JlptLevel, query: string) {
+function grammarKey(level: JlptLevel, query: string, locale: string) {
   return (index: number, previous: GrammarPage | null) => {
     if (previous && !previous.nextCursor) return null;
-    const params = new URLSearchParams({ level, limit: "30" });
+    const params = new URLSearchParams({ level, limit: "30", locale });
     if (query) params.set("query", query);
     if (index > 0 && previous?.nextCursor)
       params.set("cursor", previous.nextCursor);
@@ -58,41 +62,43 @@ async function fetchGrammarPage(path: string): Promise<GrammarPage> {
 }
 
 export function GrammarLibrary() {
+  useLocale();
   const [level, setLevel] = useState<JlptLevel>("N1");
   const [query, setQuery] = useState("");
   const deferred = useDeferredValue(query);
   const [filter, setFilter] = useState<(typeof filters)[number]>("ALL");
   const levels = useGrammarLevels();
+  const explanationLocale = useExplanationLocale();
   const levelItems = levels.data ?? fallbackGrammarLevels;
   const levelSummary =
     levelItems.find((item) => item.level === level) ?? fallbackGrammarLevels[0];
   const swr = useSWRInfinite<GrammarPage>(
-    grammarKey(level, deferred.trim()),
+    grammarKey(level, deferred.trim(), explanationLocale),
     fetchGrammarPage,
   );
   const items = useMemo(
     () =>
-      (swr.data?.flatMap((page) => page.items) ?? []).filter(
+      (swr.data?.flatMap((page) => page.items) ?? []).map(item => localizeGrammar(item, explanationLocale)).filter(
         (item) =>
           filter === "ALL" ||
           learningStatus(item.progress?.[0]) === filter,
       ),
-    [filter, swr.data],
+    [filter, swr.data, explanationLocale],
   );
   const hasMore = Boolean(swr.data?.at(-1)?.nextCursor);
   const emptyTitle =
     levelSummary.contentStatus === "PENDING"
-      ? `${level} 内容待补充`
-      : "没有找到语法";
+      ? t(`${level} 内容待补充`)
+      : t("没有找到语法");
   const emptyDescription =
     levelSummary.contentStatus === "PENDING"
-      ? "该等级内容暂未开放。"
-      : "换个关键词或清除筛选条件试试。";
+      ? t("该等级内容暂未开放。")
+      : t("换个关键词或清除筛选条件试试。");
   return (
     <div className="min-w-0 max-w-full">
       <PageHeading
-        title={`${level} 语法库`}
-        description={`${levelSummary.grammarCount} 个正式语法，按自己的节奏学习和巩固。`}
+        title={t(`${level} 语法库`)}
+        description={t(`${levelSummary.grammarCount} 个正式语法，按自己的节奏学习和巩固。`)}
       />
       <div className="mb-5">
         <LevelSelector
@@ -112,7 +118,7 @@ export function GrammarLibrary() {
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             className="min-w-0 w-full bg-transparent text-sm outline-none"
-            placeholder={`搜索 ${level} 语法或中文解释`}
+            placeholder={t(`搜索 ${level} 语法或中文解释`)}
           />
         </label>
       </div>
@@ -124,7 +130,7 @@ export function GrammarLibrary() {
             variant={filter === value ? "default" : "outline"}
             onClick={() => setFilter(value)}
           >
-            {filterLabels[value]}
+            {t(filterLabels[value])}
           </Button>
         ))}
       </div>
@@ -138,7 +144,7 @@ export function GrammarLibrary() {
       ) : items.length ? (
         <>
           <LibraryCardGrid
-            aria-label="语法卡片列表"
+            aria-label={t("语法卡片列表")}
           >
             {items.map((item) => {
               const progress = item.progress?.[0];
@@ -160,9 +166,9 @@ export function GrammarLibrary() {
                           {statusSummary(progress)}
                         </span>
                         <span className="whitespace-nowrap rounded-full bg-primary/10 px-2 py-1 font-medium text-primary sm:px-3">
-                          {progress?.lastScore != null
+                          {t(progress?.lastScore != null
                             ? `最近 ${progress.lastScore} 分`
-                            : "尚未练习"}
+                            : "尚未练习")}
                         </span>
                         <Button
                           asChild
@@ -171,7 +177,7 @@ export function GrammarLibrary() {
                           className="rounded-full px-2 text-[11px] sm:px-4 sm:text-xs"
                         >
                           <Link href={`/grammar/${item.id}`}>
-                            {progress ? "查看并练习" : "开始学习"}
+                            {t(progress ? "查看并练习" : "开始学习")}
                           </Link>
                         </Button>
                       </div>
@@ -188,7 +194,7 @@ export function GrammarLibrary() {
               disabled={swr.isValidating}
               onClick={() => void swr.setSize(swr.size + 1)}
             >
-              {swr.isValidating ? "加载中…" : "加载更多语法"}
+              {t(swr.isValidating ? "加载中…" : "加载更多语法")}
             </Button>
           )}
         </>
@@ -202,6 +208,6 @@ export function GrammarLibrary() {
 function statusSummary(progress?: GrammarProgress) {
   const nextReviewOn = progress?.learningState?.nextReviewOn;
   if (nextReviewOn)
-    return `预计 ${formatStudyDate(nextReviewOn)} 复习`;
-  return progress ? "排期会随练习调整" : "尚未安排复习";
+    return t(`预计 ${formatStudyDate(nextReviewOn)} 复习`);
+  return progress ? t("排期会随练习调整") : t("尚未安排复习");
 }

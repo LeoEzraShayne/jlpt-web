@@ -1,12 +1,15 @@
 "use client";
-
+import { QuotaNotice } from "@/components/membership/quota-notice";
+import { quotaErrorCode, billingError } from "@/components/membership/use-membership";
+import { t } from "@/lib/i18n/locale-store";
+import { useLocale } from "@/components/locale/locale-provider";
 import { LoaderCircle, Play } from "lucide-react";
 import { useRef, useState } from "react";
 import { useDefaultEnter } from "@/hooks/use-default-enter";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { useFocusCycle } from "@/components/focus/focus-cycle-provider";
-import { apiRequest, ApiError } from "@/lib/api/client";
+import { apiRequest } from "@/lib/api/client";
 import { cn } from "@/lib/utils";
 import type { SessionMode, StudySession } from "@/lib/api/types";
 
@@ -31,6 +34,7 @@ export function StartStudyButton({
   disabled?: boolean;
   defaultEnter?: boolean;
 }) {
+  useLocale();
   const router = useRouter();
   const focus = useFocusCycle();
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -38,6 +42,7 @@ export function StartStudyButton({
   useDefaultEnter(buttonRef, defaultEnter);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
+  const [quotaCode, setQuotaCode] = useState("");
 
   async function start() {
     if (starting.current || disabled) return;
@@ -55,7 +60,8 @@ export function StartStudyButton({
       focus.startFocus();
       router.push(`/study/${data.session.id}`);
     } catch (cause) {
-      setError(cause instanceof ApiError ? cause.message : "无法开始学习");
+      setQuotaCode(quotaErrorCode(cause));
+      setError(billingError(cause, t));
       setPending(false);
       starting.current = false;
     }
@@ -63,7 +69,8 @@ export function StartStudyButton({
 
   return (
     <div className={cn("min-w-0", className)}>
-      {error && <p className="mb-2 text-xs text-destructive">{error}</p>}
+      <QuotaNotice code={quotaCode} />
+    {error && <p className="mb-2 text-xs text-destructive">{t(error)}</p>}
       <Button
         ref={buttonRef}
         aria-keyshortcuts={defaultEnter ? "Enter" : undefined}
@@ -74,7 +81,7 @@ export function StartStudyButton({
         className={cn("w-full", buttonClassName)}
       >
         {pending ? <LoaderCircle className="animate-spin" /> : <Play />}
-        {label}
+        {t(label)}
       </Button>
     </div>
   );

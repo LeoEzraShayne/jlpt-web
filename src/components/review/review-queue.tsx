@@ -1,5 +1,6 @@
 "use client";
-
+import { t } from "@/lib/i18n/locale-store";
+import { useLocale } from "@/components/locale/locale-provider";
 import { ChevronDown, ChevronUp, Clock3, RefreshCcw } from "lucide-react";
 import { useState } from "react";
 import useSWRInfinite from "swr/infinite";
@@ -43,6 +44,7 @@ async function fetchQueue(path: string): Promise<QueuePage> {
 }
 
 export function ReviewQueue() {
+  useLocale();
   const [level, setLevel] = useState("");
   const [showUpcoming, setShowUpcoming] = useState(false);
   const swr = useSWRInfinite<QueuePage>((index, previous) => getKey(index, previous, level), fetchQueue);
@@ -63,23 +65,23 @@ export function ReviewQueue() {
   return (
     <div className="min-w-0 max-w-full">
       <PageHeading
-        title="复习队列"
-        description={`当前有 ${dueCount} 个到期语法，系统已按逾期和薄弱程度排好顺序。`}
+        title={t("复习队列")}
+        description={t(`当前有 ${dueCount} 个到期语法，系统已按逾期和薄弱程度排好顺序。`)}
       />
-      <label className="mb-5 block text-sm">级别筛选<select aria-label="复习级别" className="ml-3 rounded-lg border bg-background p-2" value={level} onChange={event => setLevel(event.target.value)}><option value="">全部启用计划</option>{["N1", "N2", "N3", "N4"].map(value => <option key={value}>{value}</option>)}</select></label>
+      <label className="mb-5 block text-sm">{t("级别筛选")}<select aria-label={t("复习级别")} className="ml-3 rounded-lg border bg-background p-2" value={level} onChange={event => setLevel(event.target.value)}><option value="">{t("全部启用计划")}</option>{["N1", "N2", "N3", "N4"].map(value => <option key={value}>{value}</option>)}</select></label>
       {priority && (
         <Card className="mb-7 border-primary/40 warm-shadow">
           <CardContent className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="min-w-0">
-              <p className="text-sm font-semibold text-primary">最优先复习</p>
+              <p className="text-sm font-semibold text-primary">{t("最优先复习")}</p>
               <h2 className="mt-1 break-words text-xl font-bold">
                 {priority.progress.grammar.title}
               </h2>
               <p className="mt-1 text-sm text-muted-foreground">
                 {priority.overdueDays > 0
-                  ? `逾期 ${priority.overdueDays} 天`
-                  : "今天到期"}
-                {` · 预计 ${priority.estimatedMinutes} 分钟`}
+                  ? t(`逾期 ${priority.overdueDays} 天`)
+                  : t("今天到期")}
+                {t(` · 预计 ${priority.estimatedMinutes} 分钟`)}
               </p>
             </div>
             <StartStudyButton
@@ -87,15 +89,15 @@ export function ReviewQueue() {
               buttonClassName="sm:min-w-36"
               grammarId={priority.progress.grammar.id}
               mode="REVIEW"
-              label="开始最优先复习"
+              label={t("开始最优先复习")}
             />
           </CardContent>
         </Card>
       )}
       {!items.length ? (
         <EmptyState
-          title="未来 7 天没有复习任务"
-          description="完成新语法学习后，系统会根据实际表现继续安排。"
+          title={t("未来 7 天没有复习任务")}
+          description={t("完成新语法学习后，系统会根据实际表现继续安排。")}
         />
       ) : (
         <div className="space-y-8">
@@ -110,8 +112,7 @@ export function ReviewQueue() {
                   className="w-full justify-between"
                   onClick={() => setShowUpcoming(true)}
                 >
-                  未来 7 天还有 {counts.upcoming} 项复习
-                  <ChevronDown />
+                  {t("未来 7 天还有")}{counts.upcoming} {t("项复习")}<ChevronDown />
                 </Button>
               );
             return (
@@ -135,7 +136,7 @@ export function ReviewQueue() {
               disabled={swr.isValidating}
               onClick={() => void swr.setSize(swr.size + 1)}
             >
-              {swr.isValidating ? "加载中…" : "加载更多"}
+              {t(swr.isValidating ? "加载中…" : "加载更多")}
             </Button>
           )}
         </div>
@@ -155,19 +156,20 @@ function Group({
   items: ReviewSchedule[];
   onCollapse?: () => void;
 }) {
+  useLocale();
   return (
     <section>
       <div className="mb-3 flex items-center justify-between gap-3">
-        <h2 className="text-lg font-bold">{title}</h2>
+        <h2 className="text-lg font-bold">{t(title)}</h2>
         {onCollapse && (
           <Button size="sm" variant="ghost" onClick={onCollapse}>
-            收起 <ChevronUp />
+            {t("收起")}<ChevronUp />
           </Button>
         )}
       </div>
       <div
         className="grid min-w-0 items-stretch gap-3 md:grid-cols-2 2xl:grid-cols-3"
-        aria-label={`${title}复习列表`}
+        aria-label={t(`${title}复习列表`)}
       >
         {items.map((item) => (
           <Card key={item.id} className="h-full min-w-0 warm-shadow">
@@ -183,7 +185,7 @@ function Group({
                       className={`ml-1 inline-flex whitespace-nowrap rounded-full px-2 py-0.5 align-middle text-xs font-normal leading-5 ${tone}`}
                     >
                       {item.overdueDays > 0
-                        ? `逾期 ${item.overdueDays} 天`
+                        ? t(`逾期 ${item.overdueDays} 天`)
                         : title}
                     </span>
                   </h3>
@@ -194,13 +196,12 @@ function Group({
               </div>
               <div className="mt-auto flex min-w-0 items-center justify-between gap-3 pt-2">
                 <span className="flex shrink-0 items-center gap-1 text-xs text-muted-foreground">
-                  <Clock3 className="size-4" />预计 {item.estimatedMinutes} 分钟
-                </span>
+                  <Clock3 className="size-4" />{t("预计")}{item.estimatedMinutes} {t("分钟")}</span>
                 <StartStudyButton
                   buttonClassName="w-auto min-w-24 px-4"
                   grammarId={item.progress.grammar.id}
                   mode="REVIEW"
-                  label="开始复习"
+                  label={t("开始复习")}
                   variant="outline"
                 />
               </div>

@@ -1,5 +1,6 @@
 "use client";
-
+import { t } from "@/lib/i18n/locale-store";
+import { useLocale } from "@/components/locale/locale-provider";
 import { Hourglass } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { apiRequest } from "@/lib/api/client";
@@ -12,6 +13,7 @@ export function StudyTimerCard({
   sessionId: string;
   initialTimer: StudyTimer;
 }) {
+  useLocale();
   const [timer, setTimer] = useState(initialTimer);
   const [remainingMs, setRemainingMs] = useState(() =>
     remainingForTimer(initialTimer),
@@ -70,23 +72,23 @@ export function StudyTimerCard({
         <div className="min-w-0 flex-1">
           <div className="flex min-w-0 flex-wrap items-baseline justify-between gap-2">
             <p className="font-semibold" aria-live="polite">
-              {isFocus ? "专注学习" : "休息时间"}
+              {t(isFocus ? "专注学习" : "休息时间")}
             </p>
             <time className="font-mono text-2xl font-bold tabular-nums">
               {formatRemaining(remainingMs)}
             </time>
           </div>
           <p className="mt-1 text-sm text-muted-foreground">
-            {isFocus
+            {t(isFocus
               ? `专注 ${timer.focusMinutes} 分钟后休息 ${timer.breakMinutes} 分钟`
-              : `${timer.breakMinutes} 分钟后自动开始下一轮学习`}
+              : `${timer.breakMinutes} 分钟后自动开始下一轮学习`)}
           </p>
         </div>
       </div>
       <div
         className="mt-4 h-2 overflow-hidden rounded-full bg-muted"
         role="progressbar"
-        aria-label={isFocus ? "本轮专注剩余时间" : "本轮休息剩余时间"}
+        aria-label={isFocus ? t("本轮专注剩余时间") : t("本轮休息剩余时间")}
         aria-valuemin={0}
         aria-valuemax={100}
         aria-valuenow={Math.round(progress)}

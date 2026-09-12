@@ -1,10 +1,13 @@
+"use client";
+import { t } from "@/lib/i18n/locale-store";
+import { useLocale } from "@/components/locale/locale-provider";
 import { BookOpen, CheckCircle2, ChevronDown, GraduationCap, RefreshCcw, type LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import type { DashboardStats } from "@/lib/dashboard-stats";
 import type { Dashboard } from "@/lib/api/types";
 
-const minutes = (value: number) => `${Number(value.toFixed(1))} 分钟`;
+const minutes = (value: number) => t(`${Number(value.toFixed(1))} 分钟`);
 
 interface DashboardStatsCardsProps {
   level: string;
@@ -23,10 +26,11 @@ export function DashboardStatsCards({
   allocation,
   levels,
 }: DashboardStatsCardsProps) {
+  useLocale();
   return (
-    <section aria-label="今日学习概览" className="contents md:grid md:min-w-0 md:gap-4 md:grid-cols-2 xl:grid-cols-6">
+    <section aria-label={t("今日学习概览")} className="contents md:grid md:min-w-0 md:gap-4 md:grid-cols-2 xl:grid-cols-6">
       <StatsCard
-        title="今日剩余"
+        title={t("今日剩余")}
         icon={BookOpen}
         columns={3}
         className="xl:col-span-3"
@@ -44,7 +48,7 @@ export function DashboardStatsCards({
         <AllocationDetails levels={levels} />
       </StatsCard>
       <StatsCard
-        title="今日完成"
+        title={t("今日完成")}
         icon={CheckCircle2}
         columns={3}
         className="xl:col-span-3"
@@ -60,14 +64,14 @@ export function DashboardStatsCards({
           { label: "今日实际用时", value: minutes(allocation?.spentMinutes ?? stats.studyMinutesToday) },
         ]}
       >
-        <p className="mt-3 text-xs leading-5 text-muted-foreground">实际用时包含已完成、进行中及额外练习。</p>
+        <p className="mt-3 text-xs leading-5 text-muted-foreground">{t("实际用时包含已完成、进行中及额外练习。")}</p>
       </StatsCard>
       {recommendedTask && <div className="-order-1 min-w-0 md:order-none md:col-span-2 xl:col-span-2">{recommendedTask}</div>}
       <StatsCard
-        title="复习总账"
+        title={t("复习总账")}
         icon={RefreshCcw}
         className={recommendedTask ? "xl:col-span-2" : "xl:col-span-3"}
-        meta="启用计划合计"
+        meta={t("启用计划合计")}
         items={[
           {
             label: "逾期待复习",
@@ -82,10 +86,10 @@ export function DashboardStatsCards({
         ]}
       />
       <StatsCard
-        title={`${level} 总体进度`}
+        title={t(`${level} 总体进度`)}
         icon={GraduationCap}
         className={recommendedTask ? "xl:col-span-2" : "xl:col-span-3"}
-        meta={`共 ${stats.progress.total} 个语法`}
+        meta={t(`共 ${stats.progress.total} 个语法`)}
         progress={stats.progress}
         items={[
           { label: "较稳定", value: stats.progress.mastered, color: "bg-success" },
@@ -99,15 +103,16 @@ export function DashboardStatsCards({
 }
 
 function AllocationDetails({ levels }: Pick<Dashboard, "levels">) {
+  useLocale();
   if (!levels?.length) return null;
   return <details className="group mt-3 border-t border-border/60 pt-3">
     <summary className="flex cursor-pointer list-none items-center justify-between gap-2 rounded text-xs font-medium text-muted-foreground hover:text-foreground focus-visible:outline-2 focus-visible:outline-ring [&::-webkit-details-marker]:hidden">
-      各级别今日安排<ChevronDown className="size-4 transition-transform group-open:rotate-180" />
+      {t("各级别今日安排")}<ChevronDown className="size-4 transition-transform group-open:rotate-180" />
     </summary>
     <div className="mt-3 space-y-3 text-xs leading-5">
       {levels?.map(item => <div key={item.planId} className="border-t border-border/60 pt-2">
-        <div className="flex flex-wrap justify-between gap-x-3"><strong>{item.level} · {item.isPrimary ? "主目标" : "基础"}</strong><span className="text-muted-foreground">{item.reviewCount + item.newCount + item.completedCount === 0 ? "今日未安排" : `待办约 ${minutes(item.estimatedMinutes)}`}</span></div>
-        {item.reviewCount + item.newCount + item.completedCount > 0 && <p className="text-muted-foreground">待复习 {item.reviewCount} · 待新学 {item.newCount} · 已完成 {item.completedCount}</p>}
+        <div className="flex flex-wrap justify-between gap-x-3"><strong>{item.level} · {t(item.isPrimary ? "主目标" : "基础")}</strong><span className="text-muted-foreground">{t(item.reviewCount + item.newCount + item.completedCount === 0 ? "今日未安排" : `待办约 ${minutes(item.estimatedMinutes)}`)}</span></div>
+        {item.reviewCount + item.newCount + item.completedCount > 0 && <p className="text-muted-foreground">{t("待复习")}{item.reviewCount} {t("· 待新学")}{item.newCount} {t("· 已完成")}{item.completedCount}</p>}
       </div>)}
     </div>
   </details>;
@@ -139,6 +144,7 @@ function StatsCard({
   progress?: DashboardStats["progress"];
   children?: ReactNode;
 }) {
+  useLocale();
   return (
     <Card aria-label={title} className={`min-w-0 border border-border/60 shadow-none ring-0 [--card-spacing:--spacing(5)] ${className ?? ""}`}>
       <CardContent>
@@ -147,7 +153,7 @@ function StatsCard({
             <span className="grid size-9 place-items-center rounded-full bg-secondary text-secondary-foreground">
               <Icon className="size-4" />
             </span>
-            {title}
+            {t(title)}
           </h2>
           {meta && <span className="text-xs leading-5 text-muted-foreground">{meta}</span>}
         </div>

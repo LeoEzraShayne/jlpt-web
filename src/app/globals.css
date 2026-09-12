@@ -158,3 +158,8 @@
     font-weight: 500;
   }
 }
+
+/* Prevent native touch flash while preserving keyboard focus and press feedback. */
+a, button, input, select, textarea, summary { -webkit-tap-highlight-color: transparent; }
+button:active:not(:disabled), a:active { opacity: .82; }
+html[lang="en"] .whitespace-nowrap { white-space: normal; }

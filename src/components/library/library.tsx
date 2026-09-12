@@ -1,4 +1,6 @@
 "use client";
+import { t } from "@/lib/i18n/locale-store";
+import { useLocale } from "@/components/locale/locale-provider";
 import { useState } from "react";
 import { usePaged } from "@/hooks/use-paged";
 import { LoadStatus } from "./load-status";
@@ -25,28 +27,27 @@ import { VocabularyLearningList } from "@/components/vocabulary-learning/learnin
 import { ImportManager } from "./import-manager";
 
 export function Library() {
+  useLocale();
   const [tab, setTab] = useState("vocabulary");
   return (
     <div className="flex min-w-0 flex-col gap-5">
       <div>
-        <h1 className="text-2xl font-bold">词汇与表达库</h1>
+        <h1 className="text-2xl font-bold">{t("词汇与表达库")}</h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          词汇分级仅供参考。个人收藏与资料仅自己可见，融入语法练习。
-        </p>
+          {t("词汇分级仅供参考。个人收藏与资料仅自己可见，融入语法练习。")}</p>
       </div>
       <label className="text-sm">
-        内容
-        <select
-          aria-label="内容类型"
+        {t("内容")}<select
+          aria-label={t("内容类型")}
           className="ml-3 rounded-lg border bg-background p-2"
           value={tab}
           onChange={(e) => setTab(e.target.value)}
         >
-          <option value="vocabulary">词汇查询</option>
-          <option value="learning">词汇学习清单</option>
-          <option value="bookmarks">生词收藏</option>
-          <option value="expressions">常用表达</option>
-          <option value="imports">私人资料导入</option>
+          <option value="vocabulary">{t("词汇查询")}</option>
+          <option value="learning">{t("词汇学习清单")}</option>
+          <option value="bookmarks">{t("生词收藏")}</option>
+          <option value="expressions">{t("常用表达")}</option>
+          <option value="imports">{t("私人资料导入")}</option>
         </select>
       </label>
       {tab === "learning" ? (
@@ -63,6 +64,7 @@ export function Library() {
 }
 
 function Vocabulary({ bookmarks }: { bookmarks: boolean }) {
+  useLocale();
   const [query, setQuery] = useState("");
   const [search, setSearch] = useState("");
   const [level, setLevel] = useState<JlptLevel | "">("");
@@ -82,25 +84,25 @@ function Vocabulary({ bookmarks }: { bookmarks: boolean }) {
           className="flex flex-wrap gap-2"
         >
           <input
-            aria-label="搜索词汇"
+            aria-label={t("搜索词汇")}
             className="min-w-0 basis-full flex-1 rounded-lg border bg-background p-2 sm:basis-auto"
-            placeholder="词形、读音或中文释义"
+            placeholder={t("词形、读音或中文释义")}
             maxLength={100}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
           <select
-            aria-label="词汇参考级别"
+            aria-label={t("词汇参考级别")}
             className="rounded-lg border bg-background p-2"
             value={level}
             onChange={(e) => setLevel(e.target.value as JlptLevel | "")}
           >
-            <option value="">全部级别</option>
+            <option value="">{t("全部级别")}</option>
             {["N1", "N2", "N3", "N4"].map((l) => (
               <option key={l}>{l}</option>
             ))}
           </select>
-          <Button type="submit">搜索</Button>
+          <Button type="submit">{t("搜索")}</Button>
         </form>
       )}
       <LoadStatus
@@ -110,11 +112,11 @@ function Vocabulary({ bookmarks }: { bookmarks: boolean }) {
       />
       {!swr.isLoading && !swr.error && !swr.items.length && (
         <EmptyState
-          title={bookmarks ? "还没有收藏生词" : "没有匹配的词汇"}
-          description="可尝试其他词形或读音。"
+          title={bookmarks ? t("还没有收藏生词") : t("没有匹配的词汇")}
+          description={t("可尝试其他词形或读音。")}
         />
       )}
-      <LibraryCardGrid aria-label="词汇卡片列表">
+      <LibraryCardGrid aria-label={t("词汇卡片列表")}>
         {swr.items.map((item) => (
           <WordCard
             key={item.id}
@@ -130,19 +132,18 @@ function Vocabulary({ bookmarks }: { bookmarks: boolean }) {
           disabled={swr.isValidating}
           onClick={() => void swr.setSize(swr.size + 1)}
         >
-          加载更多
-        </Button>
+          {t("加载更多")}</Button>
       )}
     </div>
   );
 }
 function Expressions() {
+  useLocale();
   const swr = usePaged<PersonalExpression>("/expressions");
   return (
     <div className="flex flex-col gap-4">
       <p className="text-sm text-muted-foreground">
-        从批改结果收藏正确原句、修正版或拓展示例。正式复习时参考原句默认隐藏，打开计为提示。
-      </p>
+        {t("从批改结果收藏正确原句、修正版或拓展示例。正式复习时参考原句默认隐藏，打开计为提示。")}</p>
       <LoadStatus
         loading={swr.isLoading}
         error={swr.error}
@@ -150,8 +151,8 @@ function Expressions() {
       />
       {!swr.isLoading && !swr.error && !swr.items.length && (
         <EmptyState
-          title="还没有常用表达"
-          description="完成一次造句批改后，收藏想熟练使用的表达。"
+          title={t("还没有常用表达")}
+          description={t("完成一次造句批改后，收藏想熟练使用的表达。")}
         />
       )}
       {swr.items.map((item) => (
@@ -167,8 +168,7 @@ function Expressions() {
           disabled={swr.isValidating}
           onClick={() => void swr.setSize(swr.size + 1)}
         >
-          加载更多
-        </Button>
+          {t("加载更多")}</Button>
       )}
     </div>
   );
@@ -180,6 +180,7 @@ function ExpressionCard({
   expression: PersonalExpression;
   refresh: () => Promise<unknown>;
 }) {
+  useLocale();
   const [note, setNote] = useState(expression.note);
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
@@ -191,9 +192,9 @@ function ExpressionCard({
         ...(!remove ? { body: JSON.stringify({ note }) } : {}),
       });
       await refresh();
-      setMessage("已保存");
+      setMessage(t("已保存"));
     } catch (e) {
-      setMessage(e instanceof Error ? e.message : "保存失败");
+      setMessage(e instanceof Error ? e.message : t("保存失败"));
     } finally {
       setBusy(false);
     }
@@ -211,20 +212,16 @@ function ExpressionCard({
       </CardHeader>
       <CardContent className="flex flex-col gap-3">
         <p className="text-xs text-muted-foreground">
-          来源：
-          {
-            {
+          {t("来源：")}{t({
               ORIGINAL: "正确原句",
               CORRECTION: "修正版",
               ALTERNATIVE: "拓展示例",
-            }[expression.variant]
-          }{" "}
-          · 场景：{expression.scene ?? "未记录"}
+            }[expression.variant])}{" "}
+          {t("· 场景：")}{t(expression.scene ?? "未记录")}
         </p>
         <label className="text-sm">
-          个人备注
-          <input
-            aria-label="表达备注"
+          {t("个人备注")}<input
+            aria-label={t("表达备注")}
             maxLength={2000}
             className="mt-1 w-full rounded-lg border bg-background p-2"
             value={note}
@@ -233,23 +230,21 @@ function ExpressionCard({
         </label>
         <div className="flex flex-wrap gap-2">
           <Button size="sm" disabled={busy} onClick={() => void save()}>
-            保存备注
-          </Button>
+            {t("保存备注")}</Button>
           <Button
             size="sm"
             variant="outline"
             disabled={busy}
             onClick={() => void save(true)}
           >
-            移除表达
-          </Button>
+            {t("移除表达")}</Button>
           <StartStudyButton
             grammarId={expression.grammarId}
             mode="PRACTICE"
-            label="练习关联语法"
+            label={t("练习关联语法")}
           />
         </div>
-        {message && <p role="status">{message}</p>}
+        {message && <p role="status">{t(message)}</p>}
       </CardContent>
     </Card>
   );

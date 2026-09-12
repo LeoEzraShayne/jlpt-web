@@ -1,5 +1,6 @@
 "use client";
-
+import { t } from "@/lib/i18n/locale-store";
+import { useLocale } from "@/components/locale/locale-provider";
 import { Check, Palette } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -17,6 +18,7 @@ const options: Array<{ id: ThemeId; name: string; color: string }> = [
 ];
 
 export function ThemePicker({ compact = false }: { compact?: boolean }) {
+  useLocale();
   const { theme, setTheme } = useColorTheme();
   const me = useMe();
   async function choose(nextTheme: ThemeId) {
@@ -33,12 +35,12 @@ export function ThemePicker({ compact = false }: { compact?: boolean }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size={compact ? "icon" : "sm"} aria-label="选择主题颜色" className="bg-card">
-          <Palette className="size-4" />{!compact && <span>主题</span>}
+        <Button variant="outline" size={compact ? "icon" : "sm"} aria-label={t("选择主题颜色")} className="bg-card">
+          <Palette className="size-4" />{!compact && <span>{t("主题")}</span>}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-44">
-        <DropdownMenuLabel>主题颜色</DropdownMenuLabel>
+        <DropdownMenuLabel>{t("主题颜色")}</DropdownMenuLabel>
         {options.map((option) => (
           <DropdownMenuItem key={option.id} onClick={() => void choose(option.id)} className="gap-3">
             <span className="size-4 rounded-full border" style={{ backgroundColor: option.color }} />

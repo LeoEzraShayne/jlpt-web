@@ -1,5 +1,6 @@
 "use client";
-
+import { t } from "@/lib/i18n/locale-store";
+import { useLocale } from "@/components/locale/locale-provider";
 import {
   Bell,
   CalendarDays,
@@ -9,6 +10,7 @@ import {
   UserRound,
 } from "lucide-react";
 import Image from "next/image";
+import { LanguagePicker } from "@/components/locale/language-picker";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -27,9 +29,10 @@ const navItems = [
 ];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
+  useLocale();
   const pathname = usePathname();
   const { data: user } = useMe();
-  const initial = user?.displayName?.slice(0, 1) || "日";
+  const initial = user?.displayName?.slice(0, 1) || t("日");
   return (
     <div className="min-h-screen lg:grid lg:grid-cols-[224px_1fr]">
       <aside className="hidden min-h-screen border-r bg-sidebar px-4 py-6 lg:flex lg:flex-col">
@@ -44,9 +47,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             alt=""
             className="size-10 shrink-0"
           />
-          <span className="text-sm">文法トレーニング</span>
+          <span className="text-sm">JLPT Sentence Lab</span>
         </Link>
-        <nav className="space-y-2" aria-label="主导航">
+        <nav className="space-y-2" aria-label={t("主导航")}>
           {navItems.map(({ href, label, icon: Icon }) => {
             const active = pathname === href || pathname.startsWith(`${href}/`);
             return (
@@ -61,16 +64,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 )}
               >
                 <Icon className="size-5" />
-                {label}
+                {t(label)}
               </Link>
             );
           })}
         </nav>
         <div className="soft-grid mt-auto rounded-2xl border bg-card p-4 text-sm">
-          <p className="font-semibold">今天也前进一点</p>
+          <p className="font-semibold">{t("今天也前进一点")}</p>
           <p className="mt-1 text-xs leading-5 text-muted-foreground">
-            坚持完成复习，记忆会越来越牢固。
-          </p>
+            {t("坚持完成复习，记忆会越来越牢固。")}</p>
         </div>
       </aside>
       <div className="min-w-0 max-w-full">
@@ -87,17 +89,17 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               className="size-6 shrink-0"
             />
             <span className="truncate text-sm sm:text-base">
-              文法トレーニング
+              JLPT Sentence Lab
             </span>
           </Link>
           <div className="hidden lg:block" />
           <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
             {pathname.startsWith("/study/") && <FocusCycleCompact />}
-            <ThemePicker compact />
+            <LanguagePicker /><ThemePicker compact />
             <Button
               variant="ghost"
               size="icon"
-              aria-label="通知"
+              aria-label={t("通知")}
               className="hidden sm:inline-flex"
             >
               <Bell className="size-5" />
@@ -106,7 +108,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               {user?.avatarUrl && (
                 <AvatarImage
                   src={user.avatarUrl}
-                  alt={`${user.displayName} 的 Google 头像`}
+                  alt={t(`${user.displayName} 的 Google 头像`)}
                   referrerPolicy="no-referrer"
                 />
               )}
@@ -124,7 +126,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </main>
         <nav
           className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-5 border-t bg-card px-1 pt-1 pb-[max(0.25rem,env(safe-area-inset-bottom))] lg:hidden"
-          aria-label="移动端导航"
+          aria-label={t("移动端导航")}
         >
           {navItems.map(({ href, label, icon: Icon }) => {
             const active = pathname === href || pathname.startsWith(`${href}/`);
@@ -140,7 +142,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 )}
               >
                 <Icon className="size-5 shrink-0" />
-                {label}
+                {t(label)}
               </Link>
             );
           })}

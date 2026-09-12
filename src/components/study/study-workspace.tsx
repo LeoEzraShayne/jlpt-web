@@ -1,5 +1,9 @@
 "use client";
-
+import { QuotaNotice } from "@/components/membership/quota-notice";
+import { quotaErrorCode, billingError } from "@/components/membership/use-membership";
+import { feedbackSnapshot, localizeGrammar } from "@/lib/i18n/content";
+import { t } from "@/lib/i18n/locale-store";
+import { useLocale } from "@/components/locale/locale-provider";
 import {
   ArrowLeft,
   Eye,
@@ -30,6 +34,7 @@ import type { AiReviewJob, RecallRating, ReviewResult, StudySession } from "@/li
 import { saveCompletionNotice } from "@/lib/study-display";
 
 export function StudyWorkspace({ sessionId }: { sessionId: string }) {
+  useLocale();
   const router = useRouter();
   const { mutate: mutateGlobal } = useSWRConfig();
   const sessionSWR = useSWR<StudySession>(
@@ -44,7 +49,9 @@ export function StudyWorkspace({ sessionId }: { sessionId: string }) {
   const [submitting, setSubmitting] = useState(false);
   const [completing, setCompleting] = useState(false);
   const completionPending = useRef(false);
+  const submissionKey = useRef<{ sentence: string; key: string } | null>(null);
   const [message, setMessage] = useState("");
+  const [quotaCode, setQuotaCode] = useState("");
   const reviewId =
     submittedReviewId === undefined
       ? sessionSWR.data?.attempts?.[0]?.aiJob?.id
@@ -74,7 +81,7 @@ export function StudyWorkspace({ sessionId }: { sessionId: string }) {
           : 0,
     },
   );
-  if (sessionSWR.isLoading) return <LoadingState label="正在恢复学习进度…" />;
+  if (sessionSWR.isLoading) return <LoadingState label={t("正在恢复学习进度…")} />;
   if (sessionSWR.error || !sessionSWR.data)
     return (
       <div className="mx-auto max-w-4xl p-5">
@@ -85,10 +92,10 @@ export function StudyWorkspace({ sessionId }: { sessionId: string }) {
       </div>
     );
   const session = sessionSWR.data;
-  const grammar = session.grammar;
+  const grammar = localizeGrammar(session.grammar, session.explanationLocale ?? "zh");
   const hintVisible = session.mode === "REVIEW" && session.trainingContext?.referenceHidden ? false : (showHint ?? session.mode === "LEARN");
   const job = reviewSWR.data;
-  const result = job?.result;
+  const result = job?.result ? feedbackSnapshot(job.result) : undefined;
   const correction = result ?? previousCorrection;
   const reviewing = Boolean(
     reviewId && (!job || ["QUEUED", "PROCESSING"].includes(job.status)),
@@ -109,9 +116,10 @@ export function StudyWorkspace({ sessionId }: { sessionId: string }) {
       );
       setShowHint(true);
     } catch (cause) {
+      setQuotaCode(quotaErrorCode(cause));
       setShowHint(false);
       setMessage(
-        cause instanceof ApiError ? cause.message : "提示打开失败，请重试",
+        cause instanceof ApiError ? cause.message : t("提示打开失败，请重试"),
       );
     }
   }
@@ -120,19 +128,22 @@ export function StudyWorkspace({ sessionId }: { sessionId: string }) {
     if (submitDisabled) return;
     setSubmitting(true);
     setMessage("");
+    const pending = submissionKey.current?.sentence === sentence.trim() ? submissionKey.current : { sentence: sentence.trim(), key: crypto.randomUUID() };
+    submissionKey.current = pending;
     try {
       const { data } = await apiRequest<{ reviewId: string }>(
         "/sentence-reviews",
         {
           method: "POST",
-          body: JSON.stringify({ sessionId, sentence: sentence.trim() }),
+          body: JSON.stringify({ sessionId, sentence: pending.sentence, requestKey: pending.key }),
         },
       );
       setPollInterval(500);
       setSubmittedReviewId(data.reviewId);
     } catch (cause) {
+      setQuotaCode(quotaErrorCode(cause));
       setMessage(
-        cause instanceof ApiError ? cause.message : "提交失败，请重试",
+        billingError(cause, t),
       );
     } finally {
       setSubmitting(false);
@@ -140,9 +151,11 @@ export function StudyWorkspace({ sessionId }: { sessionId: string }) {
   }
   async function retryJob() {
     if (!reviewId) return;
-    await apiRequest(`/sentence-reviews/${reviewId}/retry`, { method: "POST" });
-    setPollInterval(500);
-    void reviewSWR.mutate();
+    try {
+      await apiRequest(`/sentence-reviews/${reviewId}/retry`, { method: "POST" });
+      setPollInterval(500);
+      void reviewSWR.mutate();
+    } catch (cause) { setQuotaCode(quotaErrorCode(cause)); setMessage(billingError(cause, t)); }
   }
   async function complete(rating: RecallRating, includeAiResult = true) {
     if (completionPending.current) return;
@@ -170,8 +183,9 @@ export function StudyWorkspace({ sessionId }: { sessionId: string }) {
       ]);
       router.replace("/today");
     } catch (cause) {
+      setQuotaCode(quotaErrorCode(cause));
       setMessage(
-        cause instanceof ApiError ? cause.message : "完成失败，请重试",
+        cause instanceof ApiError ? cause.message : t("完成失败，请重试"),
       );
       setCompleting(false);
       completionPending.current = false;
@@ -180,8 +194,7 @@ export function StudyWorkspace({ sessionId }: { sessionId: string }) {
   function revise() {
     setPreviousCorrection(result ?? null);
     setSubmittedReviewId(null);
-    setSentence("");
-    setMessage("请重新写一句，再提交批改。");
+    setMessage(t("请重新写一句，再提交批改。"));
   }
   return (
     <main className="min-h-screen min-w-0 max-w-full overflow-x-clip bg-background">
@@ -190,16 +203,15 @@ export function StudyWorkspace({ sessionId }: { sessionId: string }) {
           <Button asChild variant="ghost" className="shrink-0 px-2 sm:px-4">
             <Link href="/today">
               <ArrowLeft />
-              退出练习
-            </Link>
+              {t("退出练习")}</Link>
           </Button>
           <div className="ml-auto flex shrink-0 items-center gap-3 sm:gap-4">
             <span className="text-sm font-medium">
-              {session.mode === "LEARN"
+              {t(session.mode === "LEARN"
                 ? "新语法学习"
                 : session.mode === "REVIEW"
                   ? "复习"
-                  : "自由练习"}
+                  : "自由练习")}
             </span>
             <span className="rounded-full bg-secondary px-3 py-1 text-xs font-semibold text-secondary-foreground">
               {grammar.level}
@@ -211,19 +223,18 @@ export function StudyWorkspace({ sessionId }: { sessionId: string }) {
         <div className="min-w-0 text-center">
           <h1 className="text-2xl font-bold sm:text-3xl">{grammar.title}</h1>
           <p className="mt-2 whitespace-nowrap text-[clamp(11px,3.45vw,16px)] text-muted-foreground">
-            请先回忆含义和接续，再用它造一个自己的句子。
-          </p>
+            {t("请先回忆含义和接续，再用它造一个自己的句子。")}</p>
         </div>
-        <FocusCycleCard />
+        <QuotaNotice code={quotaCode} /><FocusCycleCard />
         <TrainingPanel session={session} hintVisible={hintVisible} reveal={reveal} />
         <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border p-3">
-          <p className="text-xs text-muted-foreground">用当前语法练习到期的个人词汇，不影响语法正式复习。</p>
-          <StartVocabularyPractice grammarId={grammar.id} studySessionId={sessionId} label="练习到期词汇" />
+          <p className="text-xs text-muted-foreground">{t("用当前语法练习到期的个人词汇，不影响语法正式复习。")}</p>
+          <StartVocabularyPractice grammarId={grammar.id} studySessionId={sessionId} label={t("练习到期词汇")} />
         </div>
         <Card className="mt-7 min-w-0 warm-shadow">
           <CardHeader>
             <CardTitle className="flex min-w-0 flex-wrap items-center justify-between gap-2">
-              <span>语法提示</span>
+              <span>{t("语法提示")}</span>
               <Button
                 variant="ghost"
                 size="sm"
@@ -232,42 +243,41 @@ export function StudyWorkspace({ sessionId }: { sessionId: string }) {
                 }
               >
                 {hintVisible ? <EyeOff /> : <Eye />}
-                {hintVisible ? "隐藏提示" : "查看提示"}
+                {t(hintVisible ? "隐藏提示" : "查看提示")}
               </Button>
             </CardTitle>
           </CardHeader>
           <CardContent>
             {hintVisible ? (
               <div className="min-w-0 space-y-4">
-                <Hint label="中文解释" value={grammar.chineseExplanation} />
+                <Hint label={t("中文解释")} value={grammar.chineseExplanation} />
                 <Hint
-                  label="接续方式"
-                  value={grammar.connectionRule || "资料暂未标注"}
+                  label={t("接续方式")}
+                  value={grammar.connectionRule || t("资料暂未标注")}
                 />
                 {grammar.examples[0] && (
                   <Hint
-                    label="参考例句"
+                    label={t("参考例句")}
                     value={`${grammar.examples[0].sentence}（${grammar.examples[0].translation}）`}
                   />
                 )}
               </div>
             ) : (
               <div className="rounded-xl border border-dashed p-5 text-center text-sm text-muted-foreground sm:p-7">
-                尽量先凭记忆造句，需要时再查看提示。
-              </div>
+                {t("尽量先凭记忆造句，需要时再查看提示。")}</div>
             )}
           </CardContent>
         </Card>
         <Card className="mt-6 min-w-0 warm-shadow">
           <CardHeader>
-            <CardTitle>造一个日语句子</CardTitle>
+            <CardTitle>{t("造一个日语句子")}</CardTitle>
           </CardHeader>
           <CardContent>
             <form className="min-w-0" onSubmit={submit}>
               {correction && (
                 <div className="mb-4 min-w-0" role="status">
                   <p className="text-sm font-medium text-muted-foreground">
-                    {result ? "AI 修改后的句子" : "上次 AI 修改后的句子"}
+                    {t(result ? "AI 修改后的句子" : "上次 AI 修改后的句子")}
                   </p>
                   <p
                     lang="ja"
@@ -277,7 +287,7 @@ export function StudyWorkspace({ sessionId }: { sessionId: string }) {
                   </p>
                   {correction.correctedSentenceTranslationZh && (
                     <p className="mt-2 text-sm leading-7 text-muted-foreground">
-                      中文：{correction.correctedSentenceTranslationZh}
+                      {t("中文：")}{correction.correctedSentenceTranslationZh}
                     </p>
                   )}
                 </div>
@@ -285,7 +295,7 @@ export function StudyWorkspace({ sessionId }: { sessionId: string }) {
               {!result && (
                 <>
                   <Textarea
-                    aria-label="日语句子"
+                    aria-label={t("日语句子")}
                     value={sentence}
                     onKeyDown={(event) => {
                       if (
@@ -303,10 +313,10 @@ export function StudyWorkspace({ sessionId }: { sessionId: string }) {
                       setSentence(event.target.value.slice(0, 150))
                     }
                     rows={6}
-                    placeholder={`请使用「${grammar.title}」造句`}
+                    placeholder={t(`请使用「${grammar.title}」造句`)}
                   />
                   <div className="mt-2 flex flex-wrap justify-between gap-2 text-xs text-muted-foreground">
-                    <span>Enter 提交 · Shift+Enter 换行</span>
+                    <span>{t("Enter 提交 · Shift+Enter 换行")}</span>
                     <span>{sentence.length}/150</span>
                   </div>
                   <Button
@@ -320,15 +330,15 @@ export function StudyWorkspace({ sessionId }: { sessionId: string }) {
                     ) : (
                       <Send />
                     )}
-                    {reviewing
+                    {t(reviewing
                       ? "AI 正在批改…"
-                      : "提交给 AI 批改"}
+                      : "提交给 AI 批改")}
                   </Button>
                   {job?.status === "FAILED" && (
                     <div className="mt-4 rounded-xl bg-destructive/10 p-4 text-sm text-destructive">
                       <p className="flex items-start gap-2">
                         <TriangleAlert className="mt-0.5 size-4 shrink-0" />
-                        {reviewFailureMessage(job)}
+                        {t(reviewFailureMessage(job))}
                       </p>
                       <Button
                         type="button"
@@ -337,16 +347,14 @@ export function StudyWorkspace({ sessionId }: { sessionId: string }) {
                         className="mt-3"
                         onClick={() => void retryJob()}
                       >
-                        重新批改
-                      </Button>
+                        {t("重新批改")}</Button>
                       <p className="mt-3 text-xs text-muted-foreground">
-                        也可以按真实回忆情况完成。缺少合格评分时，本次不增加掌握证据或延长间隔。
-                      </p>
+                        {t("也可以按真实回忆情况完成。缺少合格评分时，本次不增加掌握证据或延长间隔。")}</p>
                       <div className="mt-2 grid grid-cols-3 gap-2">
                         {[
-                          ["FORGOT", "忘记了"],
-                          ["FUZZY", "有些模糊"],
-                          ["REMEMBERED", "记住了"],
+                          ["FORGOT", t("忘记了")],
+                          ["FUZZY", t("有些模糊")],
+                          ["REMEMBERED", t("记住了")],
                         ].map(([rating, label]) => (
                           <Button
                             key={rating}
@@ -358,7 +366,7 @@ export function StudyWorkspace({ sessionId }: { sessionId: string }) {
                               void complete(rating as RecallRating, false)
                             }
                           >
-                            {label}
+                            {t(label)}
                           </Button>
                         ))}
                       </div>
@@ -374,20 +382,18 @@ export function StudyWorkspace({ sessionId }: { sessionId: string }) {
             <ReviewResultCard result={result} showCorrection={false} />
             <div className="mt-6 min-w-0">
               <div className="flex min-w-0 flex-col rounded-2xl border bg-card p-5">
-                <h2 className="font-semibold">这次记得怎么样？</h2>
+                <h2 className="font-semibold">{t("这次记得怎么样？")}</h2>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  系统会结合你的真实回忆和本次目标语法表现安排复习。
-                </p>
+                  {t("系统会结合你的真实回忆和本次目标语法表现安排复习。")}</p>
                 {result.recallPolicy &&
                   result.recallPolicy.reason !== "NONE" && (
                     <RecallPolicyMessage reason={result.recallPolicy.reason} />
                   )}
                 {allowedRatings.length === 0 ? (
                   <div className="mt-auto pt-4">
-                    <DefaultStudyButton disabled={completing} onClick={revise} title="修改后重新提交">
+                    <DefaultStudyButton disabled={completing} onClick={revise} title={t("修改后重新提交")}>
                       <RefreshCcw />
-                      修改后重新提交
-                    </DefaultStudyButton>
+                      {t("修改后重新提交")}</DefaultStudyButton>
                   </div>
                 ) : (
                   <div className="mt-auto grid auto-cols-fr grid-flow-col gap-2 pt-4 sm:gap-3">
@@ -397,41 +403,35 @@ export function StudyWorkspace({ sessionId }: { sessionId: string }) {
                       disabled={completing}
                       onClick={() => void complete("FORGOT")}
                     >
-                      忘记了
-                    </Button>
+                      {t("忘记了")}</Button>
                     <Button
                       className="min-w-0 px-2 text-xs sm:text-sm"
                       variant="outline"
                       disabled={completing}
                       onClick={() => void complete("FUZZY")}
                     >
-                      有些模糊
-                    </Button>
+                      {t("有些模糊")}</Button>
                     {allowedRatings.includes("REMEMBERED") && (
                       result.totalScore < 80 ? (
                         <Button variant="outline" disabled={completing}
                           onClick={() => void complete("REMEMBERED")}>
-                          记住了
-                        </Button>
+                          {t("记住了")}</Button>
                       ) : (
                         <DefaultStudyButton disabled={completing}
-                          onClick={() => void complete("REMEMBERED")} title="记住了">
-                          记住了
-                        </DefaultStudyButton>
+                          onClick={() => void complete("REMEMBERED")} title={t("记住了")}>
+                          {t("记住了")}</DefaultStudyButton>
                       )
                     )}
                     {result.totalScore < 80 && (
-                      <DefaultStudyButton disabled={completing} onClick={revise} title="修改后重试">
+                      <DefaultStudyButton disabled={completing} onClick={revise} title={t("修改后重试")}>
                         <RefreshCcw className="hidden sm:block" />
-                        修改后重试
-                      </DefaultStudyButton>
+                        {t("修改后重试")}</DefaultStudyButton>
                     )}
                   </div>
                 )}
                 {result.totalScore < 80 && (
                   <p className="mt-2 text-xs text-muted-foreground">
-                    首次结果仍会保留
-                  </p>
+                    {t("首次结果仍会保留")}</p>
                 )}
               </div>
             </div>
@@ -439,7 +439,7 @@ export function StudyWorkspace({ sessionId }: { sessionId: string }) {
         )}
         {message && (
           <p className="mt-4 rounded-xl bg-secondary p-3 text-sm text-secondary-foreground">
-            {message}
+            {t(message)}
           </p>
         )}
       </div>
@@ -451,6 +451,7 @@ function RecallPolicyMessage({
 }: {
   reason: NonNullable<ReviewResult["recallPolicy"]>["reason"] | undefined;
 }) {
+  useLocale();
   const messages = {
     SCORE_BELOW_80: "本次造句质量低于 80 分，最高按“有些模糊”安排。",
     TARGET_GRAMMAR_MISSING: "句子没有使用目标语法，本次排期会按“忘记了”处理。",
@@ -459,21 +460,22 @@ function RecallPolicyMessage({
   if (!reason || reason === "NONE") return null;
   return (
     <p className="mt-3 rounded-xl bg-secondary p-3 text-sm text-secondary-foreground">
-      {messages[reason]}
+      {t(messages[reason])}
     </p>
   );
 }
 
 function reviewFailureMessage(job: AiReviewJob) {
   if (["AI_TIMEOUT", "AI_NETWORK_ERROR"].includes(job.errorCode ?? ""))
-    return "AI 批改响应超时，请稍后重新批改。";
-  return "AI 批改服务暂时不可用，请稍后重新批改。";
+    return t("AI 批改响应超时，请稍后重新批改。");
+  return t("AI 批改服务暂时不可用，请稍后重新批改。");
 }
 
 function Hint({ label, value }: { label: string; value: string }) {
+  useLocale();
   return (
     <div>
-      <p className="text-xs font-medium text-muted-foreground">{label}</p>
+      <p className="text-xs font-medium text-muted-foreground">{t(label)}</p>
       <p className="mt-1 leading-7">{value}</p>
     </div>
   );

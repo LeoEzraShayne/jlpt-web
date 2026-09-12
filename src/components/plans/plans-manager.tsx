@@ -1,4 +1,6 @@
 "use client";
+import { t } from "@/lib/i18n/locale-store";
+import { useLocale } from "@/components/locale/locale-provider";
 import { FormEvent, useState } from "react";
 import { useSWRConfig } from "swr";
 import { useMe, usePlans } from "@/hooks/use-api";
@@ -30,6 +32,7 @@ export const currentPlan = (plan: StudyPlan) =>
 const selectClass = "mt-2 w-full rounded-lg border bg-background p-2 text-sm";
 
 export function PlansManager() {
+  useLocale();
   const me = useMe();
   const plans = usePlans();
   const { mutate } = useSWRConfig();
@@ -55,10 +58,9 @@ export function PlansManager() {
   return (
     <div className="flex min-w-0 flex-col gap-5">
       <div>
-        <h2 className="text-xl font-bold">学习计划</h2>
+        <h2 className="text-xl font-bold">{t("学习计划")}</h2>
         <p className="mt-2 text-sm text-muted-foreground">
-          每级别一个当前计划，到期复习全部安排。暂停后可随时恢复。
-        </p>
+          {t("每级别一个当前计划，到期复习全部安排。暂停后可随时恢复。")}</p>
       </div>
       <Preferences
         key={user.targetLevel}
@@ -83,14 +85,14 @@ export function PlansManager() {
       </div>
       {items.some((item) => !currentPlan(item)) && (
         <details className="rounded-xl border p-4">
-          <summary>历史计划</summary>
+          <summary>{t("历史计划")}</summary>
           <ul className="mt-3 flex flex-col gap-2">
             {items
               .filter((item) => !currentPlan(item))
               .map((item) => (
                 <li key={item.id}>
                   {item.level} ·{" "}
-                  {item.status === "ARCHIVED" ? "已归档" : "已完成"} ·{" "}
+                  {t(item.status === "ARCHIVED" ? "已归档" : "已完成")} ·{" "}
                   {item.startDate.slice(0, 10)} ～{" "}
                   {item.targetDate.slice(0, 10)}
                 </li>
@@ -108,6 +110,7 @@ function Preferences({
   user: User;
   onSaved: () => Promise<void>;
 }) {
+  useLocale();
   const [target, setTarget] = useState(user.targetLevel);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
@@ -123,9 +126,9 @@ function Preferences({
         }),
       });
       await onSaved();
-      setMessage("主目标已保存。");
+      setMessage(t("主目标已保存。"));
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "保存失败");
+      setMessage(error instanceof Error ? error.message : t("保存失败"));
     } finally {
       setBusy(false);
     }
@@ -133,17 +136,15 @@ function Preferences({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>统一每日安排</CardTitle>
+        <CardTitle>{t("统一每日安排")}</CardTitle>
         <CardDescription>
-          启用计划的到期复习全部列出，新学按各计划的每日数量上限安排。
-        </CardDescription>
+          {t("启用计划的到期复习全部列出，新学按各计划的每日数量上限安排。")}</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={save} className="flex flex-col gap-5">
           <label className="text-sm">
-            主目标
-            <select
-              aria-label="主目标"
+            {t("主目标")}<select
+              aria-label={t("主目标")}
               value={target}
               onChange={(e) => setTarget(e.target.value as JlptLevel)}
               className={selectClass}
@@ -154,11 +155,10 @@ function Preferences({
             </select>
           </label>
           <Button disabled={busy} type="submit">
-            保存每日安排
-          </Button>
+            {t("保存每日安排")}</Button>
           {message && (
             <p role="status" className="text-sm">
-              {message}
+              {t(message)}
             </p>
           )}
         </form>
@@ -177,6 +177,7 @@ function LevelPlan({
   user: User;
   onSaved: () => Promise<void>;
 }) {
+  useLocale();
   const today = new Intl.DateTimeFormat("en-CA", {
     timeZone: user.timezone,
   }).format(new Date());
@@ -214,26 +215,26 @@ function LevelPlan({
       await onSaved();
       setEditing(false);
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "保存失败");
+      setError(cause instanceof Error ? cause.message : t("保存失败"));
     } finally {
       setBusy(false);
     }
   }
   return (
-    <Card className="min-w-0 self-start" aria-label={`${level} 学习计划`}>
+    <Card className="min-w-0 self-start" aria-label={t(`${level} 学习计划`)}>
       <CardHeader>
         <CardTitle className="flex flex-wrap items-center gap-2">
-          {level} {level === user.targetLevel && <Badge>主目标</Badge>}
+          {level} {level === user.targetLevel && <Badge>{t("主目标")}</Badge>}
           <Badge variant="secondary">
-            {!plan ? "未建立" : plan.status === "ACTIVE" ? "进行中" : "已暂停"}
+            {t(!plan ? "未建立" : plan.status === "ACTIVE" ? "进行中" : "已暂停")}
           </Badge>
         </CardTitle>
         <CardDescription>
-          {plan?.mode === "SYSTEM"
+          {t(plan?.mode === "SYSTEM"
             ? "系统学习"
             : plan
               ? "查漏补缺"
-              : "新增计划不会切换主目标"}
+              : "新增计划不会切换主目标")}
         </CardDescription>
       </CardHeader>
       <CardContent className="flex min-w-0 flex-col gap-4">
@@ -241,8 +242,7 @@ function LevelPlan({
           <p className="text-sm text-muted-foreground">
             {plan.startDate.slice(0, 10)} ～ {plan.targetDate.slice(0, 10)}
             <br />
-            已学 {plan.learnedGrammar ?? 0} / {plan.totalGrammar ?? 0} ·
-            每日新学上限 {plan.dailyNewLimit}
+            {t("已学")}{plan.learnedGrammar ?? 0} / {plan.totalGrammar ?? 0} {t("· 每日新学上限")}{plan.dailyNewLimit}
           </p>
         )}
         {editing && (
@@ -254,20 +254,18 @@ function LevelPlan({
             className="flex min-w-0 flex-col gap-4"
           >
             <label className="text-sm">
-              学习方式
-              <select
-                aria-label={`${level} 学习方式`}
+              {t("学习方式")}<select
+                aria-label={t(`${level} 学习方式`)}
                 className={selectClass}
                 value={mode}
                 onChange={(e) => setMode(e.target.value as StudyPlanMode)}
               >
-                <option value="SYSTEM">系统学习</option>
-                <option value="GAP_FILL">查漏补缺</option>
+                <option value="SYSTEM">{t("系统学习")}</option>
+                <option value="GAP_FILL">{t("查漏补缺")}</option>
               </select>
             </label>
             <p className="text-xs text-muted-foreground">
-              查漏补缺只安排已学内容和你标记“需加强”的语法。
-            </p>
+              {t("查漏补缺只安排已学内容和你标记“需加强”的语法。")}</p>
             <PlanDateRange
               startDate={start}
               endDate={end}
@@ -275,9 +273,9 @@ function LevelPlan({
               onEndDateChange={setEnd}
             />
             <label className="text-sm">
-              每日新语法上限：{limit}
+              {t("每日新语法上限：")}{limit}
               <input
-                aria-label={`${level} 每日新语法上限`}
+                aria-label={t(`${level} 每日新语法上限`)}
                 className="mt-2 w-full accent-primary"
                 type="range"
                 min="1"
@@ -288,22 +286,21 @@ function LevelPlan({
             </label>
             <div className="flex flex-wrap gap-2">
               <Button disabled={busy} type="submit">
-                {plan ? "保存调整" : `创建 ${level} 计划`}
+                {t(plan ? "保存调整" : `创建 ${level} 计划`)}
               </Button>
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => setEditing(false)}
               >
-                取消
-              </Button>
+                {t("取消")}</Button>
             </div>
           </form>
         )}
         {!editing && (
           <div className="flex flex-wrap gap-2">
             <Button onClick={() => setEditing(true)}>
-              {plan ? "调整计划" : `建立 ${level} 计划`}
+              {t(plan ? "调整计划" : `建立 ${level} 计划`)}
             </Button>
             {plan && (
               <>
@@ -314,10 +311,10 @@ function LevelPlan({
                     void save(plan.status === "ACTIVE" ? "PAUSED" : "ACTIVE")
                   }
                 >
-                  {plan.status === "ACTIVE" ? "暂停计划" : "恢复计划"}
+                  {t(plan.status === "ACTIVE" ? "暂停计划" : "恢复计划")}
                 </Button>
                 <Button variant="ghost" onClick={() => setForecast(!forecast)}>
-                  {forecast ? "收起预估" : "计划预估"}
+                  {t(forecast ? "收起预估" : "计划预估")}
                 </Button>
               </>
             )}
@@ -325,7 +322,7 @@ function LevelPlan({
         )}
         {error && (
           <p role="alert" className="text-sm text-destructive">
-            {error}
+            {t(error)}
           </p>
         )}
         {forecast && plan && <PlanForecastCard planId={plan.id} />}

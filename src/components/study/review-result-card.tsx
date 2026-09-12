@@ -1,3 +1,7 @@
+"use client";
+import { feedbackSnapshot } from "@/lib/i18n/content";
+import { t } from "@/lib/i18n/locale-store";
+import { useLocale } from "@/components/locale/locale-provider";
 import {
   CheckCircle2,
   MessageCircleMore,
@@ -9,18 +13,20 @@ import { FuriganaText } from "@/components/shared/furigana-text";
 import type { ReviewResult } from "@/lib/api/types";
 
 export function ReviewResultCard({
-  result,
+  result: rawResult,
   showCorrection = true,
 }: {
   result: ReviewResult;
   showCorrection?: boolean;
 }) {
+  useLocale();
+  const result = feedbackSnapshot(rawResult);
   const scores = [
-    ["语法使用", result.grammarScore, 30],
-    ["接续正确", result.connectionScore, 20],
-    ["句子完整", result.completenessScore, 20],
-    ["自然度", result.naturalnessScore, 20],
-    ["词汇表达", result.vocabularyScore, 10],
+    [t("语法使用"), result.grammarScore, 30],
+    [t("接续正确"), result.connectionScore, 20],
+    [t("句子完整"), result.completenessScore, 20],
+    [t("自然度"), result.naturalnessScore, 20],
+    [t("词汇表达"), result.vocabularyScore, 10],
   ] as const;
   return (
     <div className="min-w-0 space-y-5">
@@ -29,8 +35,7 @@ export function ReviewResultCard({
           <div className="grid place-items-center rounded-2xl bg-secondary p-5 text-center">
             <span className="text-5xl font-bold">{result.totalScore}</span>
             <span className="mt-1 text-xs text-muted-foreground">
-              本次造句质量 / 100
-            </span>
+              {t("本次造句质量 / 100")}</span>
           </div>
           <div className="min-w-0">
             <h2 className="flex items-start gap-2 text-xl font-bold">
@@ -38,13 +43,12 @@ export function ReviewResultCard({
               {result.encouragement}
             </h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              {targetGrammarMessage(result)}。分数用于检查语法和表达，不代表真实记忆率。
-            </p>
+              {t(targetGrammarMessage(result))}{t("。分数用于检查语法和表达，不代表真实记忆率。")}</p>
             <div className="mt-4 grid min-w-0 gap-3 sm:grid-cols-2">
               {scores.map(([label, value, max]) => (
                 <div className="min-w-0" key={label}>
                   <div className="flex justify-between text-xs">
-                    <span>{label}</span>
+                    <span>{t(label)}</span>
                     <span>
                       {value}/{max}
                     </span>
@@ -61,11 +65,11 @@ export function ReviewResultCard({
           </div>
         </CardContent>
       </Card>
-      {result.contentResponse && <Feedback icon={MessageCircleMore} title="内容回应" text={result.contentResponse} />}
+      {result.contentResponse && <Feedback icon={MessageCircleMore} title={t("内容回应")} text={result.contentResponse} />}
       {result.errorSpans.length > 0 && (
         <Card className="min-w-0">
           <CardHeader>
-            <CardTitle role="heading" aria-level={2}>需要调整的地方</CardTitle>
+            <CardTitle role="heading" aria-level={2}>{t("需要调整的地方")}</CardTitle>
           </CardHeader>
           <CardContent className="min-w-0 space-y-3">
             {result.errorSpans.map((span, index) => (
@@ -90,13 +94,13 @@ export function ReviewResultCard({
       )}
       <Feedback
         icon={MessageCircleMore}
-        title="中文说明"
+        title={t("中文说明")}
         text={result.explanationZh}
       />
       {showCorrection && (
         <Feedback
           icon={WandSparkles}
-          title="原句纠错"
+          title={t("原句纠错")}
           text={result.correctedSentence}
           annotated={result.correctedSentenceFurigana}
           translation={result.correctedSentenceTranslationZh}
@@ -106,7 +110,7 @@ export function ReviewResultCard({
       {result.alternativeSentence && (
         <Feedback
           icon={Sparkles}
-          title="拓展示例"
+          title={t("拓展示例")}
           text={result.alternativeSentence}
           annotated={result.alternativeSentenceFurigana}
           translation={result.alternativeSentenceTranslationZh}
@@ -118,10 +122,10 @@ export function ReviewResultCard({
 }
 
 function targetGrammarMessage(result: ReviewResult) {
-  if (result.usedTargetGrammar === false) return "目标语法未使用";
-  if (result.targetGrammarCorrect === false) return "目标语法使用不正确";
-  if (result.targetGrammarCorrect === true) return "目标语法使用正确";
-  return "目标语法表现已纳入反馈";
+  if (result.usedTargetGrammar === false) return t("目标语法未使用");
+  if (result.targetGrammarCorrect === false) return t("目标语法使用不正确");
+  if (result.targetGrammarCorrect === true) return t("目标语法使用正确");
+  return t("目标语法表现已纳入反馈");
 }
 
 function Feedback({
@@ -139,12 +143,13 @@ function Feedback({
   translation?: string | null;
   japanese?: boolean;
 }) {
+  useLocale();
   return (
     <Card>
       <CardHeader>
         <CardTitle role="heading" aria-level={2} className="flex items-center gap-2">
           <Icon className="size-5 text-primary" />
-          {title}
+          {t(title)}
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -163,7 +168,7 @@ function Feedback({
         </p>
         {translation && (
           <p className="mt-3 border-t pt-3 text-sm leading-7 text-muted-foreground">
-            中文：{translation}
+            {t("中文：")}{translation}
           </p>
         )}
       </CardContent>

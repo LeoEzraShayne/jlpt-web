@@ -1,5 +1,6 @@
 "use client";
-
+import { t } from "@/lib/i18n/locale-store";
+import { useLocale } from "@/components/locale/locale-provider";
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 
@@ -28,6 +29,7 @@ function initialState(): FocusState {
 }
 
 export function FocusCycleProvider({ children }: { children: React.ReactNode }) {
+  useLocale();
   const [state, setState] = useState<FocusState>(initialState);
   const hydrated = useRef(false);
   const lastTick = useRef(0);
@@ -117,11 +119,11 @@ export function FocusCycleProvider({ children }: { children: React.ReactNode }) 
       {children}
       {state.phase === "BREAK_PROMPT" && (
         <div className="fixed inset-x-3 bottom-[calc(5.5rem+env(safe-area-inset-bottom))] z-50 mx-auto max-w-md rounded-2xl border bg-card p-5 warm-shadow lg:bottom-6" role="dialog" aria-modal="true" aria-labelledby="focus-break-title">
-          <h2 id="focus-break-title" className="font-semibold">已经专注 30 分钟，休息一下吧</h2>
-          <p className="mt-1 text-sm text-muted-foreground">休息 5 分钟，让注意力恢复后再继续。</p>
+          <h2 id="focus-break-title" className="font-semibold">{t("已经专注 30 分钟，休息一下吧")}</h2>
+          <p className="mt-1 text-sm text-muted-foreground">{t("休息 5 分钟，让注意力恢复后再继续。")}</p>
           <div className="mt-4 flex gap-3">
-            <Button className="flex-1" onClick={startBreak}>开始休息</Button>
-            <Button className="flex-1" variant="outline" onClick={skipBreak}>暂时跳过</Button>
+            <Button className="flex-1" onClick={startBreak}>{t("开始休息")}</Button>
+            <Button className="flex-1" variant="outline" onClick={skipBreak}>{t("暂时跳过")}</Button>
           </div>
         </div>
       )}

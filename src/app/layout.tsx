@@ -12,14 +12,14 @@ const themeScript = `try{var t=localStorage.getItem("jlpt-color-theme");if(["sun
 export const metadata: Metadata = {
   metadataBase: siteUrl,
   title: {
-    default: "JLPT N1～N4 日语语法学习｜文法トレーニング",
-    template: "%s｜文法トレーニング",
+    default: "JLPT N1～N4 日语语法学习｜JLPT Sentence Lab",
+    template: "%s｜JLPT Sentence Lab",
   },
   description: "通过日语造句、AI 语法批改和间隔复习，系统掌握 JLPT N1～N4 日语语法。包含中文解释、接续、例句和个性化学习计划。",
-  applicationName: "文法トレーニング",
+  applicationName: "JLPT Sentence Lab",
   keywords: ["JLPT", "JLPT N1", "JLPT N2", "JLPT N3", "JLPT N4", "日语语法", "日语学习", "日语造句", "日本語文法"],
-  authors: [{ name: "文法トレーニング" }],
-  creator: "文法トレーニング",
+  authors: [{ name: "JLPT Sentence Lab" }],
+  creator: "JLPT Sentence Lab",
   category: "education",
   alternates: { canonical: "/" },
   icons: {
@@ -30,13 +30,13 @@ export const metadata: Metadata = {
     type: "website",
     locale: "zh_CN",
     url: "/",
-    siteName: "文法トレーニング",
-    title: "JLPT N1～N4 日语语法学习｜文法トレーニング",
+    siteName: "JLPT Sentence Lab",
+    title: "JLPT N1～N4 日语语法学习｜JLPT Sentence Lab",
     description: "用日语造句、AI 批改和间隔复习，真正掌握 JLPT N1～N4 语法。",
   },
   twitter: {
     card: "summary_large_image",
-    title: "JLPT N1～N4 日语语法学习｜文法トレーニング",
+    title: "JLPT N1～N4 日语语法学习｜JLPT Sentence Lab",
     description: "用日语造句、AI 批改和间隔复习，真正掌握 JLPT N1～N4 语法。",
   },
   robots: {
@@ -51,7 +51,7 @@ export const metadata: Metadata = {
     },
   },
   referrer: "strict-origin-when-cross-origin",
-  appleWebApp: { capable: true, title: "文法トレーニング", statusBarStyle: "default" },
+  appleWebApp: { capable: true, title: "JLPT Sentence Lab", statusBarStyle: "default" },
 };
 
 export const viewport: Viewport = {

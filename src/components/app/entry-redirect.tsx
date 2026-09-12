@@ -1,5 +1,6 @@
 "use client";
-
+import { t } from "@/lib/i18n/locale-store";
+import { useLocale } from "@/components/locale/locale-provider";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { usePlans, useMe } from "@/hooks/use-api";
@@ -8,6 +9,7 @@ import { LoadingState } from "@/components/shared/loading-state";
 import { ErrorState } from "@/components/shared/error-state";
 
 export function EntryRedirect() {
+  useLocale();
   const router = useRouter();
   const me = useMe();
   const plan = usePlans(Boolean(me.data));
@@ -21,5 +23,5 @@ export function EntryRedirect() {
   if (plan.error) {
     return <ErrorState message={plan.error.message} onRetry={() => void plan.mutate()} />;
   }
-  return <LoadingState label="正在进入文法训练…" />;
+  return <LoadingState label={t("正在进入文法训练…")} />;
 }

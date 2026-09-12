@@ -1,3 +1,6 @@
+"use client";
+import { t } from "@/lib/i18n/locale-store";
+import { useLocale } from "@/components/locale/locale-provider";
 import { Badge } from "@/components/ui/badge";
 import type { Progress } from "@/lib/api/types";
 
@@ -23,8 +26,9 @@ export function learningStatus(progress?: Progress): LearningStatus {
 }
 
 export function GrammarStatus({ progress }: { progress?: Progress }) {
+  useLocale();
   const status = learningStatus(progress);
   return (
-    <Badge className={`${styles[status]} border-0`}>{labels[status]}</Badge>
+    <Badge className={`${styles[status]} border-0`}>{t(labels[status])}</Badge>
   );
 }

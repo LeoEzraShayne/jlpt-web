@@ -1,4 +1,7 @@
 "use client";
+import { t } from "@/lib/i18n/locale-store";
+import { useLocale } from "@/components/locale/locale-provider";
+import { LanguagePicker } from "@/components/locale/language-picker";
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -10,6 +13,7 @@ import { ThemePicker } from "@/components/theme/theme-picker";
 import { PlansManager } from "@/components/plans/plans-manager";
 
 export function ProfileSettings() {
+  useLocale();
   const me = useMe();
   const router = useRouter();
   const { cache } = useSWRConfig();
@@ -20,14 +24,14 @@ export function ProfileSettings() {
       for (const key of Array.from(cache.keys())) cache.delete(key);
       router.replace("/login");
     } catch {
-      setError("退出失败，请重试");
+      setError(t("退出失败，请重试"));
     }
   }
   return (
     <div className="flex min-w-0 flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold">我的学习</h1>
+          <h1 className="text-2xl font-bold">{t("我的学习")}</h1>
           <p className="break-all text-sm text-muted-foreground">
             {me.data?.displayName} · {me.data?.email}
           </p>
@@ -35,15 +39,14 @@ export function ProfileSettings() {
         <div className="flex flex-wrap items-center gap-2">
           <ThemePicker />
           <Button asChild variant="outline">
-            <Link href="/library">词汇与表达库</Link>
+            <Link href="/library">{t("词汇与表达库")}</Link>
           </Button>
           <Button variant="outline" onClick={() => void logout()}>
-            退出登录
-          </Button>
+            {t("退出登录")}</Button>
         </div>
       </div>
-      {error && <p role="alert">{error}</p>}
-      <PlansManager />
+      {error && <p role="alert">{t(error)}</p>}
+      <LanguagePicker explanations /><Button asChild variant="outline"><Link href="/membership">{t("会员与额度")}</Link></Button><PlansManager />
     </div>
   );
 }

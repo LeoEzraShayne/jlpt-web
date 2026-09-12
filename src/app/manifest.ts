@@ -2,8 +2,8 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "文法トレーニング｜JLPT N1～N4 日语语法学习",
-    short_name: "文法トレーニング",
+    name: "JLPT Sentence Lab｜JLPT N1～N4 日语语法学习",
+    short_name: "JLPT Sentence Lab",
     description: "通过造句、AI 批改和间隔复习掌握 JLPT 日语语法。",
     start_url: "/",
     display: "standalone",

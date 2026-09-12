@@ -1,5 +1,6 @@
 "use client";
-
+import { t } from "@/lib/i18n/locale-store";
+import { useLocale } from "@/components/locale/locale-provider";
 import { History, RotateCcw } from "lucide-react";
 import Link from "next/link";
 import useSWRInfinite from "swr/infinite";
@@ -29,6 +30,7 @@ async function fetchPage(path: string): Promise<Page> {
 }
 
 export function HistoryList() {
+  useLocale();
   const swr = useSWRInfinite<Page>(getKey, fetchPage);
   const items = swr.data?.flatMap((page) => page.items) ?? [];
   const hasMore = Boolean(swr.data?.at(-1)?.nextCursor);
@@ -43,13 +45,13 @@ export function HistoryList() {
   return (
     <div className="min-w-0 max-w-full">
       <PageHeading
-        title="学习记录"
-        description="回看自己的表达和每一次进步。"
+        title={t("学习记录")}
+        description={t("回看自己的表达和每一次进步。")}
       />
       {items.length ? (
         <div
           className="grid min-w-0 items-stretch gap-4 md:grid-cols-2 2xl:grid-cols-3"
-          aria-label="学习记录列表"
+          aria-label={t("学习记录列表")}
         >
           {items.map((attempt) => (
             <Card key={attempt.id} className="h-full min-w-0 warm-shadow">
@@ -76,7 +78,7 @@ export function HistoryList() {
                       className={`text-2xl ${historyScoreTone(attempt.aiJob.result.totalScore)}`}
                     >
                       {attempt.aiJob.result.totalScore}
-                      <span className="ml-0.5 text-sm">分</span>
+                      <span className="ml-0.5 text-sm">{t("分")}</span>
                     </strong>
                   )}
                   <Button
@@ -87,8 +89,7 @@ export function HistoryList() {
                   >
                     <Link href={`/history/${attempt.id}`}>
                       <RotateCcw />
-                      查看详情
-                    </Link>
+                      {t("查看详情")}</Link>
                   </Button>
                 </div>
               </CardContent>
@@ -101,14 +102,13 @@ export function HistoryList() {
               disabled={swr.isValidating}
               onClick={() => void swr.setSize(swr.size + 1)}
             >
-              加载更多
-            </Button>
+              {t("加载更多")}</Button>
           )}
         </div>
       ) : (
         <EmptyState
-          title="还没有造句记录"
-          description="完成一次学习任务后，AI 批改会保存在这里。"
+          title={t("还没有造句记录")}
+          description={t("完成一次学习任务后，AI 批改会保存在这里。")}
         />
       )}
     </div>

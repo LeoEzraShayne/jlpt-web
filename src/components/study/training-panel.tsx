@@ -1,4 +1,7 @@
 "use client";
+import { localizedText, vocabularyMeaning } from "@/lib/i18n/content";
+import { t } from "@/lib/i18n/locale-store";
+import { useLocale } from "@/components/locale/locale-provider";
 import Link from "next/link";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -40,6 +43,7 @@ export function TrainingPanel({
   hintVisible: boolean;
   reveal: () => Promise<void>;
 }) {
+  useLocale();
   const context = session.trainingContext;
   if (!context) return null;
   // Existing sessions can contain separate senses of the same lexical form.
@@ -60,25 +64,24 @@ export function TrainingPanel({
     <Card className="mt-6 min-w-0">
       <CardHeader>
         <CardTitle role="heading" aria-level={2}>
-          {session.trainingMode ? modes[session.trainingMode] : "场景表达"}
+          {t(session.trainingMode ? modes[session.trainingMode] : "场景表达")}
         </CardTitle>
-        <CardDescription>{context.instructionZh}</CardDescription>
+        <CardDescription>{context.instruction ?? context.instructionZh}</CardDescription>
       </CardHeader>
       <CardContent className="flex min-w-0 flex-col gap-4">
         {context.scenario && (
           <div>
             <p className="text-xs text-muted-foreground">
-              {domains[context.scenario.domain] ?? context.scenario.domain} ·{" "}
-              {registers[context.scenario.register] ??
-                context.scenario.register}
+              {t(domains[context.scenario.domain] ?? context.scenario.domain)} ·{" "}
+              {t(registers[context.scenario.register] ??
+                context.scenario.register)}
             </p>
-            <p className="mt-2 leading-7">{context.scenario.promptZh}</p>
+            <p className="mt-2 leading-7">{localizedText(context.scenario.localized, "prompt", context.scenario.promptZh, session.explanationLocale ?? "zh")}</p>
           </div>
         )}
         {context.supportingGrammar && (
           <p className="text-sm">
-            可顺带复习：
-            <Link
+            {t("可顺带复习：")}<Link
               className="text-primary underline"
               href={`/grammar/${encodeURIComponent(context.supportingGrammar.id)}`}
             >
@@ -86,16 +89,15 @@ export function TrainingPanel({
               {context.supportingGrammar.level}）
             </Link>
             <span className="mt-1 block text-xs text-muted-foreground">
-              自然时再组合，本轮只评估目标语法的掌握证据。
-            </span>
+              {t("自然时再组合，本轮只评估目标语法的掌握证据。")}</span>
           </p>
         )}
         {!!words.length && (
           <div>
-            <h3 className="mb-2 text-sm font-semibold">可选重点词</h3>
+            <h3 className="mb-2 text-sm font-semibold">{t("可选重点词")}</h3>
             <div className={`grid gap-2 ${wordGridColumns}`}>
               {words.map((word) => (
-                <TrainingWord key={word.id} word={word} />
+                <TrainingWord key={word.id} word={word} explanationLocale={session.explanationLocale ?? "zh"} />
               ))}
             </div>
           </div>
@@ -104,22 +106,19 @@ export function TrainingPanel({
           (referencesHidden ? (
             <div className="rounded-xl border border-dashed p-4">
               <p className="text-sm text-muted-foreground">
-                个人参考表达已隐藏。打开后记为使用提示，本轮不计入独立掌握证据。
-              </p>
+                {t("个人参考表达已隐藏。打开后记为使用提示，本轮不计入独立掌握证据。")}</p>
               <Button
                 className="mt-3"
                 size="sm"
                 variant="outline"
                 onClick={() => void reveal()}
               >
-                查看参考表达（使用提示）
-              </Button>
+                {t("查看参考表达（使用提示）")}</Button>
             </div>
           ) : (
             <details>
               <summary className="cursor-pointer text-sm font-medium">
-                参考表达与短句素材
-              </summary>
+                {t("参考表达与短句素材")}</summary>
               <div className="mt-3 flex flex-col gap-3">
                 {context.expressions?.map((expression) =>
                   expression.sentence ? (
@@ -137,8 +136,7 @@ export function TrainingPanel({
                         {expression.translationZh}
                       </p>
                       <p className="mt-1 text-xs text-muted-foreground">
-                        来源：个人常用表达
-                      </p>
+                        {t("来源：个人常用表达")}</p>
                     </div>
                   ) : null,
                 )}
@@ -149,8 +147,7 @@ export function TrainingPanel({
                         {phrase.word} {phrase.reading}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        来源：已校验私人资料
-                      </p>
+                        {t("来源：已校验私人资料")}</p>
                     </div>
                   ) : null,
                 )}
@@ -162,10 +159,11 @@ export function TrainingPanel({
   );
 }
 function TrainingWord({
-  word,
+  word, explanationLocale,
 }: {
-  word: NonNullable<TrainingContext["words"]>[number];
+  word: NonNullable<TrainingContext["words"]>[number]; explanationLocale: "zh" | "en";
 }) {
+  useLocale();
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   async function bookmark() {
@@ -175,9 +173,9 @@ function TrainingWord({
         method: "PUT",
         body: "{}",
       });
-      setMessage("已收藏");
+      setMessage(t("已收藏"));
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "收藏失败");
+      setMessage(error instanceof Error ? error.message : t("收藏失败"));
     } finally {
       setBusy(false);
     }
@@ -188,7 +186,7 @@ function TrainingWord({
       <div className="flex flex-wrap items-center justify-between gap-2">
         <span>
           {word.word}（{word.reading}）
-          {word.chineseGloss ? ` · ${word.chineseGloss}` : ""}
+          {` · ${vocabularyMeaning(word, explanationLocale)}`}
         </span>
         <Button
           size="sm"
@@ -196,10 +194,9 @@ function TrainingWord({
           disabled={busy}
           onClick={() => void bookmark()}
         >
-          收藏生词
-        </Button>
+          {t("收藏生词")}</Button>
       </div>
-      {!word.chineseGloss && glosses.length > 0 && (
+      {explanationLocale === "zh" && !word.chineseGloss && glosses.length > 0 && (
         <p className="mt-2 text-muted-foreground">
           {glosses
             .filter((g) => typeof g === "object" && g && "text" in g)
@@ -209,7 +206,7 @@ function TrainingWord({
       )}
       {message && (
         <p role="status" className="mt-1 text-xs">
-          {message}
+          {t(message)}
         </p>
       )}
     </div>
