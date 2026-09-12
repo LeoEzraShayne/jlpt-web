@@ -56,14 +56,14 @@ export interface Progress {
 }
 
 export interface GrammarExample {
-  localized?: LocalizedContent;
+  localized?: LocalizedContent | null;
   id: string;
   sentence: string;
   translation: string;
   sortOrder: number;
 }
 export interface GrammarPoint {
-  localized?: LocalizedContent;
+  localized?: LocalizedContent | null;
   id: string;
   level: JlptLevel;
   title: string;
@@ -76,7 +76,7 @@ export interface GrammarPoint {
   progress?: Progress[];
   relationMembers?: Array<{
     group: {
-      localized?: LocalizedContent;
+      localized?: LocalizedContent | null;
       id: string;
       title: string;
       notes: string;
@@ -326,10 +326,12 @@ export interface CompletionNotice {
 }
 
 export interface TrainingContext {
+  explanationLocale?: "zh" | "en";
+  instruction?: string;
   version?: "training-v1";
   instructionZh?: string;
   scenario?: {
-    localized?: LocalizedContent;
+    localized?: LocalizedContent | null;
     version: "scenario-v1"; id: string; scenarioId: string; taskId: string;
     objectiveId: string; domain: string; objective: string; register: string; promptZh: string;
   } | null;
