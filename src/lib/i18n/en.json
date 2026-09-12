@@ -11,6 +11,7 @@
   "有效期至": "Valid until",
   "语法与词汇合计每天 5 个任务，每个任务包含 3 次成功批改。": "5 grammar and vocabulary tasks combined per day, with 3 successful assessments per task.",
   "会员正常学习不限任务与批改次数，无隐藏每日上限。": "Unlimited tasks and assessments for normal member use, with no hidden daily limit.",
+  "当前尚未启用任务额度限制": "Task limits are not currently enabled.",
   "今日免费任务剩余 {0}/{1}": "Free tasks remaining today: {0}/{1}",
   "预留中": "Reserved",
   "奖励任务余额": "Reward tasks saved:",

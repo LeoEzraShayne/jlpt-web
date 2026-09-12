@@ -37,7 +37,25 @@ export function MembershipPage() {
   }
   return <div className="flex flex-col gap-6">
     <div className="flex flex-wrap items-center justify-between gap-3"><div><h1 className="text-2xl font-bold">{t("会员与额度")}</h1><p className="mt-2 text-sm text-muted-foreground">{t("一次购买，不自动续费。续购保留剩余时长。")}</p></div><Button asChild variant="outline"><Link href="/membership/orders">{t("订单记录")}</Link></Button></div>
-    {membership.isLoading ? <LoadingState /> : membership.error ? <ErrorState message={billingError(membership.error, t)} onRetry={() => void membership.mutate()} /> : membership.data && <Card><CardHeader><CardTitle>{t(membership.data.isMember ? "会员已生效" : "免费学习")}</CardTitle><CardDescription>{membership.data.isMember && membership.data.expiresAt ? `${t("有效期至")} ${date(membership.data.expiresAt)}` : t("语法与词汇合计每天 5 个任务，每个任务包含 3 次成功批改。")}</CardDescription></CardHeader><CardContent className="flex flex-col gap-2 text-sm">{membership.data.isMember ? <p>{t("会员正常学习不限任务与批改次数，无隐藏每日上限。")}</p> : <><p>{t(`今日免费任务剩余 ${membership.data.quota.remaining}/${membership.data.quota.dailyLimit}`)} · {t("预留中")} {membership.data.quota.reserved}</p><p>{t("奖励任务余额")} {membership.data.quota.rewardBalance}</p><p>{t("下次刷新")} {date(membership.data.quota.resetsAt)} ({membership.data.quota.timezone})</p></>}<p className="text-muted-foreground">{t("系统失败不计入成功批改；复习积压会保留。")}</p></CardContent></Card>}
+    {membership.isLoading ? <LoadingState /> : membership.error ? <ErrorState message={billingError(membership.error, t)} onRetry={() => void membership.mutate()} /> : membership.data && <Card>
+      <CardHeader>
+        <CardTitle>{t(membership.data.isMember ? "会员已生效" : "免费学习")}</CardTitle>
+        <CardDescription>
+          {membership.data.isMember && membership.data.expiresAt && <span className="block">{t("有效期至")} {date(membership.data.expiresAt)}</span>}
+          {membership.data.quota.enforcementEnabled === false
+            ? t("当前尚未启用任务额度限制")
+            : !membership.data.isMember && t("语法与词汇合计每天 5 个任务，每个任务包含 3 次成功批改。")}
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="flex flex-col gap-2 text-sm">
+        {membership.data.isMember ? <p>{t("会员正常学习不限任务与批改次数，无隐藏每日上限。")}</p> : membership.data.quota.enforcementEnabled !== false && <>
+          <p>{t(`今日免费任务剩余 ${membership.data.quota.remaining}/${membership.data.quota.dailyLimit}`)} · {t("预留中")} {membership.data.quota.reserved}</p>
+          <p>{t("奖励任务余额")} {membership.data.quota.rewardBalance}</p>
+          <p>{t("下次刷新")} {date(membership.data.quota.resetsAt)} ({membership.data.quota.timezone})</p>
+        </>}
+        <p className="text-muted-foreground">{t("系统失败不计入成功批改；复习积压会保留。")}</p>
+      </CardContent>
+    </Card>}
     {surface === "android" ? <Card><CardHeader><CardTitle>{t("Android 购买")}</CardTitle><CardDescription>{t("请使用应用内 Google Play 购买入口。已有会员在所有设备生效。")}</CardDescription></CardHeader></Card> : surface === "web" && <>
       <label className="flex items-center gap-3 text-sm">{t("购买市场")}<select aria-label={t("购买市场")} className="rounded-lg border bg-background p-2" value={market} disabled={!!pending} onChange={event => setMarket(event.target.value as BillingMarket)}><option value="GLOBAL">{t("全球 · 美元 USD")}</option><option value="JP">{t("日本 · 日元 JPY")}</option></select></label>
       <p className="text-xs text-muted-foreground">{t("币种由购买市场决定，切换语言不会改变价格。")}</p>
