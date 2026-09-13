@@ -48,6 +48,14 @@ test("phone lists stack while tablet grids preserve odd cards, actions, paginati
   await page.goto("/plans");
   const plan = page.getByLabel("N1 学习计划", { exact: true });
   const compactWidth = (await plan.boundingBox())!.width;
+  if (width >= 600 && width < 1024) {
+    const actions = await Promise.all(["调整计划", "暂停计划", "计划预估"].map(name =>
+      plan.getByRole("button", { name, exact: true }).boundingBox()));
+    expect(actions[1]!.y).toBe(actions[0]!.y);
+    expect(actions[2]!.y).toBe(actions[0]!.y);
+    expect(actions[1]!.x).toBeGreaterThanOrEqual(actions[0]!.x + actions[0]!.width);
+    expect(actions[2]!.x).toBeGreaterThanOrEqual(actions[1]!.x + actions[1]!.width);
+  }
   const nextPlan = (await page.getByLabel("N2 学习计划", { exact: true }).boundingBox())!;
   const firstPlan = (await plan.boundingBox())!;
   if (width < 600) {

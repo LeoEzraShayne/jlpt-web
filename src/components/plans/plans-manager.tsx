@@ -299,7 +299,7 @@ function LevelPlan({
           </form>
         )}
         {!editing && (
-          <div className="flex flex-col gap-2 lg:flex-row lg:flex-wrap">
+          <div className="flex flex-col gap-2 min-[37.5rem]:max-lg:grid min-[37.5rem]:max-lg:grid-cols-3 min-[37.5rem]:max-lg:[&>button]:min-w-0 lg:flex-row lg:flex-wrap">
             <Button onClick={() => setEditing(true)}>
               {t(plan ? "调整计划" : `建立 ${level} 计划`)}
             </Button>
