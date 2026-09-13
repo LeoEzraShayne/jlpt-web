@@ -9,7 +9,7 @@ import { useSWRConfig } from "swr";
 import { useMe } from "@/hooks/use-api";
 import { apiRequest } from "@/lib/api/client";
 import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { ThemePicker } from "@/components/theme/theme-picker";
 import { PlansManager } from "@/components/plans/plans-manager";
 import { setAdultAccessConfirmed } from "@/lib/adult-access";
@@ -51,12 +51,16 @@ export function ProfileSettings() {
       {error && <p role="alert">{t(error)}</p>}
       <PlansManager settingsCard={
         <Card className="min-w-0">
-          <CardHeader><CardTitle>{t("语言与会员")}</CardTitle></CardHeader>
-          <CardContent className="flex flex-1 flex-col gap-5 [&_select]:h-5 [&_select]:py-0">
-            <LanguagePicker explanations />
-            <Button asChild variant="outline" className="mt-auto w-full">
-              <Link href="/membership">{t("会员与额度")}</Link>
-            </Button>
+          <CardHeader>
+            <CardTitle>{t("语言与会员")}</CardTitle>
+            <CardDescription>{t("讲解语言用于新练习，已有练习和历史保持原来的语言。")}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <LanguagePicker explanations showExplanationHint={false} explanationAction={
+              <Button asChild size="sm" className="shrink-0 rounded-full">
+                <Link href="/membership">{t("会员与额度")}</Link>
+              </Button>
+            } />
           </CardContent>
         </Card>
       } />
