@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useSyncExternalStore } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { useLocale } from "@/components/locale/locale-provider";
 import { LanguagePicker } from "@/components/locale/language-picker";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,8 @@ export function AdultAccessBoundary({ children }: { children: React.ReactNode })
   const { t } = useLocale();
   const accepted = useSyncExternalStore(subscribeAdultAccess, adultAccessConfirmed, () => false);
   const [checked, setChecked] = useState(false);
+  // Migrate an existing explicit tab acknowledgement; never infer it from login or membership.
+  useEffect(() => { if (accepted && adultAccessConfirmed()) setAdultAccessConfirmed(true); }, [accepted]);
   if (accepted) return children;
   return (
     <main className="grid min-h-[80vh] place-items-center bg-background px-4 py-10">

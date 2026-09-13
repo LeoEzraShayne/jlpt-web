@@ -834,7 +834,7 @@
   "本服务仅限年满 18 周岁的用户。登录与学习数据的处理方式见隐私说明。": "This service is for users aged 18 and over. See the privacy notice for how sign-in and learning data are processed.",
   "使用年龄": "Age requirement",
   "日语造句实验室仅面向年满 18 周岁的成年人；未成年人请勿登录或使用学习与 AI 功能。": "JLPT Sentence Lab is for adults aged 18 and over. Minors must not sign in or use its learning and AI features.",
-  "进入登录或学习页面前，浏览器会请求你确认已满 18 周岁；此确认在当前标签页的会话存储中保存，退出登录时清除，不是 Google 提供的年龄验证结果。": "Before entering sign-in or learning pages, your browser asks you to confirm that you are at least 18. This acknowledgement is saved in the current tab’s session storage and cleared when you sign out. It is not an age verification result from Google.",
+  "进入登录或学习页面前，你需要确认已满 18 周岁；此确认保存在当前浏览器的本地存储中，重开应用时可复用，退出登录时清除，不是 Google 提供的年龄验证结果。": "Before entering sign-in or learning pages, you must confirm that you are at least 18. This acknowledgement is saved in this browser’s local storage, remembered when you reopen the app, and cleared when you sign out. It is not an age verification result from Google.",
   "本日语学习服务仅面向年满 18 周岁的用户。": "This Japanese learning service is for users aged 18 and over.",
   "返回首页": "Back to home"
 }
