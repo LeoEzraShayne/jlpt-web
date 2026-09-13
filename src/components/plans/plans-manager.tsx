@@ -303,7 +303,7 @@ function LevelPlan({
           </form>
         )}
         {!editing && (
-          <div className="flex flex-col gap-2 min-[37.5rem]:max-lg:grid min-[37.5rem]:max-lg:grid-cols-3 min-[37.5rem]:max-lg:[&>button]:min-w-0 lg:flex-row lg:flex-wrap">
+          <div className="flex flex-col gap-2 min-[37.5rem]:grid min-[37.5rem]:grid-cols-3 min-[37.5rem]:[&>button]:min-w-0 lg:gap-1 lg:[&>button]:px-1 lg:[&>button]:whitespace-normal lg:[&>button]:[overflow-wrap:anywhere]">
             <Button onClick={() => setEditing(true)}>
               {t(plan ? "调整计划" : `建立 ${level} 计划`)}
             </Button>
