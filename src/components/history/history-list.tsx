@@ -50,7 +50,7 @@ export function HistoryList() {
       />
       {items.length ? (
         <div
-          className="grid min-w-0 items-stretch grid-cols-1 gap-3 min-[37.5rem]:grid-cols-2 lg:gap-4 2xl:grid-cols-3"
+          className="grid min-w-0 items-stretch grid-cols-1 gap-3 min-[37.5rem]:grid-cols-2 lg:gap-4 xl:grid-cols-3"
           aria-label={t("学习记录列表")}
         >
           {items.map((attempt) => (

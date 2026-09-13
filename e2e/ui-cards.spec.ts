@@ -12,8 +12,8 @@ test("phone lists stack while tablet grids preserve odd cards, actions, paginati
   const width = page.viewportSize()!.width;
   for (const [path, label, desktopColumns] of [
     ["/grammar", "语法卡片列表", width >= 1280 ? 3 : 2],
-    ["/history", "学习记录列表", width >= 1536 ? 3 : 2],
-    ["/review", "已逾期复习列表", width >= 1536 ? 3 : 2],
+    ["/history", "学习记录列表", width >= 1280 ? 3 : 2],
+    ["/review", "已逾期复习列表", width >= 1280 ? 3 : 2],
     ["/today", "先完成复习任务列表", width >= 1280 ? 3 : 2],
   ] as const) {
     await page.goto(path);
