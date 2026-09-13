@@ -76,26 +76,28 @@ export function ReviewQueue() {
       <label className="mb-5 block text-sm">{t("级别筛选")}<select aria-label={t("复习级别")} className="ml-3 rounded-lg border bg-background p-2" value={level} onChange={event => setLevel(event.target.value)}><option value="">{t("全部启用计划")}</option>{["N1", "N2", "N3", "N4"].map(value => <option key={value}>{value}</option>)}</select></label>
       {priority && (
         <Card className="mb-7 border-primary/40 warm-shadow">
-          <CardContent className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <CardContent className="flex flex-col gap-4">
             <div className="min-w-0">
               <p className="text-sm font-semibold text-primary">{t("最优先复习")}</p>
               <h2 className="mt-1 break-words text-xl font-bold">
                 {explanationLocale === "en" ? priority.progress.grammar.displayTitle ?? priority.progress.grammar.title : priority.progress.grammar.title}
               </h2>
-              <p className="mt-1 text-sm text-muted-foreground">
+            </div>
+            <div className="flex items-center justify-between gap-2">
+              <p className="min-w-0 text-xs text-muted-foreground sm:text-sm">
                 {priority.overdueDays > 0
                   ? t(`逾期 ${priority.overdueDays} 天`)
                   : t("今天到期")}
                 {t(` · 预计 ${priority.estimatedMinutes} 分钟`)}
               </p>
+              <StartStudyButton
+                className="shrink-0"
+                buttonClassName="h-auto rounded-full px-2 py-1 text-xs sm:px-3 sm:text-sm sm:min-w-36"
+                grammarId={priority.progress.grammar.id}
+                mode="REVIEW"
+                label={t("开始最优先复习")}
+              />
             </div>
-            <StartStudyButton
-              className="w-full shrink-0 sm:w-auto"
-              buttonClassName="h-auto rounded-full py-1 sm:min-w-36"
-              grammarId={priority.progress.grammar.id}
-              mode="REVIEW"
-              label={t("开始最优先复习")}
-            />
           </CardContent>
         </Card>
       )}
