@@ -124,7 +124,8 @@ function AllocationDetails({ levels }: Pick<Dashboard, "levels">) {
 
 interface StatItem {
   label: string;
-  value: number | string;
+  value: ReactNode;
+  labelContent?: ReactNode;
   detail?: string;
   hint?: string;
   color?: string;
@@ -181,7 +182,7 @@ export function StatsCard({
             <div key={t(item.label)} className={cn("min-w-0 border-t border-border/60 pt-2", completedLayout && (index < 3 ? "col-span-2" : "col-span-3"))}>
               <dt className="flex items-center gap-1.5 text-xs leading-5 text-muted-foreground sm:text-sm">
                 {item.color && <span aria-hidden="true" className={`size-1.5 shrink-0 rounded-full ${item.color}`} />}
-                {item.hint ? <StatHint label={t(item.label)} hint={t(item.hint)} /> : t(item.label)}
+                {item.hint ? <StatHint label={t(item.label)} hint={t(item.hint)} /> : item.labelContent ?? t(item.label)}
               </dt>
               <dd className="mt-1 text-2xl font-semibold tracking-tight tabular-nums">{item.value}</dd>
               {item.detail && <p className="mt-1 text-xs leading-5 text-muted-foreground">{t(item.detail)}</p>}
