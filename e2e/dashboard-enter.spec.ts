@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Page } from "./adult-fixture";
 
 async function mockDashboard(page: Page, state: "ready" | "empty" | "locked" = "ready") {
   const started: unknown[] = [];

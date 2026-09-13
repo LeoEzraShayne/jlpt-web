@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Page } from "./adult-fixture";
 
 async function mockStudy(page: Page, rememberedAllowed = true, score = 100) {
   const completions: unknown[] = [];

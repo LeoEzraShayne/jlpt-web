@@ -17,8 +17,13 @@ import { ThemePicker } from "@/components/theme/theme-picker";
 import { authUrl } from "@/lib/api/client";
 import { usePlans, useMe } from "@/hooks/use-api";
 import { androidBindingPath, consumeAndroidLogin, rememberAndroidLogin } from "@/lib/android-commerce";
+import { AdultAccessBoundary } from "./adult-access-boundary";
 
 export function LoginView() {
+  return <AdultAccessBoundary><LoginContent /></AdultAccessBoundary>;
+}
+
+function LoginContent() {
   useLocale();
   const router = useRouter();
   const params = useSearchParams();
@@ -102,7 +107,8 @@ export function LoginView() {
               {t("登录未完成，请重新尝试。")}</p>
           )}
           <p className="mt-6 text-center text-xs leading-5 text-muted-foreground">
-            {t("登录即表示你同意仅将账号用于保存学习进度。我们不会在浏览器中保存 OAuth Token。")}</p>
+            {t("本服务仅限年满 18 周岁的用户。登录与学习数据的处理方式见隐私说明。")}{" "}
+            <a href="/privacy" className="underline underline-offset-4">{t("隐私说明")}</a></p>
         </section>
       </div>
     </main>

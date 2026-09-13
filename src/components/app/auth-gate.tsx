@@ -8,8 +8,13 @@ import { ApiError } from "@/lib/api/client";
 import { LoadingState } from "@/components/shared/loading-state";
 import { ErrorState } from "@/components/shared/error-state";
 import { useColorTheme } from "@/components/theme/theme-provider";
+import { AdultAccessBoundary } from "@/components/auth/adult-access-boundary";
 
 export function AuthGate({ children, requirePlan = true }: { children: React.ReactNode; requirePlan?: boolean }) {
+  return <AdultAccessBoundary><AuthenticatedContent requirePlan={requirePlan}>{children}</AuthenticatedContent></AdultAccessBoundary>;
+}
+
+function AuthenticatedContent({ children, requirePlan }: { children: React.ReactNode; requirePlan: boolean }) {
   useLocale();
   const router = useRouter();
   const pathname = usePathname();

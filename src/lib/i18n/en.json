@@ -826,5 +826,15 @@
   "Gemini 服务条款": "Gemini terms of service",
   "DeepSeek 开放平台条款": "DeepSeek Open Platform terms",
   "Google 隐私政策": "Google privacy policy",
-  "旧功过格隐私政策": "Legacy Merit Ledger privacy policy"
+  "旧功过格隐私政策": "Legacy Merit Ledger privacy policy",
+  "仅限年满 18 周岁的用户": "For users aged 18 and over",
+  "本日语学习服务仅面向成年人。未满 18 周岁请勿登录或使用学习与 AI 功能。": "This Japanese learning service is for adults only. If you are under 18, do not sign in or use its learning and AI features.",
+  "我确认已年满 18 周岁，并已阅读隐私说明。": "I confirm that I am at least 18 years old and have read the privacy notice.",
+  "确认并继续": "Confirm and continue",
+  "本服务仅限年满 18 周岁的用户。登录与学习数据的处理方式见隐私说明。": "This service is for users aged 18 and over. See the privacy notice for how sign-in and learning data are processed.",
+  "使用年龄": "Age requirement",
+  "日语造句实验室仅面向年满 18 周岁的成年人；未成年人请勿登录或使用学习与 AI 功能。": "JLPT Sentence Lab is for adults aged 18 and over. Minors must not sign in or use its learning and AI features.",
+  "进入登录或学习页面前，浏览器会请求你确认已满 18 周岁；此确认在当前标签页的会话存储中保存，退出登录时清除，不是 Google 提供的年龄验证结果。": "Before entering sign-in or learning pages, your browser asks you to confirm that you are at least 18. This acknowledgement is saved in the current tab’s session storage and cleared when you sign out. It is not an age verification result from Google.",
+  "本日语学习服务仅面向年满 18 周岁的用户。": "This Japanese learning service is for users aged 18 and over.",
+  "返回首页": "Back to home"
 }

@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Page } from "./adult-fixture";
 import { expectNoHorizontalOverflow } from "./layout";
 const user = {
   id: "u1",
@@ -94,6 +94,7 @@ async function mockAuthenticatedApi(
     let data: unknown = {};
     let meta: unknown;
     if (path.endsWith("/me")) data = user;
+    else if (path.endsWith("/me/entitlements")) data = { isMember: false, expiresAt: null, salesEnabled: false, quota: { enforcementEnabled: false, dailyLimit: 5, consumed: 0, reserved: 0, remaining: 5, rewardBalance: 0, resetsAt: "2026-09-14T00:00:00Z", timezone: "Asia/Tokyo" } };
     else if (path.endsWith("/study-plans")) data = method === "POST" ? plan : { items: overrides.onboardingWithoutPlan && new URL(page.url()).pathname === "/onboarding" ? [] : [plan], nextCursor: null };
     else if (/\/study-plans\/[^/]+\/forecast$/.test(path)) { data = []; meta = { algorithmVersion: "adaptive-v1", isEstimate: true, assumption: "REMEMBERED", projectedCompletionDate: "2026-09-30", targetDate: "2026-12-06", remainingNewAfterHorizon: 39, planAtRisk: false }; }
     else if (path.endsWith("/study-plans/current")) {

@@ -1,4 +1,4 @@
-import { test, expect, type Page } from '@playwright/test';
+import { test, expect, type Page } from '../adult-fixture';
 import { execFileSync } from 'node:child_process';
 import { resolve } from 'node:path';
 test.skip(!process.env.REAL_API_DIR, 'Run through scripts/real-stack/run.mjs');

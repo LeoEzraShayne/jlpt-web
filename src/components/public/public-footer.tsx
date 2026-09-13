@@ -8,7 +8,8 @@ export function PublicFooter() {
   return (
     <footer className="border-t bg-card">
       <div className="mx-auto flex max-w-[76rem] flex-col gap-4 px-4 py-8 text-sm text-muted-foreground sm:px-6 md:flex-row md:items-center md:justify-between lg:px-8">
-        <p>{t("JLPT Sentence Lab — 提供中英文体验的 JLPT N1～N4 日语语法学习工具。")}</p>
+        <div className="space-y-2"><p>{t("JLPT Sentence Lab — 提供中英文体验的 JLPT N1～N4 日语语法学习工具。")}</p>
+          <p>{t("本日语学习服务仅面向年满 18 周岁的用户。")}</p></div>
         <nav className="flex flex-wrap gap-x-5 gap-y-2" aria-label={t("页脚导航")}>
           <Link href="/about" className="hover:text-foreground">{t("关于与联系")}</Link>
           <Link href="/privacy" className="hover:text-foreground">{t("隐私说明")}</Link>

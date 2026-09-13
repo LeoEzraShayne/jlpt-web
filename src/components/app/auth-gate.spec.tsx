@@ -1,3 +1,4 @@
+import { ADULT_ACCESS_KEY } from "@/lib/adult-access";
 import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AuthGate } from "./auth-gate";
@@ -6,7 +7,7 @@ const state = vi.hoisted(() => ({ path: "/membership", me: { data: { id: "u1" },
 vi.mock("next/navigation", () => ({ usePathname: () => state.path, useRouter: () => ({ replace: state.replace }) }));
 vi.mock("@/hooks/use-api", () => ({ useMe: () => state.me, usePlans: (enabled: boolean) => { state.usePlans(enabled); return state.plan; } }));
 vi.mock("@/components/theme/theme-provider", () => ({ useColorTheme: () => ({ setTheme: state.setTheme }) }));
-beforeEach(() => { vi.clearAllMocks(); state.me.error = null; });
+beforeEach(() => { sessionStorage.setItem(ADULT_ACCESS_KEY, "confirmed"); vi.clearAllMocks(); state.me.error = null; });
 afterEach(cleanup);
 describe("billing access before onboarding", () => {
   it.each(["/membership", "/membership/orders", "/membership/return"])("allows signed-in users without plans on %s", path => {

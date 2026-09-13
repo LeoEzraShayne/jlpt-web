@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './adult-fixture';
 import { expectNoHorizontalOverflow } from './layout';
 test('Chinese vocabulary shares grammar grid, with notes, provenance and level filtering', async ({ page }, info) => {
  const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));

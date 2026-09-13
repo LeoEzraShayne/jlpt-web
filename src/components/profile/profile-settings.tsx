@@ -11,6 +11,7 @@ import { apiRequest } from "@/lib/api/client";
 import { Button } from "@/components/ui/button";
 import { ThemePicker } from "@/components/theme/theme-picker";
 import { PlansManager } from "@/components/plans/plans-manager";
+import { setAdultAccessConfirmed } from "@/lib/adult-access";
 
 export function ProfileSettings() {
   useLocale();
@@ -21,6 +22,7 @@ export function ProfileSettings() {
   async function logout() {
     try {
       await apiRequest("/auth/logout", { method: "POST" });
+      setAdultAccessConfirmed(false);
       for (const key of Array.from(cache.keys())) cache.delete(key);
       router.replace("/login");
     } catch {

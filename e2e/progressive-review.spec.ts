@@ -1,4 +1,4 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Page } from './adult-fixture';
 import { expectNoHorizontalOverflow } from './layout';
 
 async function mock(page: Page) {

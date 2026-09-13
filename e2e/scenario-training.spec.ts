@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./adult-fixture";
 import { expectNoHorizontalOverflow } from "./layout";
 
 test("review hides personal references, reveals explicitly, and saves checked AI variants", async ({

@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./adult-fixture";
 import { expectNoHorizontalOverflow } from "./layout";
 
 test("all tasks stay in the grid, completed tasks disappear, and the final task starts correctly", async ({ page }) => {

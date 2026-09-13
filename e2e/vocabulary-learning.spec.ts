@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./adult-fixture";
 import { expectNoHorizontalOverflow } from "./layout";
 import { mockVocabularyLearning } from "./vocabulary-learning-mock";
 

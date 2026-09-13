@@ -1,3 +1,4 @@
+import { ADULT_ACCESS_KEY } from "@/lib/adult-access";
 import { act, cleanup, render, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { rememberAndroidLogin } from "@/lib/android-commerce";
@@ -10,7 +11,7 @@ vi.mock("@/hooks/use-api", () => ({ useMe: () => ({ data: { id: "qa" } }), usePl
 vi.mock("@/components/locale/language-picker", () => ({ LanguagePicker: () => null }));
 vi.mock("@/components/theme/theme-picker", () => ({ ThemePicker: () => null }));
 const path = "/android/link?bindingId=aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee";
-beforeEach(() => { sessionStorage.clear(); vi.clearAllMocks(); state.query = "login=success"; act(() => setLocale("zh")); });
+beforeEach(() => { sessionStorage.clear(); sessionStorage.setItem(ADULT_ACCESS_KEY, "confirmed"); vi.clearAllMocks(); state.query = "login=success"; act(() => setLocale("zh")); });
 afterEach(cleanup);
 it("returns from the actual /login?login=success OAuth landing before onboarding can win", async () => {
   rememberAndroidLogin(path);
