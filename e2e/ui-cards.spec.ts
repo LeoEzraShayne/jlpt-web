@@ -70,17 +70,16 @@ test("phone lists stack while tablet grids preserve odd cards, actions, paginati
     }
     if (path === "/today" && width >= 1024) {
       const overview = page.getByLabel("今日学习概览", { exact: true });
-      const labels = ["最优先复习", "今日词汇", "今日剩余", "今日完成", "复习总账", "N1 总体进度"];
+      const labels = ["最优先复习", "今日词汇", "今日完成", "今日剩余", "复习总账", "N1 总体进度"];
       const boxes = await Promise.all(labels.map(label => overview.getByLabel(label, { exact: true }).boundingBox()));
-      expect(boxes[1]!.y).toBe(boxes[0]!.y);
-      expect(boxes[1]!.x).toBeGreaterThan(boxes[0]!.x + boxes[0]!.width);
-      expect(boxes[2]!.y).toBeGreaterThan(boxes[0]!.y + boxes[0]!.height);
-      const statsColumns = width >= 1280 ? 4 : 2;
-      for (let i = 2; i < boxes.length; i++) {
-        expect(boxes[i]!.height).toBe(boxes[2]!.height);
-        const rowStart = 2 + Math.floor((i - 2) / statsColumns) * statsColumns;
-        expect(boxes[i]!.y).toBe(boxes[rowStart]!.y);
+      for (const row of [0, 3]) {
+        for (let i = row + 1; i < row + 3; i++) {
+          expect(boxes[i]!.y).toBe(boxes[row]!.y);
+          expect(boxes[i]!.height).toBe(boxes[row]!.height);
+          expect(boxes[i]!.x).toBeGreaterThan(boxes[i - 1]!.x + boxes[i - 1]!.width);
+        }
       }
+      expect(boxes[3]!.y).toBeGreaterThan(boxes[0]!.y + boxes[0]!.height);
       await expect(overview.getByRole("link", { name: "学习清单", exact: true })).toHaveAttribute("href", "/vocabulary-learning");
     }
     if (path === "/today" && width < 1024) {

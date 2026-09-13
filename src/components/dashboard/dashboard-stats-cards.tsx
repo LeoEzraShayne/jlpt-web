@@ -32,30 +32,9 @@ export function DashboardStatsCards({
 }: DashboardStatsCardsProps) {
   useLocale();
   return (
-    <section aria-label={t("今日学习概览")} className="grid min-w-0 gap-4">
-      {(recommendedTask || vocabularyCard) && <div className={cn("grid min-w-0 gap-4", recommendedTask && vocabularyCard && "min-[37.5rem]:grid-cols-2")}>
-        {recommendedTask && <div className="min-w-0">{recommendedTask}</div>}
-        {vocabularyCard}
-      </div>}
-      <div className="grid min-w-0 gap-4 min-[37.5rem]:auto-rows-fr min-[37.5rem]:grid-cols-2 xl:grid-cols-4 [&:has(details[open])]:auto-rows-auto [&:has(details[open])]:items-start">
-      <StatsCard
-        title={t("今日剩余")}
-        mobileTwoColumns
-        icon={BookOpen}
-        columns={2}
-        items={[
-          { label: "待开始复习", value: stats.pendingReview },
-          { label: "待开始新语法", value: stats.pendingNew },
-          {
-            label: "进行中",
-            value: stats.inProgressReview + stats.inProgressNew,
-            detail: `复习 ${stats.inProgressReview} · 新学 ${stats.inProgressNew}`,
-          },
-          { label: "剩余任务用时", value: minutes(estimatedMinutes) },
-        ]}
-      >
-        <AllocationDetails levels={levels} />
-      </StatsCard>
+    <section aria-label={t("今日学习概览")} className="grid min-w-0 gap-4 min-[37.5rem]:grid-cols-2 lg:grid-cols-3 [&:has(details[open])]:items-start">
+      {recommendedTask && <div className="min-w-0">{recommendedTask}</div>}
+      {vocabularyCard}
       <StatsCard
         title={t("今日完成")}
         icon={CheckCircle2}
@@ -76,6 +55,24 @@ export function DashboardStatsCards({
           },
         ]}
       />
+      <StatsCard
+        title={t("今日剩余")}
+        mobileTwoColumns
+        icon={BookOpen}
+        columns={2}
+        items={[
+          { label: "待开始复习", value: stats.pendingReview },
+          { label: "待开始新语法", value: stats.pendingNew },
+          {
+            label: "进行中",
+            value: stats.inProgressReview + stats.inProgressNew,
+            detail: `复习 ${stats.inProgressReview} · 新学 ${stats.inProgressNew}`,
+          },
+          { label: "剩余任务用时", value: minutes(estimatedMinutes) },
+        ]}
+      >
+        <AllocationDetails levels={levels} />
+      </StatsCard>
       <StatsCard
         title={t("复习总账")}
         icon={RefreshCcw}
@@ -105,7 +102,6 @@ export function DashboardStatsCards({
           { label: "尚未学习", value: stats.progress.notStarted, color: "bg-muted-foreground/25" },
         ]}
       />
-      </div>
     </section>
   );
 }
