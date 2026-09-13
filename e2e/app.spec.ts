@@ -254,7 +254,7 @@ test("today task opens the focused study flow and enforces score 59 revision", a
   await expect(page.getByText("待开始新语法").locator("..")).toContainText("1");
   await expect(page.getByText("尚未学习").locator("..")).toContainText("40");
   await expect(page.getByText("未掌握", { exact: true })).toHaveCount(0);
-  const estimateBox = await page.getByText("预计 8 分钟", { exact: true }).last().boundingBox();
+  const estimateBox = await page.getByText(/^预计\s*8\s*分钟$/).last().boundingBox();
   const actionBox = await page.getByRole("button", { name: "开始学习" }).last().boundingBox();
   expect(estimateBox).not.toBeNull();
   expect(actionBox).not.toBeNull();
