@@ -34,9 +34,24 @@ test("phone lists stack while tablet grids preserve odd cards, actions, paginati
         expect(third.x).toBe(first.x);
         expect(third.y).toBeGreaterThan(first.y);
       }
-      for (const action of await grid.locator('button, a[data-slot="button"]').all()) {
-        expect((await action.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+      for (const action of await grid.locator('[data-slot="card"] button, [data-slot="card"] a[data-slot="button"]').all()) {
+        expect((await action.boundingBox())!.height).toBe(32);
       }
+    }
+    if (path === "/grammar") {
+      for (const button of await page.getByLabel("JLPT 等级", { exact: true }).getByRole("button").all()) {
+        const name = (await button.locator("strong").boundingBox())!;
+        const count = (await button.locator("span").boundingBox())!;
+        expect(count.x).toBeGreaterThan(name.x);
+        expect(Math.abs(count.y + count.height / 2 - name.y - name.height / 2)).toBeLessThan(1);
+      }
+    }
+    if (path === "/review") expect((await page.getByRole("button", { name: "开始最优先复习", exact: true }).boundingBox())!.height).toBe(32);
+    if (path === "/today") {
+      const overview = page.getByLabel("今日学习概览", { exact: true });
+      expect((await overview.getByRole("button", { name: "开始复习", exact: true }).boundingBox())!.height).toBe(32);
+      expect((await overview.getByRole("button", { name: "开始词汇练习", exact: true }).boundingBox())!.height).toBe(32);
+      await expect(overview.getByLabel("今日剩余", { exact: true }).getByText("102分", { exact: true })).toBeVisible();
     }
     if (path === "/grammar" || path === "/history") {
       if (path === "/grammar") {
@@ -125,9 +140,10 @@ test("phone lists stack while tablet grids preserve odd cards, actions, paginati
       expect(cards[i]!.x).toBeGreaterThan(cards[i - 1]!.x + cards[i - 1]!.width);
     }
   }
-  if (width >= 600) {
+  {
     const actions = await Promise.all(["调整计划", "暂停计划", "计划预估"].map(name =>
       plan.getByRole("button", { name, exact: true }).boundingBox()));
+    if (width < 1024) for (const action of actions) expect(action!.height).toBe(32);
     expect(actions[1]!.y).toBe(actions[0]!.y);
     expect(actions[2]!.y).toBe(actions[0]!.y);
     expect(actions[1]!.x).toBeGreaterThanOrEqual(actions[0]!.x + actions[0]!.width);

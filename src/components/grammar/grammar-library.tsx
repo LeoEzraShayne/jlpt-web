@@ -168,7 +168,7 @@ export function GrammarLibrary() {
                   action={
                     <Button
                       asChild size="sm" variant={progress ? "outline" : "default"}
-                      className="h-auto min-w-0 max-w-[50%] rounded-full px-3 py-1.5 whitespace-normal max-lg:min-h-11 lg:text-xs"
+                      className="h-auto min-h-8 min-w-0 max-w-[50%] rounded-full px-3 py-1 whitespace-normal lg:text-xs"
                     >
                       <Link href={`/grammar/${item.id}`}>{t(progress ? "查看并练习" : "开始学习")}</Link>
                     </Button>

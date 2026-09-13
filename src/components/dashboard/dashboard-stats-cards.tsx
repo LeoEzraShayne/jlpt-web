@@ -30,7 +30,7 @@ export function DashboardStatsCards({
   allocation,
   levels,
 }: DashboardStatsCardsProps) {
-  useLocale();
+  const { locale } = useLocale();
   return (
     <section aria-label={t("今日学习概览")} className="grid min-w-0 gap-4 min-[37.5rem]:grid-cols-2 lg:grid-cols-3 [&:has(details[open])]:items-start">
       {recommendedTask && <div className="min-w-0">{recommendedTask}</div>}
@@ -68,7 +68,7 @@ export function DashboardStatsCards({
           },
           { label: "进行中复习", value: stats.inProgressReview },
           { label: "进行中新学", value: stats.inProgressNew },
-          { label: "剩余任务用时", value: minutes(estimatedMinutes) },
+          { label: "剩余任务用时", value: locale === "zh" ? `${Number(estimatedMinutes.toFixed(1))}分` : minutes(estimatedMinutes) },
         ]}
       >
         <AllocationDetails levels={levels} />

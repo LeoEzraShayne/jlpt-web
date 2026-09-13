@@ -63,7 +63,7 @@ export function HistoryList() {
               )}
               action={
                 <Button asChild variant="outline" size="sm"
-                  className="ml-auto h-auto min-w-0 max-w-[60%] rounded-full px-3 whitespace-normal max-lg:min-h-11">
+                  className="ml-auto h-auto min-h-8 min-w-0 max-w-[60%] rounded-full px-3 py-1 whitespace-normal">
                   <Link href={`/history/${attempt.id}`}><RotateCcw />{t("查看详情")}</Link>
                 </Button>
               }

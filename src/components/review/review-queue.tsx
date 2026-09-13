@@ -91,7 +91,7 @@ export function ReviewQueue() {
             </div>
             <StartStudyButton
               className="w-full shrink-0 sm:w-auto"
-              buttonClassName="sm:min-w-36"
+              buttonClassName="h-auto rounded-full py-1 sm:min-w-36"
               grammarId={priority.progress.grammar.id}
               mode="REVIEW"
               label={t("开始最优先复习")}
@@ -196,7 +196,7 @@ function Group({
             action={
               <StartStudyButton
                 className="ml-auto min-w-0 max-w-[60%]"
-                buttonClassName="h-auto w-auto max-w-full whitespace-normal rounded-full px-3"
+                buttonClassName="h-auto w-auto max-w-full whitespace-normal rounded-full px-3 py-1"
                 grammarId={item.progress.grammar.id}
                 mode="REVIEW" label={t("开始复习")} variant="outline"
               />

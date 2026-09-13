@@ -27,7 +27,7 @@ export function LevelSelector({
         disabled={pending && !allowPending}
         aria-pressed={value === item.level}
         onClick={() => onChange(item.level)}
-        className="h-auto min-h-12 flex-col gap-0.5 py-2 lg:flex-row lg:gap-3"
+        className="h-auto min-h-8 flex-row gap-3 py-1"
       >
         <strong>{item.level}</strong>
         <span className="font-normal opacity-75">{t(pending ? "待补充" : `${item.grammarCount} 条`)}</span>

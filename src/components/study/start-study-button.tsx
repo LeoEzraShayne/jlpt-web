@@ -78,7 +78,7 @@ export function StartStudyButton({
         onClick={start}
         disabled={pending || disabled}
         variant={variant}
-        className={cn("w-full max-lg:min-h-11", buttonClassName)}
+        className={cn("w-full max-lg:min-h-8 max-lg:rounded-full", buttonClassName)}
       >
         {pending ? <LoaderCircle className="animate-spin" /> : <Play />}
         {t(label)}
