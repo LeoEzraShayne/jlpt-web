@@ -64,4 +64,4 @@ Google OAuth 目前仅请求 `email` / `profile`，没有年龄结果。Play 的
 
 实测结果：`npm run build`、`npm run lint`、`npm run typecheck`、`npm test`（20 文件 / 94 项）、`npm run check:lines`（170 文件）与 `git diff --check` 通过。专用 18+ 浏览器测试在 desktop 和 mobile-320 均通过；截图已目视确认无横向溢出，测试捕获的页面及 console 错误为空。
 
-额外抽跑旧 `app.spec.ts` 的 `today task opens the focused study flow and enforces score 59 revision`：补齐其既有 `/me/entitlements` mock，并将 `预计 8 分钟` 改为仍严格验证 8 分钟的空白容忍正则后，两种 viewport 均走过 59 分反馈、必须修改、修正句及读音检查。随后第 280 行期待修改时输入框清空，但实际保留原句；现有 `StudyWorkspace.revise()` 在本次修改前就没有清空句子。此处尚需核对既有业务预期，不以修改断言掩盖语义差异。未运行全部 E2E 或真实 Google 登录，不能报告全套端到端通过。
+额外抽跑旧 `app.spec.ts` 的 `today task opens the focused study flow and enforces score 59 revision`，最终 desktop / mobile-320 均通过。修正两项旧 fixture/断言：补齐既有 `/me/entitlements` mock；`预计 8 分钟` 使用仍严格验证 8 分钟的空白容忍正则。经根执行代理确认，修改时保留原句符合既有预期，回归改为验证保留原句 → 用户手动清空后禁用提交 → 写入修正句后启用；未更改产品行为。连同专用年龄确认测试，共 4 项浏览器检查通过。未运行全部 E2E 或真实 Google 登录，不能报告全套端到端或审核账号已通过。

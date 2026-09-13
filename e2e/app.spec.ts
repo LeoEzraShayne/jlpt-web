@@ -277,7 +277,8 @@ test("today task opens the focused study flow and enforces score 59 revision", a
   await page.getByRole("button", { name: "修改后重新提交" }).click();
   await expect(page.getByText("上次 AI 修改后的句子", { exact: true })).toBeVisible();
   await expect(page.locator("ruby rt")).toHaveText(["いのち", "もんだい"]);
-  await expect(page.getByPlaceholder(/请使用/)).toHaveValue("");
+  await expect(page.getByPlaceholder(/请使用/)).toHaveValue("これは問題にかかわる。");
+  await page.getByPlaceholder(/请使用/).fill("");
   await expect(page.getByRole("button", { name: /提交给 AI/ })).toBeDisabled();
   await page.getByPlaceholder(/请使用/).fill("これは命にかかわる大事な問題です。");
   await expect(page.getByRole("button", { name: /提交给 AI/ })).toBeEnabled();
