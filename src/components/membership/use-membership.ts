@@ -3,16 +3,13 @@ import useSWR from "swr";
 import { useEffect, useState } from "react";
 import { ApiError, apiFetcher } from "@/lib/api/client";
 import type { MembershipSummary } from "@/lib/api/sentence-lab";
+import { androidClient } from "@/lib/android-commerce";
 export const useMembership = () => useSWR<MembershipSummary>("/me/entitlements", apiFetcher, { shouldRetryOnError: false });
 // This hint only hides web payment UI; it grants no native/account trust.
-// The verified native bridge replaces this hint in the Android integration stage.
 export function usePaymentSurface() {
   const [surface, setSurface] = useState<"loading" | "web" | "android">("loading");
   useEffect(() => {
-    const android = document.referrer.startsWith("android-app://com.meritledger.app") || /JLPTSentenceLabAndroid/.test(navigator.userAgent) || new URLSearchParams(location.search).get("platform") === "android";
-    let remembered = false;
-    try { remembered = sessionStorage.getItem("jlpt-android-surface") === "1"; if (android) sessionStorage.setItem("jlpt-android-surface", "1"); } catch {}
-    const timer = window.setTimeout(() => setSurface(android || remembered ? "android" : "web"), 0);
+    const timer = window.setTimeout(() => setSurface(androidClient() ? "android" : "web"), 0);
     return () => window.clearTimeout(timer);
   }, []);
   return surface;

@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/theme/theme-provider";
 import { localeBootstrapScript } from "@/lib/i18n/document-locale";
 import { AppProviders } from "@/components/app/app-providers";
+import { androidSurfaceBootstrapScript } from "@/lib/android-commerce";
 import "./globals.css";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
@@ -65,7 +66,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="zh-CN" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} min-h-screen`}>
-        <script dangerouslySetInnerHTML={{ __html: themeScript + localeBootstrapScript }} />
+        <script dangerouslySetInnerHTML={{ __html: themeScript + localeBootstrapScript + androidSurfaceBootstrapScript }} />
         <ThemeProvider><AppProviders>{children}</AppProviders></ThemeProvider>
       </body>
     </html>

@@ -10,12 +10,13 @@ import {
   Sparkles,
 } from "lucide-react";
 import { LanguagePicker } from "@/components/locale/language-picker";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ThemePicker } from "@/components/theme/theme-picker";
 import { authUrl } from "@/lib/api/client";
 import { usePlans, useMe } from "@/hooks/use-api";
+import { androidBindingPath, consumeAndroidLogin, rememberAndroidLogin } from "@/lib/android-commerce";
 
 export function LoginView() {
   useLocale();
@@ -23,13 +24,22 @@ export function LoginView() {
   const params = useSearchParams();
   const me = useMe();
   const plan = usePlans(Boolean(me.data));
+  const oauthReturn = useRef<string | null | undefined>(undefined);
   useEffect(() => {
+    // next.config redirects the Google callback to /login?login=success.
+    // Resolve once, and do not let the plan redirect race this handoff.
+    if (params.get("login") === "success") {
+      if (oauthReturn.current === undefined) oauthReturn.current = consumeAndroidLogin();
+      if (oauthReturn.current) { router.replace(oauthReturn.current); return; }
+    }
+    const bindingPath = androidBindingPath(params.get("next"));
+    if (me.data && bindingPath) { router.replace(bindingPath); return; }
     if (plan.data) {
       const next = params.get("next");
-      const safeNext = next?.startsWith("/") && !next.startsWith("//") ? next : null;
+      const safeNext = next?.startsWith("/") && !next.startsWith("//") && !next.includes("\\") ? next : null;
       router.replace(safeNext && /^\/membership(?:[/?]|$)/.test(safeNext) ? safeNext : plan.data.items.length ? safeNext ?? "/today" : "/onboarding");
     }
-  }, [params, plan.data, plan.error, router]);
+  }, [params, plan.data, plan.error, me.data, router]);
   return (
     <main className="relative min-h-screen overflow-x-clip bg-background px-4 py-5 sm:px-5 sm:py-8">
       <div className="soft-grid absolute inset-0 opacity-50" />
@@ -83,7 +93,7 @@ export function LoginView() {
             size="lg"
             className="mt-7 h-12 w-full max-w-full text-base sm:mt-8 xl:h-[3.25rem] xl:text-[1.0625rem]"
           >
-            <a href={authUrl}>
+            <a href={authUrl} onClick={() => rememberAndroidLogin(params.get("next"))}>
               {t("使用 Google 登录")}<ArrowRight className="size-5" />
             </a>
           </Button>

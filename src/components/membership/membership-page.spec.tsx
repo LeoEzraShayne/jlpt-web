@@ -9,10 +9,21 @@ import { VocabularyPracticeWorkspace } from "@/components/vocabulary-learning/pr
 vi.mock("@/lib/api/client", async importOriginal => ({ ...await importOriginal<typeof import("@/lib/api/client")>(), apiFetcher: vi.fn(), apiRequest: vi.fn() }));
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
 function mount(element: React.ReactNode) { return render(<SWRConfig value={{ provider: () => new Map(), dedupingInterval: 0, shouldRetryOnError: false }}>{element}</SWRConfig>); }
-beforeEach(() => { vi.clearAllMocks(); window.history.replaceState(null, "", "/"); act(() => setLocale("zh")); });
+beforeEach(() => { vi.clearAllMocks(); sessionStorage.clear(); window.history.replaceState(null, "", "/"); act(() => setLocale("zh")); });
 afterEach(() => { cleanup(); act(() => setLocale("zh")); });
 const membership = { isMember: false, expiresAt: null, quota: { enforcementEnabled: true, dailyLimit: 5, remaining: 2, reserved: 1, rewardBalance: 0, resetsAt: "2026-09-14T00:00:00Z", timezone: "Asia/Tokyo" } };
 describe("membership UI", () => {
+  it.each([false, true])("opens native commerce, never Stripe, and hides member rewards (%s)", async isMember => {
+    sessionStorage.setItem("jlpt-android-surface", "android-test");
+    vi.mocked(apiFetcher).mockResolvedValue({ ...membership, isMember });
+    mount(<MembershipPage />);
+    const link = await screen.findByRole("link", { name: "在应用内查看价格与购买" });
+    expect(link).toHaveAttribute("href", "intent://commerce?action=membership#Intent;scheme=jlpt;package=com.meritledger.app.debug;end");
+    expect(screen.queryByText("使用 Stripe 安全支付")).not.toBeInTheDocument();
+    expect(apiFetcher).not.toHaveBeenCalledWith("/billing/catalog?market=GLOBAL");
+    expect(Boolean(screen.queryByRole("link", { name: "在应用内查看奖励任务" }))).toBe(!isMember);
+    expect(apiRequest).not.toHaveBeenCalled();
+  });
   it("uses currency minor units correctly", () => {
     expect(formatPrice(99, "USD", "en")).toBe("$0.99");
     expect(formatPrice(6400, "USD", "en")).toBe("$64.00");

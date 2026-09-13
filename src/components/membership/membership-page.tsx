@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { ErrorState } from "@/components/shared/error-state";
 import { LoadingState } from "@/components/shared/loading-state";
 import { billingError, useMembership, usePaymentSurface } from "./use-membership";
+import { androidClient, nativeCommerceUrl } from "@/lib/android-commerce";
 export function formatPrice(amount: number, currency: string, locale: string) { return new Intl.NumberFormat(locale, { style: "currency", currency }).format(currency === "JPY" ? amount : amount / 100); }
 export function MembershipPage() {
   const { locale, t } = useLocale();
@@ -19,7 +20,7 @@ export function MembershipPage() {
   const lock = useRef(false);
   const membership = useMembership();
   const surface = usePaymentSurface();
-  const catalog = useSWR<Catalog>("/billing/catalog?market=GLOBAL", apiFetcher, { shouldRetryOnError: false });
+  const catalog = useSWR<Catalog>(surface === "web" ? "/billing/catalog?market=GLOBAL" : null, apiFetcher, { shouldRetryOnError: false });
   const date = (value: string) => new Date(value).toLocaleString(locale === "en" ? "en-US" : "zh-CN");
   async function checkout(productCode: ProductCode) {
     if (lock.current || surface !== "web" || !catalog.data?.salesEnabled) return;
@@ -55,7 +56,7 @@ export function MembershipPage() {
         <p className="text-muted-foreground">{t("系统失败不计入成功批改；复习积压会保留。")}</p>
       </CardContent>
     </Card>}
-    {surface === "android" ? <Card><CardHeader><CardTitle>{t("Android 购买")}</CardTitle><CardDescription>{t("请使用应用内 Google Play 购买入口。已有会员在所有设备生效。")}</CardDescription></CardHeader></Card> : surface === "web" && <>
+    {surface === "android" ? <Card><CardHeader><CardTitle>{t("Android 购买")}</CardTitle><CardDescription>{t("请使用应用内 Google Play 购买入口。已有会员在所有设备生效。")}</CardDescription></CardHeader><CardContent className="flex flex-col gap-3"><Button asChild><a href={nativeCommerceUrl(androidClient() ?? "android-release", "membership")}>{t("在应用内查看价格与购买")}</a></Button>{membership.data && !membership.data.isMember && <Button asChild variant="outline"><a href={nativeCommerceUrl(androidClient() ?? "android-release", "reward")}>{t("在应用内查看奖励任务")}</a></Button>}<p className="text-xs text-muted-foreground">{t("实际价格以 Google Play 显示的当地货币为准。")}</p></CardContent></Card> : surface === "web" && <>
       <p className="text-xs text-muted-foreground">{t("Web 新购买统一以美元（USD）付款，切换语言不会改变价格。")}</p>
       {catalog.isLoading ? <LoadingState /> : catalog.error ? <ErrorState message={billingError(catalog.error, t)} onRetry={() => void catalog.mutate()} /> : catalog.data && <>
         {!catalog.data.salesEnabled && <p role="status" className="rounded-xl border p-4 text-sm">{t("购买尚未开放，请稍后再来。")}</p>}
