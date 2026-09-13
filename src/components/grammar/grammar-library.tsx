@@ -152,38 +152,34 @@ export function GrammarLibrary() {
               return (
                 <LibraryCard key={item.id} className="h-full max-lg:[--card-spacing:--spacing(3)]">
                   <CardContent className="flex h-full min-w-0 flex-col">
-                    <div className="flex min-w-0 flex-col items-start gap-3 lg:flex-row lg:justify-between">
-                      <h2 className="min-w-0 break-words text-lg font-semibold">
-                        {item.title}
-                      </h2>
+                    <div className="mb-3 flex min-w-0 flex-wrap items-center gap-1.5 text-xs">
+                      <GrammarStatus progress={progress} />
+                      <span className="rounded-full bg-primary/10 px-1.5 py-1 font-medium text-primary">
+                        {t(progress?.lastScore != null
+                          ? `最近 ${progress.lastScore} 分`
+                          : "尚未练习")}
+                      </span>
                     </div>
+                    <h2 className="min-w-0 break-words text-lg font-semibold">
+                      {item.title}
+                    </h2>
                     <p className="mt-1 line-clamp-2 break-words text-sm text-muted-foreground">
                       {item.chineseExplanation}
                     </p>
-                    <div className="mt-auto pt-4 lg:pt-3">
-                      <div className="flex min-w-0 flex-col gap-2">
-                        <div className="flex min-w-0 items-center gap-1 overflow-x-auto whitespace-nowrap text-xs [&>*]:shrink-0 [&>*]:px-1.5">
-                          <GrammarStatus progress={progress} />
-                          <span className="rounded-full bg-primary/10 py-1 font-medium text-primary">
-                          {t(progress?.lastScore != null
-                            ? `最近 ${progress.lastScore} 分`
-                            : "尚未练习")}
-                          </span>
-                          <span className="rounded-full bg-secondary py-1 font-medium text-secondary-foreground">
-                            {statusSummary(progress)}
-                          </span>
-                        </div>
-                        <Button
-                          asChild
-                          size="sm"
-                          variant={progress ? "outline" : "default"}
-                          className="rounded-full px-2 max-lg:h-auto max-lg:min-h-11 max-lg:w-full max-lg:whitespace-normal lg:self-end lg:px-4 lg:text-xs"
-                        >
-                          <Link href={`/grammar/${item.id}`}>
-                            {t(progress ? "查看并练习" : "开始学习")}
-                          </Link>
-                        </Button>
-                      </div>
+                    <div className="mt-auto flex min-w-0 items-center justify-between gap-2 pt-4 lg:pt-3">
+                      <span className="min-w-0 rounded-full bg-secondary px-1.5 py-1 text-xs font-medium text-secondary-foreground">
+                        {statusSummary(progress)}
+                      </span>
+                      <Button
+                        asChild
+                        size="sm"
+                        variant={progress ? "outline" : "default"}
+                        className="h-auto min-w-0 max-w-[50%] rounded-full px-3 py-1.5 whitespace-normal max-lg:min-h-11 lg:text-xs"
+                      >
+                        <Link href={`/grammar/${item.id}`}>
+                          {t(progress ? "查看并练习" : "开始学习")}
+                        </Link>
+                      </Button>
                     </div>
                   </CardContent>
                 </LibraryCard>

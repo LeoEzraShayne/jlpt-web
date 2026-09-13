@@ -41,10 +41,18 @@ test("phone lists stack while tablet grids preserve odd cards, actions, paginati
         const card = grid.locator(':scope > [data-slot="card"]').first();
         const status = card.locator('[data-slot="badge"]');
         const tags = status.locator('..').locator(':scope > span');
-        await expect(tags).toHaveCount(3);
+        await expect(tags).toHaveCount(2);
         const boxes = await Promise.all((await tags.all()).map(tag => tag.boundingBox()));
         const centers = boxes.map(box => box!.y + box!.height / 2);
         expect(Math.max(...centers) - Math.min(...centers)).toBeLessThan(1);
+        const heading = (await card.getByRole("heading").boundingBox())!;
+        for (const box of boxes) expect(box!.y + box!.height).toBeLessThanOrEqual(heading.y);
+        const action = card.getByRole("link", { name: "查看并练习", exact: true });
+        const date = action.locator('..').locator(':scope > span');
+        const actionBox = (await action.boundingBox())!;
+        const dateBox = (await date.boundingBox())!;
+        expect(Math.abs(actionBox.y + actionBox.height / 2 - dateBox.y - dateBox.height / 2)).toBeLessThan(1);
+        expect(actionBox.x).toBeGreaterThan(dateBox.x + dateBox.width);
       }
       if (path === "/history") {
         const scoredCard = grid.locator(':scope > [data-slot="card"]').first();
