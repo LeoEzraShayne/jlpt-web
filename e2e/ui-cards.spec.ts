@@ -37,6 +37,15 @@ test("phone lists stack while tablet grids preserve odd cards, actions, paginati
       }
     }
     if (path === "/grammar" || path === "/history") {
+      if (path === "/grammar") {
+        const card = grid.locator(':scope > [data-slot="card"]').first();
+        const status = card.locator('[data-slot="badge"]');
+        const tags = status.locator('..').locator(':scope > span');
+        await expect(tags).toHaveCount(3);
+        const boxes = await Promise.all((await tags.all()).map(tag => tag.boundingBox()));
+        const centers = boxes.map(box => box!.y + box!.height / 2);
+        expect(Math.max(...centers) - Math.min(...centers)).toBeLessThan(1);
+      }
       if (path === "/history") {
         const scoredCard = grid.locator(':scope > [data-slot="card"]').first();
         const score = (await scoredCard.locator("strong").boundingBox())!;

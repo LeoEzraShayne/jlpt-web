@@ -156,26 +156,28 @@ export function GrammarLibrary() {
                       <h2 className="min-w-0 break-words text-lg font-semibold">
                         {item.title}
                       </h2>
-                      <GrammarStatus progress={progress} />
                     </div>
                     <p className="mt-1 line-clamp-2 break-words text-sm text-muted-foreground">
                       {item.chineseExplanation}
                     </p>
                     <div className="mt-auto pt-4 lg:pt-3">
-                      <div className="grid min-w-0 items-start gap-2 text-xs lg:grid-cols-[minmax(0,1fr)_auto_auto] lg:items-center">
-                        <span className="min-w-0 break-words rounded-full bg-secondary px-2 py-1 font-medium text-secondary-foreground lg:truncate lg:whitespace-nowrap lg:px-3">
-                          {statusSummary(progress)}
-                        </span>
-                        <span className="w-fit max-w-full rounded-full bg-primary/10 px-2 py-1 font-medium text-primary lg:whitespace-nowrap lg:px-3">
+                      <div className="flex min-w-0 flex-col gap-2">
+                        <div className="flex min-w-0 items-center gap-1 overflow-x-auto whitespace-nowrap text-xs [&>*]:shrink-0 [&>*]:px-1.5">
+                          <GrammarStatus progress={progress} />
+                          <span className="rounded-full bg-primary/10 py-1 font-medium text-primary">
                           {t(progress?.lastScore != null
                             ? `最近 ${progress.lastScore} 分`
                             : "尚未练习")}
-                        </span>
+                          </span>
+                          <span className="rounded-full bg-secondary py-1 font-medium text-secondary-foreground">
+                            {statusSummary(progress)}
+                          </span>
+                        </div>
                         <Button
                           asChild
                           size="sm"
                           variant={progress ? "outline" : "default"}
-                          className="rounded-full px-2 max-lg:h-auto max-lg:min-h-11 max-lg:w-full max-lg:whitespace-normal lg:px-4 lg:text-xs"
+                          className="rounded-full px-2 max-lg:h-auto max-lg:min-h-11 max-lg:w-full max-lg:whitespace-normal lg:self-end lg:px-4 lg:text-xs"
                         >
                           <Link href={`/grammar/${item.id}`}>
                             {t(progress ? "查看并练习" : "开始学习")}
