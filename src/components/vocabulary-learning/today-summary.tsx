@@ -16,22 +16,22 @@ export function VocabularyTodaySummary() {
   return (
     <DashboardActionCard icon={BookOpen} label={t("今日词汇")} ariaLabel={t("今日词汇")}
       footer={
-        <div className="flex min-w-0 items-center justify-between gap-3">
-          <Link href="/vocabulary-learning" className="shrink-0 rounded-full bg-muted px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground">{t("学习清单")}</Link>
-          <div className="min-w-0 max-w-[65%]">
+        <div className="flex min-w-0 flex-wrap items-center justify-between gap-2">
+          <Link href="/vocabulary-learning" className="shrink-0 whitespace-nowrap rounded-full bg-muted px-2 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground">{t("学习清单")}</Link>
+          <div className="min-w-0 max-w-full">
             <StartVocabularyPractice disabled={!data || !data.dueCount || !!error}
-              showPlayIcon buttonClassName="h-auto w-auto max-w-full rounded-full px-4 whitespace-normal max-lg:min-h-11" />
+              showPlayIcon buttonClassName="h-auto w-auto max-w-full rounded-full px-2.5 whitespace-nowrap max-lg:min-h-11" />
           </div>
         </div>
       }
     >
-      {error ? <div role="alert" className="mt-5 text-sm">{t("词汇安排暂时无法加载")}<Button size="sm" variant="ghost" onClick={() => void mutate()}>{t("重试")}</Button></div>
+      {error ? <div role="alert" className="text-sm">{t("词汇安排暂时无法加载")}<Button size="sm" variant="ghost" onClick={() => void mutate()}>{t("重试")}</Button></div>
         : data ? <>
-          <h2 className="mt-5 break-words text-2xl font-bold sm:mt-7">{t("待复习")}{data.dueCount}</h2>
-          <p className="mt-2 text-sm">{t("今日已完成")}{data.completedTodayCount}</p>
-          <p className="mt-2 text-xs leading-5 text-muted-foreground">{t("根本不会")}{data.unknownCount} {t("· 想练熟")}{data.practiceCount} {t("· 已记住")}{data.rememberedCount}</p>
+          <h2 className="break-words text-2xl font-bold leading-snug">{t("待复习")}{data.dueCount}</h2>
+          <p className="mt-1 text-sm">{t("今日已完成")}{data.completedTodayCount}</p>
+          <p className="mt-1 text-xs leading-5 text-muted-foreground">{t("根本不会")}{data.unknownCount} {t("· 想练熟")}{data.practiceCount} {t("· 已记住")}{data.rememberedCount}</p>
         </>
-          : <p role="status" className="mt-5 text-sm text-muted-foreground">{t("正在加载词汇安排…")}</p>}
+          : <p role="status" className="text-sm text-muted-foreground">{t("正在加载词汇安排…")}</p>}
     </DashboardActionCard>
   );
 }

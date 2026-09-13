@@ -32,7 +32,7 @@ export function DashboardStatsCards({
 }: DashboardStatsCardsProps) {
   useLocale();
   return (
-    <section aria-label={t("今日学习概览")} className="grid min-w-0 grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+    <section aria-label={t("今日学习概览")} className="grid min-w-0 grid-cols-1 gap-4 min-[37.5rem]:auto-rows-fr min-[37.5rem]:grid-cols-2 lg:grid-cols-3 [&:has(details[open])]:auto-rows-auto [&:has(details[open])]:items-start [&:has(details[open])_[data-slot=card]]:h-auto">
       {recommendedTask && <div className="min-w-0">{recommendedTask}</div>}
       <StatsCard
         title={t("今日剩余")}
@@ -109,7 +109,7 @@ export function DashboardStatsCards({
 function AllocationDetails({ levels }: Pick<Dashboard, "levels">) {
   useLocale();
   if (!levels?.length) return null;
-  return <details className="group mt-3 border-t border-border/60 pt-3">
+  return <details className="group mt-2 border-t border-border/60 pt-2">
     <summary className="flex cursor-pointer list-none items-center justify-between gap-2 rounded text-xs font-medium text-muted-foreground hover:text-foreground focus-visible:outline-2 focus-visible:outline-ring [&::-webkit-details-marker]:hidden">
       {t("各级别今日安排")}<ChevronDown className="size-4 transition-transform group-open:rotate-180" />
     </summary>
@@ -155,11 +155,11 @@ function StatsCard({
 }) {
   useLocale();
   return (
-    <Card aria-label={title} className={cn("min-w-0 border border-border/60 shadow-none ring-0 [--card-spacing:--spacing(5)]", mobileTwoColumns && "max-lg:[--card-spacing:--spacing(3)]", className)}>
+    <Card aria-label={title} className={cn("min-w-0 border border-border/60 shadow-none ring-0 [--card-spacing:--spacing(4)]", className)}>
       <CardContent>
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
           <h2 className="flex items-center gap-2.5 text-base font-semibold">
-            <span className="grid size-9 place-items-center rounded-full bg-secondary text-secondary-foreground">
+            <span className="grid size-8 shrink-0 place-items-center rounded-full bg-secondary text-secondary-foreground">
               <Icon className="size-4" />
             </span>
             {t(title)}
@@ -167,7 +167,7 @@ function StatsCard({
           {meta && <span className="text-xs leading-5 text-muted-foreground">{t(meta)}</span>}
         </div>
         {progress && progress.total > 0 && (
-          <div aria-hidden="true" className="mb-4 flex h-1.5 overflow-hidden rounded-full bg-muted">
+          <div aria-hidden="true" className="mb-3 flex h-1.5 overflow-hidden rounded-full bg-muted">
             {[
               [progress.mastered, "bg-success"],
               [progress.learning, "bg-primary"],
@@ -178,9 +178,9 @@ function StatsCard({
             ))}
           </div>
         )}
-        <dl className={cn("grid grid-cols-2 gap-x-5 gap-y-4", mobileTwoColumns && "max-lg:gap-3", columns === 3 && (mobileTwoColumns ? "xl:grid-cols-3" : "sm:grid-cols-3 md:grid-cols-2 xl:grid-cols-3"), completedLayout && "grid-cols-6 gap-x-3")}>
+        <dl className={cn("grid grid-cols-2 gap-x-4 gap-y-3", columns === 3 && (mobileTwoColumns ? "xl:grid-cols-3" : "sm:grid-cols-3 md:grid-cols-2 xl:grid-cols-3"), completedLayout && "grid-cols-6 gap-x-3")}>
           {items.map((item, index) => (
-            <div key={t(item.label)} className={cn("min-w-0 border-t border-border/60 pt-2.5", completedLayout && (index < 3 ? "col-span-2" : "col-span-3"))}>
+            <div key={t(item.label)} className={cn("min-w-0 border-t border-border/60 pt-2", completedLayout && (index < 3 ? "col-span-2" : "col-span-3"))}>
               <dt className="flex items-center gap-1.5 text-xs leading-5 text-muted-foreground sm:text-sm">
                 {item.color && <span aria-hidden="true" className={`size-1.5 shrink-0 rounded-full ${item.color}`} />}
                 {item.hint ? <StatHint label={t(item.label)} hint={t(item.hint)} /> : t(item.label)}

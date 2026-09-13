@@ -177,7 +177,7 @@ function RecommendedTask({ task }: { task: StudyTask }) {
         : t("开始今天的新语法")}
       footer={<TaskAction task={task} defaultEnter />}
     >
-      <h2 className={`${isReview ? "mt-5 sm:mt-7" : "mt-1"} break-words text-2xl font-bold`}>
+      <h2 className="break-words text-2xl font-bold leading-snug">
         {explanationLocale === "en" ? task.grammar.displayTitle ?? task.grammar.title : task.grammar.title}
       </h2>
       {!isReview && <p className="mt-1 text-sm text-muted-foreground">{t("用造句检验自己是否真正掌握")}</p>}
@@ -277,15 +277,15 @@ function TaskAction({
   useLocale();
   return (
     <div
-      className={cn("flex min-w-0 items-center justify-between gap-3", className)}
+      className={cn("flex min-w-0 items-center justify-between gap-3", !compact && "flex-wrap gap-2", className)}
     >
-      <span className="flex min-w-0 items-center gap-1 rounded-full bg-muted px-3 py-1.5 text-xs font-medium text-muted-foreground">
+      <span className={cn("flex min-w-0 items-center gap-1 rounded-full bg-muted px-3 py-1.5 text-xs font-medium text-muted-foreground", !compact && "shrink-0 whitespace-nowrap px-2")}>
         <Clock3 className="size-3.5 shrink-0" />
         {t("预计")}{task.estimatedMinutes} {t("分钟")}</span>
       <StartStudyButton
         defaultEnter={defaultEnter}
-        className={compact ? "ml-auto min-w-0 max-w-[60%]" : "shrink-0"}
-        buttonClassName={compact ? "h-auto max-lg:min-h-11 w-auto max-w-full whitespace-normal px-4 lg:min-w-32" : "w-auto min-w-28 px-4 sm:min-w-32"}
+        className={compact ? "ml-auto min-w-0 max-w-[60%]" : "max-w-full shrink-0"}
+        buttonClassName={compact ? "h-auto max-lg:min-h-11 w-auto max-w-full whitespace-normal px-4 lg:min-w-32" : "w-auto max-w-full whitespace-nowrap px-2.5"}
         grammarId={task.grammarId}
         taskId={task.id}
         mode={task.type === "LEARN" ? "LEARN" : "REVIEW"}

@@ -10,16 +10,16 @@ export function DashboardActionCard({ icon: Icon, label, children, footer, ariaL
   ariaLabel?: string;
 }) {
   return (
-    <Card aria-label={ariaLabel} className="h-full min-w-0 border-primary/40 warm-shadow">
-      <CardContent className="grid min-w-0 flex-1 grid-cols-[auto_minmax(0,1fr)] items-start gap-x-3 gap-y-4">
-        <span className="grid size-11 shrink-0 place-items-center rounded-full bg-secondary text-secondary-foreground">
-          <Icon className="size-5" />
-        </span>
-        <div className="min-w-0">
-          <p className="text-sm font-semibold text-primary">{label}</p>
-          {children}
+    <Card aria-label={ariaLabel} className="h-full min-w-0 border-primary/40 warm-shadow [--card-spacing:--spacing(4)]">
+      <CardContent className="flex min-w-0 flex-1 flex-col gap-3">
+        <div className="flex min-w-0 items-center gap-2.5">
+          <span className="grid size-8 shrink-0 place-items-center rounded-full bg-secondary text-secondary-foreground">
+            <Icon className="size-4" />
+          </span>
+          <p className="min-w-0 text-sm font-semibold text-primary">{label}</p>
         </div>
-        <div className="col-span-2 mt-auto w-full min-w-0">{footer}</div>
+        <div className="min-w-0">{children}</div>
+        <div className="mt-auto w-full min-w-0 pt-1 [&_[data-slot=button]]:min-w-0 [&_[data-slot=button]]:whitespace-nowrap [&_[data-slot=button]]:px-2.5">{footer}</div>
       </CardContent>
     </Card>
   );
