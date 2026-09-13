@@ -147,12 +147,12 @@ function Preferences({
       </CardHeader>
       <CardContent>
         <form onSubmit={save} className="flex flex-col gap-5">
-          <label className="text-sm">
-            {t("主目标")}<select
+          <label className="flex min-w-0 items-center gap-3 text-sm">
+            <span className="shrink-0">{t("主目标")}</span><select
               aria-label={t("主目标")}
               value={target}
               onChange={(e) => setTarget(e.target.value as JlptLevel)}
-              className={selectClass}
+              className={cn(selectClass, "mt-0 min-w-0 flex-1")}
             >
               {levels.map((level) => (
                 <option key={level}>{level}</option>

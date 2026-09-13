@@ -52,7 +52,7 @@ export function ProfileSettings() {
       <PlansManager settingsCard={
         <Card className="min-w-0">
           <CardHeader><CardTitle>{t("语言与会员")}</CardTitle></CardHeader>
-          <CardContent className="flex flex-1 flex-col gap-5">
+          <CardContent className="flex flex-1 flex-col gap-5 [&_select]:h-5 [&_select]:py-0">
             <LanguagePicker explanations />
             <Button asChild variant="outline" className="mt-auto w-full">
               <Link href="/membership">{t("会员与额度")}</Link>
