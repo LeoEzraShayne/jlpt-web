@@ -3,14 +3,15 @@ import { QuotaNotice } from "@/components/membership/quota-notice";
 import { quotaErrorCode } from "@/components/membership/use-membership";
 import { t } from "@/lib/i18n/locale-store";
 import { useLocale } from "@/components/locale/locale-provider";
+import { Play } from "lucide-react";
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ApiError, apiRequest } from "@/lib/api/client";
 import { Button } from "@/components/ui/button";
 import type { VocabularyPractice } from "./types";
 
-export function StartVocabularyPractice({ vocabularyId, grammarId, studySessionId, disabled, label = t("开始词汇练习") }: {
-  vocabularyId?: string; grammarId?: string; studySessionId?: string; disabled?: boolean; label?: string;
+export function StartVocabularyPractice({ vocabularyId, grammarId, studySessionId, disabled, buttonClassName, showPlayIcon = false, label = t("开始词汇练习") }: {
+  vocabularyId?: string; grammarId?: string; studySessionId?: string; disabled?: boolean; label?: string; buttonClassName?: string; showPlayIcon?: boolean;
 }) {
   useLocale();
   const router = useRouter();
@@ -32,7 +33,7 @@ export function StartVocabularyPractice({ vocabularyId, grammarId, studySessionI
     } finally { lock.current = false; setBusy(false); }
   }
   return <div className="min-w-0">
-    <Button size="sm" disabled={disabled || busy} onClick={() => void start()}>{t(busy ? "正在准备…" : label)}</Button>
+    <Button className={buttonClassName} size="sm" disabled={disabled || busy} onClick={() => void start()}>{showPlayIcon && <Play />}{t(busy ? "正在准备…" : label)}</Button>
     <QuotaNotice code={quotaCode} />
     {error && <p role="alert" className="mt-2 text-xs text-destructive">{t(error)}</p>}
   </div>;

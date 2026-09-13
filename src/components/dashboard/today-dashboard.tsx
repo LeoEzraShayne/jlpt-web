@@ -20,6 +20,7 @@ import { ErrorState } from "@/components/shared/error-state";
 import { LoadingState } from "@/components/shared/loading-state";
 import { StartStudyButton } from "@/components/study/start-study-button";
 import { VocabularyTodaySummary } from "@/components/vocabulary-learning/today-summary";
+import { DashboardActionCard } from "@/components/dashboard/dashboard-action-card";
 import { DashboardStatsCards } from "@/components/dashboard/dashboard-stats-cards";
 import { usePlans, useMe, useToday } from "@/hooks/use-api";
 import type { StudyTask } from "@/lib/api/types";
@@ -33,7 +34,7 @@ import {
 
 export function TodayDashboard() {
   useLocale();
-  return <div className="grid gap-4 md:block"><VocabularyTodaySummary /><div className="order-last md:mb-4"><QuotaSummary /></div><GrammarTodayDashboard /></div>;
+  return <div className="grid gap-4 md:block"><div className="order-last md:mb-4"><QuotaSummary /></div><GrammarTodayDashboard /></div>;
 }
 
 function GrammarTodayDashboard() {
@@ -126,6 +127,7 @@ function GrammarTodayDashboard() {
         allocation={data.allocation}
         levels={data.levels}
         recommendedTask={nextTask ? <RecommendedTask task={nextTask} /> : undefined}
+        vocabularyCard={<VocabularyTodaySummary />}
       />
       <section className="mt-9 min-w-0">
         <div className="mb-4 flex items-center justify-between gap-3">
@@ -167,32 +169,19 @@ function RecommendedTask({ task }: { task: StudyTask }) {
   const isReview = task.type === "REVIEW";
   const Icon = isReview ? RefreshCcw : Sparkles;
   return (
-    <Card className="h-full border-primary/40 warm-shadow">
-      <CardContent className="grid min-w-0 flex-1 grid-cols-[auto_minmax(0,1fr)] items-start gap-x-3 gap-y-4">
-        <span className="grid size-11 shrink-0 place-items-center rounded-full bg-secondary text-secondary-foreground">
-          <Icon className="size-5" />
-        </span>
-        <div className="min-w-0">
-          <p className="text-sm font-semibold text-primary">
-            {isReview
-              ? task.overdueDays > 0
-                ? t(`最优先 · 已逾期 ${task.overdueDays} 天`)
-                : t("最优先 · 今天到期")
-              : t("开始今天的新语法")}
-          </p>
-          <h2
-            className={`${isReview ? "mt-5 sm:mt-7" : "mt-1"} break-words text-2xl font-bold`}
-          >
-            {explanationLocale === "en" ? task.grammar.displayTitle ?? task.grammar.title : task.grammar.title}
-          </h2>
-          {!isReview && (
-            <p className="mt-1 text-sm text-muted-foreground">
-              {t("用造句检验自己是否真正掌握")}</p>
-          )}
-        </div>
-        <TaskAction className="col-span-2 mt-auto w-full" task={task} defaultEnter />
-      </CardContent>
-    </Card>
+    <DashboardActionCard
+      icon={Icon}
+      ariaLabel={t("最优先复习")}
+      label={isReview
+        ? task.overdueDays > 0 ? t(`最优先 · 已逾期 ${task.overdueDays} 天`) : t("最优先 · 今天到期")
+        : t("开始今天的新语法")}
+      footer={<TaskAction task={task} defaultEnter />}
+    >
+      <h2 className={`${isReview ? "mt-5 sm:mt-7" : "mt-1"} break-words text-2xl font-bold`}>
+        {explanationLocale === "en" ? task.grammar.displayTitle ?? task.grammar.title : task.grammar.title}
+      </h2>
+      {!isReview && <p className="mt-1 text-sm text-muted-foreground">{t("用造句检验自己是否真正掌握")}</p>}
+    </DashboardActionCard>
   );
 }
 

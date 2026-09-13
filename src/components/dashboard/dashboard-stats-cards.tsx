@@ -15,6 +15,7 @@ interface DashboardStatsCardsProps {
   stats: DashboardStats;
   estimatedMinutes: number;
   recommendedTask?: ReactNode;
+  vocabularyCard?: ReactNode;
   allocation?: Dashboard["allocation"];
   levels?: Dashboard["levels"];
 }
@@ -24,18 +25,19 @@ export function DashboardStatsCards({
   stats,
   estimatedMinutes,
   recommendedTask,
+  vocabularyCard,
   allocation,
   levels,
 }: DashboardStatsCardsProps) {
   useLocale();
   return (
-    <section aria-label={t("今日学习概览")} className="contents md:grid md:min-w-0 md:gap-4 md:grid-cols-2 xl:grid-cols-6">
+    <section aria-label={t("今日学习概览")} className="grid min-w-0 grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+      {recommendedTask && <div className="min-w-0">{recommendedTask}</div>}
       <StatsCard
         title={t("今日剩余")}
         mobileTwoColumns
         icon={BookOpen}
-        columns={3}
-        className="xl:col-span-3"
+        columns={2}
         items={[
           { label: "待开始复习", value: stats.pendingReview },
           { label: "待开始新语法", value: stats.pendingNew },
@@ -52,8 +54,7 @@ export function DashboardStatsCards({
       <StatsCard
         title={t("今日完成")}
         icon={CheckCircle2}
-        columns={3}
-        className="xl:col-span-3"
+        columns={2}
         items={[
           { label: "完成总数", value: stats.completedTotal },
           { label: "完成复习", value: stats.completedReview },
@@ -68,11 +69,10 @@ export function DashboardStatsCards({
       >
         <p className="mt-3 text-xs leading-5 text-muted-foreground">{t("实际用时包含已完成、进行中及额外练习。")}</p>
       </StatsCard>
-      {recommendedTask && <div className="-order-1 min-w-0 md:order-none md:col-span-2 xl:col-span-2">{recommendedTask}</div>}
+      {vocabularyCard}
       <StatsCard
         title={t("复习总账")}
         icon={RefreshCcw}
-        className={recommendedTask ? "xl:col-span-2" : "xl:col-span-3"}
         meta={t("启用计划合计")}
         items={[
           {
@@ -90,7 +90,6 @@ export function DashboardStatsCards({
       <StatsCard
         title={t(`${level} 总体进度`)}
         icon={GraduationCap}
-        className={recommendedTask ? "xl:col-span-2" : "xl:col-span-3"}
         meta={t(`共 ${stats.progress.total} 个语法`)}
         progress={stats.progress}
         items={[

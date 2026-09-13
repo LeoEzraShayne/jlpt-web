@@ -68,6 +68,20 @@ test("phone lists stack while tablet grids preserve odd cards, actions, paginati
       const actions = await grid.locator('a[data-slot="button"], button[data-slot="button"]').all();
       for (const action of actions) expect((await action.boundingBox())!.height).toBe(32);
     }
+    if (path === "/today" && width >= 1024) {
+      const overview = page.getByLabel("今日学习概览", { exact: true });
+      const labels = ["最优先复习", "今日剩余", "今日完成", "今日词汇", "复习总账", "N1 总体进度"];
+      const boxes = await Promise.all(labels.map(label => overview.getByLabel(label, { exact: true }).boundingBox()));
+      for (const row of [0, 3]) {
+        for (let i = row + 1; i < row + 3; i++) {
+          expect(boxes[i]!.y).toBe(boxes[row]!.y);
+          expect(boxes[i]!.x).toBeGreaterThan(boxes[i - 1]!.x + boxes[i - 1]!.width);
+        }
+      }
+      expect(boxes[3]!.y).toBeGreaterThan(boxes[0]!.y + boxes[0]!.height);
+      expect(boxes[3]!.x).toBe(boxes[0]!.x);
+      await expect(overview.getByRole("link", { name: "学习清单", exact: true })).toHaveAttribute("href", "/vocabulary-learning");
+    }
     if (path === "/today" && width < 1024) {
       const task = grid.locator(':scope > [data-slot="card"]').first();
       const action = task.getByRole("button", { name: "开始复习", exact: true });
