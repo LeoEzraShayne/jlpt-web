@@ -308,7 +308,7 @@ function LevelPlan({
           <div className={cn(
             "flex flex-col gap-2",
             plan
-              ? "min-[37.5rem]:grid min-[37.5rem]:grid-cols-3 min-[37.5rem]:[&>button]:min-w-0 lg:gap-1 lg:[&>button]:px-1 lg:[&>button]:whitespace-normal lg:[&>button]:[overflow-wrap:anywhere]"
+              ? "[&>button]:text-xs min-[37.5rem]:grid min-[37.5rem]:grid-cols-3 min-[37.5rem]:[&>button]:min-w-0 lg:gap-1 lg:[&>button]:px-1 lg:[&>button]:whitespace-normal lg:[&>button]:[overflow-wrap:anywhere]"
               : "items-start [&>button]:whitespace-nowrap",
           )}>
             <Button onClick={() => setEditing(true)}>
