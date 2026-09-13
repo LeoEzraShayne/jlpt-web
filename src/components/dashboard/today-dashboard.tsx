@@ -23,6 +23,7 @@ import { VocabularyTodaySummary } from "@/components/vocabulary-learning/today-s
 import { DashboardStatsCards } from "@/components/dashboard/dashboard-stats-cards";
 import { usePlans, useMe, useToday } from "@/hooks/use-api";
 import type { StudyTask } from "@/lib/api/types";
+import { cn } from "@/lib/utils";
 import { getDashboardStats, type DashboardStats } from "@/lib/dashboard-stats";
 import {
   consumeCompletionNotice,
@@ -237,7 +238,7 @@ function TaskGroup({
         <p className="text-sm text-muted-foreground">{description}</p>
       </div>
       <div
-        className="grid min-w-0 items-stretch gap-4 md:grid-cols-2 xl:grid-cols-3"
+        className="grid min-w-0 grid-cols-2 items-stretch gap-3 lg:gap-4 xl:grid-cols-3"
         aria-label={t(`${title}任务列表`)}
       >
         {tasks.map((task) => (
@@ -252,8 +253,8 @@ function TaskCard({ task }: { task: StudyTask }) {
   const explanationLocale = useExplanationLocale();
   useLocale();
   return (
-    <Card className="h-auto min-w-0 warm-shadow md:h-full md:min-h-56">
-      <CardContent className="flex min-w-0 flex-col md:h-full">
+    <Card className="h-full min-w-0 warm-shadow max-lg:[--card-spacing:--spacing(3)] md:min-h-56">
+      <CardContent className="flex h-full min-w-0 flex-col">
         <span className="w-fit rounded-full bg-secondary px-3 py-1 text-xs font-medium text-secondary-foreground">
           {task.grammar.level} · {t(task.type === "LEARN"
             ? "新语法"
@@ -267,7 +268,7 @@ function TaskCard({ task }: { task: StudyTask }) {
         <p className="mt-2 line-clamp-2 break-words text-sm text-muted-foreground">
           {localizedText(task.grammar.localized, "explanation", task.grammar.chineseExplanation, explanationLocale)}
         </p>
-        <TaskAction className="mt-4 md:mt-auto md:pt-5" task={task} />
+        <TaskAction className="mt-auto pt-4 lg:pt-5" task={task} compact />
       </CardContent>
     </Card>
   );
@@ -277,15 +278,17 @@ function TaskAction({
   task,
   className,
   defaultEnter = false,
+  compact = false,
 }: {
   task: StudyTask;
   className?: string;
   defaultEnter?: boolean;
+  compact?: boolean;
 }) {
   useLocale();
   return (
     <div
-      className={`flex min-w-0 items-center justify-between gap-3 ${className ?? ""}`}
+      className={cn("flex min-w-0 items-center justify-between gap-3", compact && "max-lg:flex-col max-lg:items-stretch", className)}
     >
       <span className="flex min-w-0 items-center gap-1 rounded-full bg-muted px-3 py-1.5 text-xs font-medium text-muted-foreground">
         <Clock3 className="size-3.5 shrink-0" />
@@ -293,7 +296,7 @@ function TaskAction({
       <StartStudyButton
         defaultEnter={defaultEnter}
         className="shrink-0"
-        buttonClassName="w-auto min-w-28 px-4 sm:min-w-32"
+        buttonClassName={compact ? "h-auto min-h-11 whitespace-normal px-2 lg:w-auto lg:min-w-32 lg:px-4" : "w-auto min-w-28 px-4 sm:min-w-32"}
         grammarId={task.grammarId}
         taskId={task.id}
         mode={task.type === "LEARN" ? "LEARN" : "REVIEW"}

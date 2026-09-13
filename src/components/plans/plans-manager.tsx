@@ -67,7 +67,7 @@ export function PlansManager() {
         user={user}
         onSaved={refresh}
       />
-      <div className="grid min-w-0 gap-5 lg:grid-cols-2">
+      <div className="grid min-w-0 grid-cols-2 gap-3 lg:gap-5">
         {levels.map((level) => {
           const plan = items.find(
             (item) => item.level === level && currentPlan(item),
@@ -221,7 +221,7 @@ function LevelPlan({
     }
   }
   return (
-    <Card className="min-w-0 self-start" aria-label={t(`${level} 学习计划`)}>
+    <Card className="min-w-0 self-start max-lg:[--card-spacing:--spacing(3)] max-lg:[&_button]:h-auto max-lg:[&_button]:min-h-11 max-lg:[&_button]:whitespace-normal max-lg:[&_button]:px-2 max-lg:[&_input[type=date]]:px-1" aria-label={t(`${level} 学习计划`)}>
       <CardHeader>
         <CardTitle className="flex flex-wrap items-center gap-2">
           {level} {level === user.targetLevel && <Badge>{t("主目标")}</Badge>}
@@ -237,9 +237,9 @@ function LevelPlan({
               : "新增计划不会切换主目标")}
         </CardDescription>
       </CardHeader>
-      <CardContent className="flex min-w-0 flex-col gap-4">
+      <CardContent className="flex min-w-0 flex-1 flex-col gap-4">
         {plan && !editing && (
-          <p className="text-sm text-muted-foreground">
+          <p className="break-words text-sm text-muted-foreground">
             {plan.startDate.slice(0, 10)} ～ {plan.targetDate.slice(0, 10)}
             <br />
             {t("已学")}{plan.learnedGrammar ?? 0} / {plan.totalGrammar ?? 0} {t("· 每日新学上限")}{plan.dailyNewLimit}
@@ -251,7 +251,7 @@ function LevelPlan({
               e.preventDefault();
               void save();
             }}
-            className="flex min-w-0 flex-col gap-4"
+            className="flex min-w-0 flex-col gap-4 max-lg:[&>div:first-of-type]:grid-cols-1"
           >
             <label className="text-sm">
               {t("学习方式")}<select
@@ -284,7 +284,7 @@ function LevelPlan({
                 onChange={(e) => setLimit(Number(e.target.value))}
               />
             </label>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-col gap-2 lg:flex-row lg:flex-wrap">
               <Button disabled={busy} type="submit">
                 {t(plan ? "保存调整" : `创建 ${level} 计划`)}
               </Button>
@@ -298,7 +298,7 @@ function LevelPlan({
           </form>
         )}
         {!editing && (
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-col gap-2 lg:flex-row lg:flex-wrap">
             <Button onClick={() => setEditing(true)}>
               {t(plan ? "调整计划" : `建立 ${level} 计划`)}
             </Button>

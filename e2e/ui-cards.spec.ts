@@ -1,0 +1,83 @@
+import { expect, test } from "./adult-fixture";
+import { expectNoHorizontalOverflow } from "./layout";
+import { layoutFixtureResponse } from "./ui-layout-fixture";
+
+test("compact grids preserve odd cards, readable actions, pagination and plan editing", async ({ page }) => {
+  layoutFixtureResponse("/api/v1/me/preferences", "PUT", { uiLocale: "zh", explanationLocale: "zh" });
+  await page.route("**/api/v1/**", async route => {
+    const request = route.request();
+    const data = layoutFixtureResponse(request.url(), request.method(), request.postDataJSON() ?? {});
+    await route.fulfill({ contentType: "application/json", body: JSON.stringify(data) });
+  });
+  const width = page.viewportSize()!.width;
+  for (const [path, label, desktopColumns] of [
+    ["/grammar", "语法卡片列表", width >= 1280 ? 3 : 2],
+    ["/history", "学习记录列表", width >= 1536 ? 3 : 2],
+    ["/review", "已逾期复习列表", width >= 1536 ? 3 : 2],
+    ["/today", "先完成复习任务列表", width >= 1280 ? 3 : 2],
+  ] as const) {
+    await page.goto(path);
+    const grid = page.getByLabel(label, { exact: true });
+    await expect(grid.locator(':scope > [data-slot="card"]')).toHaveCount(3);
+    await expectNoHorizontalOverflow(page);
+    expect(await grid.evaluate(el => getComputedStyle(el).gridTemplateColumns.split(" ").length)).toBe(desktopColumns);
+    if (width < 1024) {
+      const cards = grid.locator(':scope > [data-slot="card"]');
+      const first = (await cards.nth(0).boundingBox())!;
+      const second = (await cards.nth(1).boundingBox())!;
+      const third = (await cards.nth(2).boundingBox())!;
+      expect(second.y).toBe(first.y);
+      expect(third.x).toBe(first.x);
+      expect(third.y).toBeGreaterThan(first.y);
+      for (const action of await grid.locator('button, a[data-slot="button"]').all()) {
+        expect((await action.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+      }
+    }
+    if (path === "/grammar" || path === "/history") {
+      await page.getByRole("button", { name: /加载更多/ }).click();
+      await expect(grid.locator(':scope > [data-slot="card"]')).toHaveCount(4);
+    }
+    if (path === "/today" && width < 1024) {
+      const stats = page.getByLabel("今日剩余", { exact: true }).locator("dl");
+      expect(await stats.evaluate(el => getComputedStyle(el).gridTemplateColumns.split(" ").length)).toBe(2);
+    }
+  }
+  await page.goto("/plans");
+  const plan = page.getByLabel("N1 学习计划", { exact: true });
+  await plan.getByRole("button", { name: "调整计划" }).click();
+  await expect(plan.getByLabel("计划开始日期")).toBeVisible();
+  await expectNoHorizontalOverflow(page);
+  await plan.getByRole("button", { name: "取消", exact: true }).click();
+  await expect(plan.getByRole("button", { name: "调整计划" })).toBeVisible();
+});
+
+
+test("English cards remain readable and single-column login has a 24px section gap", async ({ page }) => {
+  layoutFixtureResponse("/api/v1/me/preferences", "PUT", { uiLocale: "en", explanationLocale: "en" });
+  await page.route("**/api/v1/**", async route => {
+    if (new URL(page.url()).pathname === "/login" && new URL(route.request().url()).pathname.endsWith("/me")) {
+      await route.fulfill({ status: 401, contentType: "application/json", body: JSON.stringify({ error: { code: "UNAUTHENTICATED" } }) });
+      return;
+    }
+    await route.fulfill({ contentType: "application/json", body: JSON.stringify(layoutFixtureResponse(route.request().url())) });
+  });
+  for (const path of ["/today", "/grammar", "/review", "/history", "/plans"]) {
+    await page.goto(path);
+    await expect(page.locator('[data-slot="card"]').first()).toBeVisible();
+    await expectNoHorizontalOverflow(page);
+    await expect(page.getByText("NaN", { exact: true })).toHaveCount(0);
+    for (const title of await page.locator('[data-slot="card"] h2, [data-slot="card"] h3').all()) {
+      expect(await title.evaluate(el => el.scrollWidth <= el.clientWidth)).toBe(true);
+    }
+  }
+  await page.goto("/login");
+  const hero = page.locator("main > div > section").first();
+  const login = page.locator("main > div > section").last();
+  await expect(login.getByRole("link", { name: /Google/ })).toBeVisible();
+  if (page.viewportSize()!.width < 1024) {
+    const first = (await hero.boundingBox())!;
+    const second = (await login.boundingBox())!;
+    expect(Math.round(second.y - first.y - first.height)).toBe(24);
+  }
+  await expectNoHorizontalOverflow(page);
+});

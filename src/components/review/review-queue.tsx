@@ -4,6 +4,7 @@ import { useExplanationLocale } from "@/hooks/use-explanation-locale";
 import { t } from "@/lib/i18n/locale-store";
 import { useLocale } from "@/components/locale/locale-provider";
 import { ChevronDown, ChevronUp, Clock3, RefreshCcw } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { useState } from "react";
 import useSWRInfinite from "swr/infinite";
 import { Button } from "@/components/ui/button";
@@ -172,13 +173,13 @@ function Group({
         )}
       </div>
       <div
-        className="grid min-w-0 items-stretch gap-3 md:grid-cols-2 2xl:grid-cols-3"
+        className={cn("grid min-w-0 items-stretch gap-3 md:grid-cols-2 2xl:grid-cols-3", !onCollapse && "grid-cols-2")}
         aria-label={t(`${title}复习列表`)}
       >
         {items.map((item) => (
-          <Card key={item.id} className="h-full min-w-0 warm-shadow">
+          <Card key={item.id} className="h-full min-w-0 warm-shadow max-lg:[--card-spacing:--spacing(3)]">
             <CardContent className="flex h-full min-w-0 flex-col gap-3">
-              <div className="flex min-w-0 items-start gap-3">
+              <div className="flex min-w-0 flex-col items-start gap-3 lg:flex-row">
                 <span className="grid size-10 shrink-0 place-items-center rounded-full bg-secondary text-secondary-foreground">
                   <RefreshCcw className="size-5" />
                 </span>
@@ -186,7 +187,7 @@ function Group({
                   <h3 className="break-words font-semibold leading-7">
                     {explanationLocale === "en" ? item.progress.grammar.displayTitle ?? item.progress.grammar.title : item.progress.grammar.title}
                     <span
-                      className={`ml-1 inline-flex whitespace-nowrap rounded-full px-2 py-0.5 align-middle text-xs font-normal leading-5 ${tone}`}
+                      className={`ml-1 inline-flex max-w-full whitespace-normal rounded-full px-2 py-0.5 align-middle text-xs font-normal leading-5 ${tone}`}
                     >
                       {item.overdueDays > 0
                         ? t(`逾期 ${item.overdueDays} 天`)
@@ -198,11 +199,12 @@ function Group({
                   </p>
                 </div>
               </div>
-              <div className="mt-auto flex min-w-0 items-center justify-between gap-3 pt-2">
-                <span className="flex shrink-0 items-center gap-1 text-xs text-muted-foreground">
+              <div className="mt-auto flex min-w-0 flex-col items-start gap-3 pt-2 lg:flex-row lg:items-center lg:justify-between">
+                <span className="flex min-w-0 items-center gap-1 text-xs text-muted-foreground">
                   <Clock3 className="size-4" />{t("预计")}{item.estimatedMinutes} {t("分钟")}</span>
                 <StartStudyButton
-                  buttonClassName="w-auto min-w-24 px-4"
+                  className="max-lg:w-full"
+                  buttonClassName="h-auto min-h-11 whitespace-normal px-2 lg:w-auto lg:min-w-24 lg:px-4"
                   grammarId={item.progress.grammar.id}
                   mode="REVIEW"
                   label={t("开始复习")}

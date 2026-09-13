@@ -51,7 +51,7 @@ function LoginContent() {
       <div className="relative mx-auto flex max-w-[82.5rem] justify-end">
         <LanguagePicker /><ThemePicker compact />
       </div>
-      <div className="relative mx-auto grid min-h-[calc(100vh-72px)] w-full min-w-0 max-w-[82.5rem] items-center gap-8 py-5 sm:min-h-[calc(100vh-96px)] sm:gap-12 sm:py-0 lg:-translate-y-[clamp(2.5rem,7vh,6rem)] lg:grid-cols-[1.15fr_.85fr] xl:grid-cols-[minmax(0,1.25fr)_minmax(490px,.85fr)] xl:gap-16">
+      <div className="relative mx-auto grid w-full min-w-0 max-w-[82.5rem] items-center gap-6 py-5 lg:min-h-[calc(100vh-96px)] lg:gap-12 lg:py-0 lg:-translate-y-[clamp(2.5rem,7vh,6rem)] lg:grid-cols-[1.15fr_.85fr] xl:grid-cols-[minmax(0,1.25fr)_minmax(490px,.85fr)] xl:gap-16">
         <section className="min-w-0">
           <div className="flex min-w-0 items-center gap-3 sm:gap-4">
             <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-primary text-primary-foreground sm:size-14 xl:size-[3.75rem]">

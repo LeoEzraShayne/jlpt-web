@@ -19,6 +19,7 @@ test("all tasks stay in the grid, completed tasks disappear, and the final task 
     }
     let data: unknown = {};
     if (path.endsWith("/me")) data = { id: "u1", displayName: "测试用户", colorTheme: "sunshine", role: "USER" };
+    if (path.endsWith("/me/entitlements")) data = { isMember: false, salesEnabled: false, quota: { enforcementEnabled: false } };
     if (path.endsWith("/study-plans")) data = { items: [{ id: "p1", level: "N1", dailyMinutes: 60, status: "ACTIVE" }], nextCursor: null };
     if (path.endsWith("/study-plans/current")) data = { id: "p1", level: "N1", dailyMinutes: 60, status: "ACTIVE" };
     if (path.endsWith("/dashboard/today")) data = {
@@ -43,7 +44,7 @@ test("all tasks stay in the grid, completed tasks disappear, and the final task 
   await page.reload();
   await expect(grid.getByRole("heading")).toHaveCount(18);
   await expect(page.getByRole("heading", { name: tasks[0].grammar.title, exact: true })).toHaveCount(0);
-  const overview = page.locator('[aria-label="今日学习概览"]');
+  const overview = page.getByLabel("今日剩余", { exact: true });
   expect((await overview.boundingBox())!.y).toBeLessThan((await grid.boundingBox())!.y);
   await expectNoHorizontalOverflow(page);
   await grid.getByRole("button", { name: "开始复习" }).last().click();

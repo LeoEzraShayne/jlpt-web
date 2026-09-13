@@ -50,13 +50,13 @@ export function HistoryList() {
       />
       {items.length ? (
         <div
-          className="grid min-w-0 items-stretch gap-4 md:grid-cols-2 2xl:grid-cols-3"
+          className="grid min-w-0 items-stretch grid-cols-2 gap-3 lg:gap-4 2xl:grid-cols-3"
           aria-label={t("学习记录列表")}
         >
           {items.map((attempt) => (
-            <Card key={attempt.id} className="h-full min-w-0 warm-shadow">
+            <Card key={attempt.id} className="h-full min-w-0 warm-shadow max-lg:[--card-spacing:--spacing(3)]">
               <CardContent className="flex h-full min-w-0 flex-col gap-3">
-                <div className="flex min-w-0 items-start gap-3">
+                <div className="flex min-w-0 flex-col items-start gap-3 lg:flex-row">
                   <span className="grid size-10 shrink-0 place-items-center rounded-full bg-secondary text-secondary-foreground">
                     <History className="size-5" />
                   </span>
@@ -72,7 +72,7 @@ export function HistoryList() {
                 <p className="line-clamp-2 break-words text-sm text-muted-foreground">
                   {attempt.sentence}
                 </p>
-                <div className="mt-auto flex items-center justify-between gap-3 pt-2">
+                <div className="mt-auto flex flex-col items-start gap-3 pt-2 lg:flex-row lg:items-center lg:justify-between">
                   {attempt.aiJob?.result && (
                     <strong
                       className={`text-2xl ${historyScoreTone(attempt.aiJob.result.totalScore)}`}
@@ -85,7 +85,7 @@ export function HistoryList() {
                     asChild
                     variant="outline"
                     size="sm"
-                    className="ml-auto"
+                    className="max-lg:h-auto max-lg:min-h-11 max-lg:w-full max-lg:whitespace-normal lg:ml-auto"
                   >
                     <Link href={`/history/${attempt.id}`}>
                       <RotateCcw />
@@ -98,7 +98,7 @@ export function HistoryList() {
           {hasMore && (
             <Button
               variant="outline"
-              className="w-full md:col-span-2 2xl:col-span-3"
+              className="col-span-full w-full max-lg:min-h-11"
               disabled={swr.isValidating}
               onClick={() => void swr.setSize(swr.size + 1)}
             >

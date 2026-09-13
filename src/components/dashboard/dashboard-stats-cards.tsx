@@ -2,6 +2,7 @@
 import { t } from "@/lib/i18n/locale-store";
 import { useLocale } from "@/components/locale/locale-provider";
 import { BookOpen, CheckCircle2, ChevronDown, GraduationCap, RefreshCcw, type LucideIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
 import type { ReactNode } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import type { DashboardStats } from "@/lib/dashboard-stats";
@@ -31,6 +32,7 @@ export function DashboardStatsCards({
     <section aria-label={t("今日学习概览")} className="contents md:grid md:min-w-0 md:gap-4 md:grid-cols-2 xl:grid-cols-6">
       <StatsCard
         title={t("今日剩余")}
+        mobileTwoColumns
         icon={BookOpen}
         columns={3}
         className="xl:col-span-3"
@@ -132,6 +134,7 @@ function StatsCard({
   meta,
   items,
   columns = 2,
+  mobileTwoColumns = false,
   progress,
   children,
 }: {
@@ -141,12 +144,13 @@ function StatsCard({
   meta?: string;
   items: StatItem[];
   columns?: 2 | 3;
+  mobileTwoColumns?: boolean;
   progress?: DashboardStats["progress"];
   children?: ReactNode;
 }) {
   useLocale();
   return (
-    <Card aria-label={title} className={`min-w-0 border border-border/60 shadow-none ring-0 [--card-spacing:--spacing(5)] ${className ?? ""}`}>
+    <Card aria-label={title} className={cn("min-w-0 border border-border/60 shadow-none ring-0 [--card-spacing:--spacing(5)]", mobileTwoColumns && "max-lg:[--card-spacing:--spacing(3)]", className)}>
       <CardContent>
         <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
           <h2 className="flex items-center gap-2.5 text-base font-semibold">
@@ -169,7 +173,7 @@ function StatsCard({
             ))}
           </div>
         )}
-        <dl className={`grid grid-cols-2 gap-x-5 gap-y-4 ${columns === 3 ? "sm:grid-cols-3 md:grid-cols-2 xl:grid-cols-3" : ""}`}>
+        <dl className={cn("grid grid-cols-2 gap-x-5 gap-y-4", mobileTwoColumns && "max-lg:gap-3", columns === 3 && (mobileTwoColumns ? "xl:grid-cols-3" : "sm:grid-cols-3 md:grid-cols-2 xl:grid-cols-3"))}>
           {items.map((item) => (
             <div key={t(item.label)} className="min-w-0 border-t border-border/60 pt-2.5">
               <dt className="flex items-center gap-1.5 text-xs leading-5 text-muted-foreground sm:text-sm">

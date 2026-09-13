@@ -144,28 +144,29 @@ export function GrammarLibrary() {
       ) : items.length ? (
         <>
           <LibraryCardGrid
+            className="grid-cols-2 gap-3 lg:gap-4"
             aria-label={t("语法卡片列表")}
           >
             {items.map((item) => {
               const progress = item.progress?.[0];
               return (
-                <LibraryCard key={item.id}>
-                  <CardContent className="flex min-w-0 flex-col md:h-full">
-                    <div className="flex min-w-0 items-start justify-between gap-3">
-                      <h2 className="min-w-0 text-lg font-semibold">
+                <LibraryCard key={item.id} className="h-full max-lg:[--card-spacing:--spacing(3)]">
+                  <CardContent className="flex h-full min-w-0 flex-col">
+                    <div className="flex min-w-0 flex-col items-start gap-3 lg:flex-row lg:justify-between">
+                      <h2 className="min-w-0 break-words text-lg font-semibold">
                         {item.title}
                       </h2>
                       <GrammarStatus progress={progress} />
                     </div>
-                    <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
+                    <p className="mt-1 line-clamp-2 break-words text-sm text-muted-foreground">
                       {item.chineseExplanation}
                     </p>
-                    <div className="mt-4 md:mt-auto md:pt-3">
-                      <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-1 text-[11px] sm:gap-2 sm:text-xs">
-                        <span className="truncate whitespace-nowrap rounded-full bg-secondary px-2 py-1 font-medium text-secondary-foreground sm:px-3">
+                    <div className="mt-auto pt-4 lg:pt-3">
+                      <div className="grid min-w-0 items-start gap-2 text-xs lg:grid-cols-[minmax(0,1fr)_auto_auto] lg:items-center">
+                        <span className="min-w-0 break-words rounded-full bg-secondary px-2 py-1 font-medium text-secondary-foreground lg:truncate lg:whitespace-nowrap lg:px-3">
                           {statusSummary(progress)}
                         </span>
-                        <span className="whitespace-nowrap rounded-full bg-primary/10 px-2 py-1 font-medium text-primary sm:px-3">
+                        <span className="w-fit max-w-full rounded-full bg-primary/10 px-2 py-1 font-medium text-primary lg:whitespace-nowrap lg:px-3">
                           {t(progress?.lastScore != null
                             ? `最近 ${progress.lastScore} 分`
                             : "尚未练习")}
@@ -174,7 +175,7 @@ export function GrammarLibrary() {
                           asChild
                           size="sm"
                           variant={progress ? "outline" : "default"}
-                          className="rounded-full px-2 text-[11px] sm:px-4 sm:text-xs"
+                          className="rounded-full px-2 max-lg:h-auto max-lg:min-h-11 max-lg:w-full max-lg:whitespace-normal lg:px-4 lg:text-xs"
                         >
                           <Link href={`/grammar/${item.id}`}>
                             {t(progress ? "查看并练习" : "开始学习")}

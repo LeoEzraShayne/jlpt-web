@@ -1,211 +1,6 @@
-import { expect, test, type Page } from "./adult-fixture";
+import { expect, test } from "./adult-fixture";
 import { expectNoHorizontalOverflow } from "./layout";
-const user = {
-  id: "u1",
-  email: "test@example.com",
-  displayName: "测试用户",
-  role: "USER",
-  timezone: "Asia/Tokyo",
-  targetLevel: "N1",
-  colorTheme: "sunshine",
-};
-const grammar = {
-  id: "g1",
-  level: "N1",
-  title: "～にかかわる",
-  chineseExplanation: "关系到……",
-  connectionRule: "名词＋にかかわる",
-  sortOrder: 1,
-  examples: [
-    {
-      id: "e1",
-      sentence: "命にかかわる問題だ。",
-      translation: "关系生命的问题。",
-      sortOrder: 1,
-    },
-  ],
-  progress: [],
-};
-const plan = {
-  id: "p1",
-  level: "N1",
-  startDate: "2026-08-09T12:00:00.000Z",
-  targetDate: "2026-12-06T12:00:00.000Z",
-  dailyMinutes: 20,
-  dailyNewLimit: 2,
-  status: "ACTIVE",
-  totalGrammar: 40,
-  learnedGrammar: 0,
-  remainingGrammar: 40,
-  recommendedDailyNew: 1,
-};
-const timer = {
-  phase: "FOCUS",
-  phaseStartedAt: new Date().toISOString(),
-  phaseEndsAt: new Date(Date.now() + 600_000).toISOString(),
-  focusMinutes: 10,
-  breakMinutes: 10,
-};
-const planning = (plannedMinutes: number) => ({ budgetMinutes: 20, plannedMinutes, dueUnscheduledCount: 0, planAtRisk: false, algorithmVersion: "adaptive-v1" });
-const reviewResult = {
-  id: "res1",
-  totalScore: 59,
-  grammarScore: 20,
-  connectionScore: 15,
-  completenessScore: 10,
-  naturalnessScore: 9,
-  vocabularyScore: 5,
-  isCorrect: false,
-  resultLevel: "NEEDS_REVISION",
-  errorSpans: [],
-  correctedSentence: "これは命にかかわる問題です。",
-  correctedSentenceFurigana: "これは命[いのち]にかかわる問題[もんだい]です。",
-  correctedSentenceTranslationZh: "这是一个性命攸关的问题。",
-  alternativeSentence: "少子化は国家の存続にかかわる重要な問題です。",
-  alternativeSentenceFurigana:
-    "少子化[しょうしか]は国家[こっか]の存続[そんぞく]にかかわる重要[じゅうよう]な問題[もんだい]です。",
-  alternativeSentenceTranslationZh: "少子化是关系到国家存续的重要问题。",
-  explanationZh: "需要修改。",
-  encouragement: "再调整一下",
-};
-async function mockAuthenticatedApi(
-  page: Page,
-  overrides: {
-    today?: unknown;
-    reviewQueue?: unknown[];
-    onboardingWithoutPlan?: boolean;
-  } = {},
-) {
-  await page.route("**/api/v1/**", async (route) => {
-    const url = new URL(route.request().url());
-    const path = url.pathname;
-    const method = route.request().method();
-    const requestOrigin = route.request().headers().origin;
-    const cors = {
-      "access-control-allow-origin": requestOrigin ?? "http://127.0.0.1:3100",
-      "access-control-allow-credentials": "true",
-      "access-control-allow-headers": "content-type",
-      "access-control-allow-methods": "GET,POST,PATCH,PUT,OPTIONS",
-    };
-    if (method === "OPTIONS") {
-      await route.fulfill({ status: 204, headers: cors });
-      return;
-    }
-    let data: unknown = {};
-    let meta: unknown;
-    if (path.endsWith("/me")) data = user;
-    else if (path.endsWith("/me/entitlements")) data = { isMember: false, expiresAt: null, salesEnabled: false, quota: { enforcementEnabled: false, dailyLimit: 5, consumed: 0, reserved: 0, remaining: 5, rewardBalance: 0, resetsAt: "2026-09-14T00:00:00Z", timezone: "Asia/Tokyo" } };
-    else if (path.endsWith("/study-plans")) data = method === "POST" ? plan : { items: overrides.onboardingWithoutPlan && new URL(page.url()).pathname === "/onboarding" ? [] : [plan], nextCursor: null };
-    else if (/\/study-plans\/[^/]+\/forecast$/.test(path)) { data = []; meta = { algorithmVersion: "adaptive-v1", isEstimate: true, assumption: "REMEMBERED", projectedCompletionDate: "2026-09-30", targetDate: "2026-12-06", remainingNewAfterHorizon: 39, planAtRisk: false }; }
-    else if (path.endsWith("/study-plans/current")) {
-      if (overrides.onboardingWithoutPlan && new URL(page.url()).pathname === "/onboarding") {
-        await route.fulfill({
-          status: 404,
-          contentType: "application/json",
-          headers: cors,
-          body: JSON.stringify({
-            error: { code: "PLAN_NOT_INITIALIZED", message: "Study plan not initialized" },
-          }),
-        });
-        return;
-      }
-      data = plan;
-    }
-    else if (path.endsWith("/dashboard/today"))
-      data = overrides.today ?? {
-        summary: {
-          newCount: 1,
-          reviewCount: 0,
-          completedCount: 0,
-          level: "N1",
-          totalGrammar: 40,
-          masteryPercent: 0,
-          masteredGrammar: 0,
-          unmasteredGrammar: 40,
-          learnedGrammar: 0,
-          trackedGrammar: 0,
-          overdueReviewCount: 0,
-        },
-        estimatedMinutes: 8,
-        requiredReviewRemaining: 0,
-        newLearningUnlocked: true,
-        nextTaskId: "t1",
-        planning: planning(8),
-        tasks: [
-          {
-            id: "t1",
-            grammarId: "g1",
-            type: "LEARN",
-            status: "PENDING",
-            estimatedMinutes: 8,
-            priorityGroup: "NEW",
-            locked: false,
-            grammar,
-          },
-        ],
-      };
-    else if (path.endsWith("/grammar-levels"))
-      data = [
-        { level: "N1", grammarCount: 40, contentStatus: "AVAILABLE" },
-        { level: "N2", grammarCount: 40, contentStatus: "AVAILABLE" },
-        { level: "N3", grammarCount: 100, contentStatus: "AVAILABLE" },
-        { level: "N4", grammarCount: 43, contentStatus: "AVAILABLE" },
-      ];
-    else if (path.endsWith("/grammar-points/g1"))
-      data = { ...grammar, title: "～を皮切りに（して）・～を皮切りとして" };
-    else if (path.endsWith("/grammar-points")) {
-      const level = url.searchParams.get("level") || "N1";
-      data = [
-        {
-          ...grammar,
-          level,
-          title: level === "N2" ? "～に関して" : grammar.title,
-        },
-      ];
-    } else if (path.endsWith("/review-queue")) data = overrides.reviewQueue ?? [];
-    else if (path.endsWith("/sentence-attempts/a1"))
-      data = {
-        id: "a1",
-        grammarId: "g1",
-        sentence:
-          "これは非常に長い日本語の文章でも画面の外にはみ出さずに表示できることを確認するための例文です。",
-        scene: "日常",
-        createdAt: "2026-08-09T10:00:00.000Z",
-        grammar,
-        aiJob: { result: reviewResult },
-      };
-    else if (path.endsWith("/sentence-attempts")) data = [{ id: "a1", grammarId: "g1", sentence: "这是用于验证长句布局不会产生横向空白或溢出的日语学习记录。", createdAt: "2026-08-10T16:16:29.000Z", grammar, aiJob: { result: reviewResult } }];
-    else if (path.endsWith("/study-sessions") && method === "POST")
-      data = { session: { id: "s1" }, grammar };
-    else if (path.endsWith("/study-sessions/s1/timer/advance")) data = timer;
-    else if (path.endsWith("/study-sessions/s1"))
-      data = {
-        id: "s1",
-        grammarId: "g1",
-        taskId: "t1",
-        mode: "LEARN",
-        status: "ACTIVE",
-        timer,
-        grammar,
-        attempts: [],
-      };
-    else if (path.endsWith("/sentence-reviews") && method === "POST")
-      data = { reviewId: "r1", status: "QUEUED" };
-    else if (path.endsWith("/sentence-reviews/r1"))
-      data = {
-        id: "r1",
-        status: "COMPLETED",
-        retryCount: 0,
-        result: reviewResult,
-      };
-    await route.fulfill({
-      status: 200,
-      contentType: "application/json",
-      headers: cors,
-      body: JSON.stringify({ data, ...(meta ? { meta } : {}) }),
-    });
-  });
-}
+import { grammar, planning, mockAuthenticatedApi } from "./app-fixture";
 test("brand login page is responsive and exposes Google sign in", async ({ page }) => {
   await page.goto("/login");
   await expect(page.getByRole("heading", { name: /真正掌握/ })).toBeVisible();
@@ -216,7 +11,7 @@ test("brand login page is responsive and exposes Google sign in", async ({ page 
   await expect(copy).toBeVisible();
   await expect(copy).toHaveCSS(
     "white-space",
-    (page.viewportSize()?.width ?? 0) < 640 ? "normal" : "nowrap",
+    (page.viewportSize()?.width ?? 0) < 1280 ? "normal" : "nowrap",
   );
   await expectNoHorizontalOverflow(page);
 });
@@ -256,9 +51,12 @@ test("today task opens the focused study flow and enforces score 59 revision", a
   await expect(page.getByText("未掌握", { exact: true })).toHaveCount(0);
   const estimateBox = await page.getByText(/^预计\s*8\s*分钟$/).last().boundingBox();
   const actionBox = await page.getByRole("button", { name: "开始学习" }).last().boundingBox();
-  expect(estimateBox).not.toBeNull();
-  expect(actionBox).not.toBeNull();
-  expect(Math.abs((estimateBox!.y + estimateBox!.height / 2) - (actionBox!.y + actionBox!.height / 2))).toBeLessThan(5);
+  expect(estimateBox).not.toBeNull(); expect(actionBox).not.toBeNull();
+  if ((page.viewportSize()?.width ?? 0) < 1024) {
+    expect(actionBox!.y).toBeGreaterThanOrEqual(estimateBox!.y + estimateBox!.height); expect(actionBox!.height).toBeGreaterThanOrEqual(44);
+  } else {
+    expect(Math.abs((estimateBox!.y + estimateBox!.height / 2) - (actionBox!.y + actionBox!.height / 2))).toBeLessThan(5);
+  }
   await page.getByRole("button", { name: "开始学习" }).first().click();
   await expect(page).toHaveURL(/\/study\/s1/);
   await expect(page.locator("time")).toHaveText(/^(30:00|29:5\d)$/);
@@ -350,13 +148,15 @@ test("today prioritizes review, locks new learning, and keeps task actions align
   await expect(page.getByText("先完成本组复习，再学习新语法", { exact: true })).toBeVisible();
   await expect(page.getByText("逾期待复习", { exact: true })).toBeVisible();
   const reviewCard = page.getByRole("heading", { name: reviewGrammar.title }).last().locator("..");
-  const estimate = reviewCard.getByText("预计 6 分钟");
+  const estimate = reviewCard.getByText(/^预计\s*6\s*分钟$/);
   const action = reviewCard.getByRole("button", { name: "开始复习" });
   const [estimateBox, actionBox] = await Promise.all([estimate.boundingBox(), action.boundingBox()]);
-  expect(estimateBox).not.toBeNull();
-  expect(actionBox).not.toBeNull();
-  expect(Math.abs((estimateBox?.y ?? 0) + (estimateBox?.height ?? 0) / 2 - ((actionBox?.y ?? 0) + (actionBox?.height ?? 0) / 2))).toBeLessThan(3);
-  expect(actionBox?.x ?? 0).toBeGreaterThan(estimateBox?.x ?? 0);
+  expect(estimateBox).not.toBeNull(); expect(actionBox).not.toBeNull();
+  if ((page.viewportSize()?.width ?? 0) < 1024) {
+    expect(actionBox!.y).toBeGreaterThanOrEqual(estimateBox!.y + estimateBox!.height); expect(actionBox!.height).toBeGreaterThanOrEqual(44);
+  } else {
+    expect(Math.abs(estimateBox!.y + estimateBox!.height / 2 - (actionBox!.y + actionBox!.height / 2))).toBeLessThan(3); expect(actionBox!.x).toBeGreaterThan(estimateBox!.x);
+  }
   await expect(reviewCard.getByText(reviewGrammar.chineseExplanation)).toBeVisible();
   const noteBox = await reviewCard.getByText(reviewGrammar.chineseExplanation).boundingBox();
   expect(noteBox).not.toBeNull();
@@ -365,7 +165,6 @@ test("today prioritizes review, locks new learning, and keeps task actions align
   }
   await expectNoHorizontalOverflow(page);
 });
-
 test("today overview keeps only the task-list completion message", async ({ page }) => {
   await mockAuthenticatedApi(page, {
     today: {
@@ -409,7 +208,6 @@ test("today overview keeps only the task-list completion message", async ({ page
   await expect(page.getByText("较稳定").locator("..")).toContainText("9");
   await expectNoHorizontalOverflow(page);
 });
-
 test("review queue exposes overdue, today, and upcoming priority groups", async ({
   page,
 }) => {
@@ -431,7 +229,7 @@ test("review queue exposes overdue, today, and upcoming priority groups", async 
   await expect(page.getByRole("heading", { name: "今天复习", exact: true })).toBeVisible();
   await page.getByRole("button", { name: /未来 7 天还有/ }).click();
   await expect(page.getByRole("heading", { name: "未来 7 天", exact: true })).toBeVisible();
-  expect(await page.locator('[aria-label="已逾期复习列表"]').evaluate((element) => getComputedStyle(element).gridTemplateColumns.split(" ").length)).toBe((page.viewportSize()?.width ?? 0) >= 1536 ? 3 : (page.viewportSize()?.width ?? 0) >= 768 ? 2 : 1);
+  expect(await page.locator('[aria-label="已逾期复习列表"]').evaluate((element) => getComputedStyle(element).gridTemplateColumns.split(" ").length)).toBe((page.viewportSize()?.width ?? 0) >= 1536 ? 3 : 2);
   await expectNoHorizontalOverflow(page);
 });
 test("grammar library switches through the available N1 to N4 levels", async ({
@@ -446,7 +244,7 @@ test("grammar library switches through the available N1 to N4 levels", async ({
     );
   const viewportWidth = page.viewportSize()?.width ?? 0;
   expect(grammarGridColumns).toBe(
-    viewportWidth >= 1280 ? 3 : viewportWidth >= 768 ? 2 : 1,
+    viewportWidth >= 1280 ? 3 : 2,
   );
   await page.getByRole("button", { name: /^N2/ }).click();
   await expect(page.getByRole("heading", { name: "N2 语法库" })).toBeVisible();
@@ -457,7 +255,6 @@ test("grammar library switches through the available N1 to N4 levels", async ({
   await expect(page.getByRole("button", { name: /^N5/ })).toHaveCount(0);
   await expectNoHorizontalOverflow(page);
 });
-
 test("daily new grammar limit supports up to ten", async ({ page }) => {
   await mockAuthenticatedApi(page, { onboardingWithoutPlan: true });
   await page.goto("/onboarding");
@@ -481,7 +278,7 @@ test("plan settings expose dates and new-learning limits without time caps", asy
 test("all main routes stay inside the viewport", async ({ page }) => {
   await mockAuthenticatedApi(page, { onboardingWithoutPlan: true });
   const routes = [
-    ["/onboarding", "生成你的 N1 学习计划"],
+    ["/onboarding", /生成你的\s*N1 学习计划/],
     ["/today", "今日任务"],
     ["/grammar", "N1 语法库"],
     ["/grammar/g1", "～を皮切りに（して）・～を皮切りとして"],
