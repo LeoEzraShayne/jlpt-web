@@ -288,15 +288,15 @@ function TaskAction({
   useLocale();
   return (
     <div
-      className={cn("flex min-w-0 items-center justify-between gap-3", compact && "max-lg:flex-col max-lg:items-stretch", className)}
+      className={cn("flex min-w-0 items-center justify-between gap-3", className)}
     >
       <span className="flex min-w-0 items-center gap-1 rounded-full bg-muted px-3 py-1.5 text-xs font-medium text-muted-foreground">
         <Clock3 className="size-3.5 shrink-0" />
         {t("预计")}{task.estimatedMinutes} {t("分钟")}</span>
       <StartStudyButton
         defaultEnter={defaultEnter}
-        className="shrink-0"
-        buttonClassName={compact ? "h-auto min-h-11 whitespace-normal px-2 lg:w-auto lg:min-w-32 lg:px-4" : "w-auto min-w-28 px-4 sm:min-w-32"}
+        className={compact ? "ml-auto min-w-0 max-w-[60%]" : "shrink-0"}
+        buttonClassName={compact ? "h-auto min-h-11 w-auto max-w-full whitespace-normal px-4 lg:min-w-32" : "w-auto min-w-28 px-4 sm:min-w-32"}
         grammarId={task.grammarId}
         taskId={task.id}
         mode={task.type === "LEARN" ? "LEARN" : "REVIEW"}
