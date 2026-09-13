@@ -37,6 +37,13 @@ test("phone lists stack while tablet grids preserve odd cards, actions, paginati
       }
     }
     if (path === "/grammar" || path === "/history") {
+      if (path === "/history") {
+        const scoredCard = grid.locator(':scope > [data-slot="card"]').first();
+        const score = (await scoredCard.locator("strong").boundingBox())!;
+        const details = (await scoredCard.getByRole("link", { name: "查看详情", exact: true }).boundingBox())!;
+        expect(Math.abs(score.y + score.height / 2 - details.y - details.height / 2)).toBeLessThan(1);
+        expect(details.x).toBeGreaterThan(score.x + score.width);
+      }
       await page.getByRole("button", { name: /加载更多/ }).click();
       await expect(grid.locator(':scope > [data-slot="card"]')).toHaveCount(4);
     }

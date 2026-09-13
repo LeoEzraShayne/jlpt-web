@@ -72,7 +72,7 @@ export function HistoryList() {
                 <p className="line-clamp-2 break-words text-sm text-muted-foreground">
                   {attempt.sentence}
                 </p>
-                <div className="mt-auto flex flex-col items-start gap-3 pt-2 lg:flex-row lg:items-center lg:justify-between">
+                <div className="mt-auto flex items-center justify-between gap-3 pt-2">
                   {attempt.aiJob?.result && (
                     <strong
                       className={`text-2xl ${historyScoreTone(attempt.aiJob.result.totalScore)}`}
@@ -85,7 +85,7 @@ export function HistoryList() {
                     asChild
                     variant="outline"
                     size="sm"
-                    className="max-lg:h-auto max-lg:min-h-11 max-lg:w-full max-lg:whitespace-normal lg:ml-auto"
+                    className="ml-auto max-lg:min-h-11"
                   >
                     <Link href={`/history/${attempt.id}`}>
                       <RotateCcw />
