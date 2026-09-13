@@ -14,6 +14,8 @@ const documentRoutes = [
 ];
 
 const nextConfig: NextConfig = {
+  // Explicit local QA tunnel only; never allow arbitrary development origins.
+  allowedDevOrigins: process.env.JLPT_DEV_HOST ? [process.env.JLPT_DEV_HOST] : [],
   outputFileTracingRoot: process.cwd(),
   turbopack: { root: process.cwd() },
   async redirects() {

@@ -20,7 +20,9 @@ export function androidClient(): AndroidClientId | null {
 }
 
 export function nativeCommerceUrl(client: AndroidClientId, action: "membership" | "reward") {
-  const packageName = client === "android-test" ? "com.meritledger.app.debug" : "com.meritledger.app";
+  const testPackage = process.env.NEXT_PUBLIC_ANDROID_TEST_PACKAGE === "com.meritledger.app"
+    ? "com.meritledger.app" : "com.meritledger.app.debug";
+  const packageName = client === "android-test" ? testPackage : "com.meritledger.app";
   return `intent://commerce?action=${action}#Intent;scheme=jlpt;package=${packageName};end`;
 }
 
