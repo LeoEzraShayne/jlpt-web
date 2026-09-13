@@ -1,4 +1,6 @@
-import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { renderToString } from "react-dom/server";
+import { hydrateRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AdultAccessBoundary } from "./adult-access-boundary";
 import { setLocale } from "@/lib/i18n/locale-store";
@@ -91,6 +93,29 @@ describe("adult access acknowledgement", () => {
     vi.spyOn(localStorage, "removeItem").mockImplementation(() => { throw new Error("Unavailable"); });
     act(() => setAdultAccessConfirmed(false));
     expect(screen.queryByText("Learning area")).not.toBeInTheDocument();
+  });
+
+  it.each(["confirmed", "unknown"])("checks browser storage after neutral server markup: %s", async stored => {
+    localStorage.setItem(ADULT_ACCESS_KEY, stored);
+    const tree = <AdultAccessBoundary><p>Learning area</p></AdultAccessBoundary>;
+    const html = renderToString(tree);
+    expect(html).not.toContain("adult-access-title");
+    expect(html).not.toContain("Learning area");
+    const container = document.createElement("div");
+    container.innerHTML = html;
+    document.body.append(container);
+    const gateSeen: boolean[] = [];
+    const observer = new MutationObserver(() => gateSeen.push(Boolean(container.querySelector("#adult-access-title"))));
+    observer.observe(container, { subtree: true, childList: true });
+    const recoverable = vi.fn();
+    let root: Root;
+    await act(async () => { root = hydrateRoot(container, tree, { onRecoverableError: recoverable }); });
+    await waitFor(() => expect(container.textContent).toContain(stored === "confirmed" ? "Learning area" : "仅限年满 18 周岁的用户"));
+    expect(recoverable).not.toHaveBeenCalled();
+    if (stored === "confirmed") expect(gateSeen).not.toContain(true);
+    observer.disconnect();
+    await act(async () => root.unmount());
+    container.remove();
   });
 
 });

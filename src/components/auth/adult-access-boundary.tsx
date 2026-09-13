@@ -5,14 +5,21 @@ import { useEffect, useState, useSyncExternalStore } from "react";
 import { useLocale } from "@/components/locale/locale-provider";
 import { LanguagePicker } from "@/components/locale/language-picker";
 import { Button } from "@/components/ui/button";
+import { LoadingState } from "@/components/shared/loading-state";
 import { adultAccessConfirmed, setAdultAccessConfirmed, subscribeAdultAccess } from "@/lib/adult-access";
+
+const subscribeReady = () => () => {};
+const clientReady = () => true;
+const serverReady = () => false;
 
 export function AdultAccessBoundary({ children }: { children: React.ReactNode }) {
   const { t } = useLocale();
+  const ready = useSyncExternalStore(subscribeReady, clientReady, serverReady);
   const accepted = useSyncExternalStore(subscribeAdultAccess, adultAccessConfirmed, () => false);
   const [checked, setChecked] = useState(false);
   // Migrate an existing explicit tab acknowledgement; never infer it from login or membership.
   useEffect(() => { if (accepted && adultAccessConfirmed()) setAdultAccessConfirmed(true); }, [accepted]);
+  if (!ready) return <LoadingState label={t("正在准备学习空间…")} />;
   if (accepted) return children;
   return (
     <main className="grid min-h-[80vh] place-items-center bg-background px-4 py-10">
