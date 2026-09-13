@@ -10,28 +10,20 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { ErrorState } from "@/components/shared/error-state";
 import { LoadingState } from "@/components/shared/loading-state";
 import { PageHeading } from "@/components/shared/page-heading";
-import { apiRequest } from "@/lib/api/client";
-import type { SentenceAttempt } from "@/lib/api/types";
+import { fetchHistoryPage, type HistoryPage } from "./history-page";
 import { historyScoreTone } from "./history-score";
 
-interface Page {
-  items: SentenceAttempt[];
-  nextCursor?: string | null;
-}
-const getKey = (index: number, previous: Page | null) =>
+const getKey = (index: number, previous: HistoryPage | null) =>
   previous && !previous.nextCursor
     ? null
     : index === 0
       ? "/sentence-attempts"
-      : `/sentence-attempts?cursor=${previous?.nextCursor}`;
-async function fetchPage(path: string): Promise<Page> {
-  const response = await apiRequest<SentenceAttempt[]>(path);
-  return { items: response.data, nextCursor: response.meta?.nextCursor };
-}
-
+      : `/sentence-attempts?cursor=${encodeURIComponent(previous?.nextCursor ?? "")}`;
 export function HistoryList() {
   useLocale();
-  const swr = useSWRInfinite<Page>(getKey, fetchPage);
+  const swr = useSWRInfinite<HistoryPage>(getKey, fetchHistoryPage, {
+    refreshInterval: pages => pages?.some(page => page.hasPending) ? 5000 : 0,
+  });
   const items = swr.data?.flatMap((page) => page.items) ?? [];
   const hasMore = Boolean(swr.data?.at(-1)?.nextCursor);
   if (swr.isLoading) return <LoadingState />;
@@ -89,7 +81,7 @@ export function HistoryList() {
         </div>
       ) : (
         <EmptyState
-          title={t("还没有造句记录")}
+          title={t("还没有已评分的记录")}
           description={t("完成一次学习任务后，AI 批改会保存在这里。")}
         />
       )}

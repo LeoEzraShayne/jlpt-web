@@ -49,7 +49,7 @@ export function layoutFixtureResponse(path: string, method = "GET", body: Record
   } else if (route === "/sentence-attempts") {
     data = (url.searchParams.has("cursor") ? fixtureGrammar.slice(3) : fixtureGrammar.slice(0, 3)).map((grammar, index) => ({
       id: `layout-a${grammar.id}`, grammar, createdAt: "2026-09-13T23:58:59.000Z", sentence: "東京での公演を皮切りに、全国各地で公演が行われることになりました。",
-      aiJob: index === 1 ? null : { result: { totalScore: 59 + index * 10 } },
+      aiJob: index === 1 ? null : { result: { totalScore: url.searchParams.has("cursor") ? 0 : 59 + index * 10 } },
     }));
     if (!url.searchParams.has("cursor")) meta = { nextCursor: "layout-next" };
   } else if (route === "/study-sessions" && method === "POST") data = { session: { id: "layout-session" } };

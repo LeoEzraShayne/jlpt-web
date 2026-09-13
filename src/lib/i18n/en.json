@@ -140,6 +140,8 @@
   "分": "points",
   "查看详情": "View details",
   "加载更多": "Load more",
+  "还没有已评分的记录": "No graded attempts yet",
+  "学习记录加载失败，请重试": "Could not load learning history. Please try again.",
   "还没有造句记录": "No sentences yet",
   "完成一次学习任务后，AI 批改会保存在这里。": "Complete a learning task to save your AI feedback here.",
   "待核对": "Needs checking",

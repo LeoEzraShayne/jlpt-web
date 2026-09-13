@@ -18,20 +18,22 @@ test("phone lists stack while tablet grids preserve odd cards, actions, paginati
   ] as const) {
     await page.goto(path);
     const grid = page.getByLabel(label, { exact: true });
-    await expect(grid.locator(':scope > [data-slot="card"]')).toHaveCount(3);
+    await expect(grid.locator(':scope > [data-slot="card"]')).toHaveCount(path === "/history" ? 2 : 3);
     await expectNoHorizontalOverflow(page);
     expect(await grid.evaluate(el => getComputedStyle(el).gridTemplateColumns.split(" ").length)).toBe(width < 600 ? 1 : desktopColumns);
     if (width < 1024) {
       const cards = grid.locator(':scope > [data-slot="card"]');
       const first = (await cards.nth(0).boundingBox())!;
       const second = (await cards.nth(1).boundingBox())!;
-      const third = (await cards.nth(2).boundingBox())!;
+      const third = path === "/history" ? null : (await cards.nth(2).boundingBox())!;
       if (width < 600) {
         expect(second.x).toBe(first.x);
         expect(second.y).toBeGreaterThan(first.y);
       } else expect(second.y).toBe(first.y);
-      expect(third.x).toBe(first.x);
-      expect(third.y).toBeGreaterThan(first.y);
+      if (third) {
+        expect(third.x).toBe(first.x);
+        expect(third.y).toBeGreaterThan(first.y);
+      }
       for (const action of await grid.locator('button, a[data-slot="button"]').all()) {
         expect((await action.boundingBox())!.height).toBeGreaterThanOrEqual(44);
       }
@@ -55,6 +57,7 @@ test("phone lists stack while tablet grids preserve odd cards, actions, paginati
         expect(actionBox.x).toBeGreaterThan(dateBox.x + dateBox.width);
       }
       if (path === "/history") {
+        await expect(grid.locator('a[href="/history/layout-alayout-g1"]')).toHaveCount(0);
         const scoredCard = grid.locator(':scope > [data-slot="card"]').first();
         const score = (await scoredCard.locator("strong").boundingBox())!;
         const details = (await scoredCard.getByRole("link", { name: "查看详情", exact: true }).boundingBox())!;
@@ -62,7 +65,8 @@ test("phone lists stack while tablet grids preserve odd cards, actions, paginati
         expect(details.x).toBeGreaterThan(score.x + score.width);
       }
       await page.getByRole("button", { name: /加载更多/ }).click();
-      await expect(grid.locator(':scope > [data-slot="card"]')).toHaveCount(4);
+      await expect(grid.locator(':scope > [data-slot="card"]')).toHaveCount(path === "/history" ? 3 : 4);
+      if (path === "/history") await expect(grid.locator('a[href="/history/layout-alayout-g3"]').locator("../..").locator("strong")).toHaveText("0分");
     }
     if (width >= 1024) {
       const actions = await grid.locator('a[data-slot="button"], button[data-slot="button"]').all();
