@@ -134,7 +134,7 @@ interface StatItem {
   color?: string;
 }
 
-function StatsCard({
+export function StatsCard({
   title,
   icon: Icon,
   className,
