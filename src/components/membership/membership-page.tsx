@@ -5,11 +5,12 @@ import useSWR from "swr";
 import { apiFetcher, apiRequest } from "@/lib/api/client";
 import type { Catalog, ProductCode } from "@/lib/api/sentence-lab";
 import { useLocale } from "@/components/locale/locale-provider";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ErrorState } from "@/components/shared/error-state";
 import { LoadingState } from "@/components/shared/loading-state";
 import { billingError, useMembership, usePaymentSurface } from "./use-membership";
+import { MembershipPackages } from "./membership-packages";
 import { androidClient, nativeCommerceUrl } from "@/lib/android-commerce";
 export function formatPrice(amount: number, currency: string, locale: string) { return new Intl.NumberFormat(locale, { style: "currency", currency }).format(currency === "JPY" ? amount : amount / 100); }
 export function MembershipPage() {
@@ -60,8 +61,7 @@ export function MembershipPage() {
       <p className="text-xs text-muted-foreground">{t("Web 新购买统一以美元（USD）付款，切换语言不会改变价格。")}</p>
       {catalog.isLoading ? <LoadingState /> : catalog.error ? <ErrorState message={billingError(catalog.error, t)} onRetry={() => void catalog.mutate()} /> : catalog.data && <>
         {!catalog.data.salesEnabled && <p role="status" className="rounded-xl border p-4 text-sm">{t("购买尚未开放，请稍后再来。")}</p>}
-        {catalog.data.launchEndsAt && <p className="text-sm">{t("美元首发价截止")} {date(catalog.data.launchEndsAt)}</p>}
-        <div className="grid gap-4 md:grid-cols-2">{catalog.data.products.map(product => <Card key={product.productCode}><CardHeader><CardTitle>{t(product.productCode === "DAY_PASS" ? "日票" : "年卡")}</CardTitle><CardDescription>{t(product.productCode === "DAY_PASS" ? "连续 24 小时" : "连续 365 天")}</CardDescription></CardHeader><CardContent className="flex flex-col gap-3"><p className="text-3xl font-bold">{formatPrice(product.amount, product.currency, locale)}</p>{product.launchPrice && <p className="text-sm text-muted-foreground">{t("美元首发优惠")}</p>}<p className="text-sm">{t("会员正常学习不限任务与批改次数，无隐藏每日上限。")}</p></CardContent><CardFooter><Button className="w-full" disabled={!catalog.data?.salesEnabled || !!pending} onClick={() => void checkout(product.productCode)}>{t(pending === product.productCode ? "正在打开安全支付…" : "使用 Stripe 安全支付")}</Button></CardFooter></Card>)}</div>
+        <MembershipPackages catalog={catalog.data} pending={pending} onCheckout={checkout} onOfferExpired={catalog.mutate} />
       </>}
     </>}
     {error && <p role="alert" className="text-sm text-destructive">{error}</p>}

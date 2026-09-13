@@ -53,7 +53,7 @@ describe("membership UI", () => {
     mount(<MembershipPage />);
     const buttons = await screen.findAllByRole("button", { name: locale === "en" ? "Pay securely with Stripe" : "使用 Stripe 安全支付" });
     expect(screen.queryByRole("combobox")).not.toBeInTheDocument();
-    expect(screen.getByText(formatPrice(9900, "USD", locale))).toBeInTheDocument();
+    expect(screen.getByText(locale === "en" ? "$99" : "US$99")).toBeInTheDocument();
     fireEvent.click(buttons[1]);
     await waitFor(() => expect(apiRequest).toHaveBeenCalledTimes(1));
     expect(apiFetcher).toHaveBeenCalledWith("/billing/catalog?market=GLOBAL");

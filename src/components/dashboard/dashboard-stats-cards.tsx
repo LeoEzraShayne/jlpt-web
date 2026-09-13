@@ -3,7 +3,8 @@ import { t } from "@/lib/i18n/locale-store";
 import { useLocale } from "@/components/locale/locale-provider";
 import { BookOpen, CheckCircle2, ChevronDown, GraduationCap, RefreshCcw, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { ReactNode } from "react";
+import { useRef, useState, type ReactNode } from "react";
+import { Tooltip } from "radix-ui";
 import { Card, CardContent } from "@/components/ui/card";
 import type { DashboardStats } from "@/lib/dashboard-stats";
 import type { Dashboard } from "@/lib/api/types";
@@ -54,21 +55,23 @@ export function DashboardStatsCards({
       <StatsCard
         title={t("今日完成")}
         icon={CheckCircle2}
-        columns={2}
+        completedLayout
         items={[
           { label: "完成总数", value: stats.completedTotal },
           { label: "完成复习", value: stats.completedReview },
           { label: "完成新学", value: stats.completedNew },
           {
-            label: "其中补完逾期",
-            value: stats.caughtUpOverdue,
-            detail: "已包含在完成复习中",
+            label: "今日实际用时",
+            value: minutes(allocation?.spentMinutes ?? stats.studyMinutesToday),
+            hint: "实际用时包含已完成、进行中及额外练习。",
           },
-          { label: "今日实际用时", value: minutes(allocation?.spentMinutes ?? stats.studyMinutesToday) },
+          {
+            label: "其中补充逾期",
+            value: stats.caughtUpOverdue,
+            hint: "已包含在完成复习中",
+          },
         ]}
-      >
-        <p className="mt-3 text-xs leading-5 text-muted-foreground">{t("实际用时包含已完成、进行中及额外练习。")}</p>
-      </StatsCard>
+      />
       {vocabularyCard}
       <StatsCard
         title={t("复习总账")}
@@ -123,6 +126,7 @@ interface StatItem {
   label: string;
   value: number | string;
   detail?: string;
+  hint?: string;
   color?: string;
 }
 
@@ -134,6 +138,7 @@ function StatsCard({
   items,
   columns = 2,
   mobileTwoColumns = false,
+  completedLayout = false,
   progress,
   children,
 }: {
@@ -144,6 +149,7 @@ function StatsCard({
   items: StatItem[];
   columns?: 2 | 3;
   mobileTwoColumns?: boolean;
+  completedLayout?: boolean;
   progress?: DashboardStats["progress"];
   children?: ReactNode;
 }) {
@@ -172,12 +178,12 @@ function StatsCard({
             ))}
           </div>
         )}
-        <dl className={cn("grid grid-cols-2 gap-x-5 gap-y-4", mobileTwoColumns && "max-lg:gap-3", columns === 3 && (mobileTwoColumns ? "xl:grid-cols-3" : "sm:grid-cols-3 md:grid-cols-2 xl:grid-cols-3"))}>
-          {items.map((item) => (
-            <div key={t(item.label)} className="min-w-0 border-t border-border/60 pt-2.5">
+        <dl className={cn("grid grid-cols-2 gap-x-5 gap-y-4", mobileTwoColumns && "max-lg:gap-3", columns === 3 && (mobileTwoColumns ? "xl:grid-cols-3" : "sm:grid-cols-3 md:grid-cols-2 xl:grid-cols-3"), completedLayout && "grid-cols-6 gap-x-3")}>
+          {items.map((item, index) => (
+            <div key={t(item.label)} className={cn("min-w-0 border-t border-border/60 pt-2.5", completedLayout && (index < 3 ? "col-span-2" : "col-span-3"))}>
               <dt className="flex items-center gap-1.5 text-xs leading-5 text-muted-foreground sm:text-sm">
                 {item.color && <span aria-hidden="true" className={`size-1.5 shrink-0 rounded-full ${item.color}`} />}
-                {t(item.label)}
+                {item.hint ? <StatHint label={t(item.label)} hint={t(item.hint)} /> : t(item.label)}
               </dt>
               <dd className="mt-1 text-2xl font-semibold tracking-tight tabular-nums">{item.value}</dd>
               {item.detail && <p className="mt-1 text-xs leading-5 text-muted-foreground">{t(item.detail)}</p>}
@@ -187,5 +193,44 @@ function StatsCard({
         {children}
       </CardContent>
     </Card>
+  );
+}
+
+function StatHint({ label, hint }: { label: string; hint: string }) {
+  const [open, setOpen] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  return (
+    <Tooltip.Provider delayDuration={150}>
+      <Tooltip.Root open={open} onOpenChange={setOpen}>
+        <Tooltip.Trigger asChild>
+          <button
+            type="button"
+            ref={triggerRef}
+            className="cursor-help rounded text-left underline decoration-border decoration-dotted underline-offset-4 focus-visible:outline-2 focus-visible:outline-ring"
+            onPointerDown={event => event.preventDefault()}
+            onClick={event => {
+              event.preventDefault();
+              setOpen(value => !value);
+            }}
+          >
+            {label}
+          </button>
+        </Tooltip.Trigger>
+        <Tooltip.Portal>
+          <Tooltip.Content
+            side="top"
+            sideOffset={6}
+            collisionPadding={12}
+            onPointerDownOutside={event => {
+              if (triggerRef.current?.contains(event.target as Node)) event.preventDefault();
+            }}
+            className="max-w-[min(16rem,calc(100vw-24px))] rounded-md bg-foreground px-3 py-2 text-xs leading-5 text-background shadow-md"
+          >
+            {hint}
+            <Tooltip.Arrow className="fill-foreground" />
+          </Tooltip.Content>
+        </Tooltip.Portal>
+      </Tooltip.Root>
+    </Tooltip.Provider>
   );
 }

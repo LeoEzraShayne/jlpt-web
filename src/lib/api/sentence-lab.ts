@@ -5,7 +5,7 @@ export type ProductCode = 'DAY_PASS' | 'YEAR_PASS';
 export type TaskKind = 'GRAMMAR' | 'VOCABULARY';
 export interface CatalogProduct {
   productCode: ProductCode; currency: 'USD' | 'JPY'; amount: number;
-  durationSeconds: number; launchPrice: boolean;
+  regularAmount?: number; durationSeconds: number; launchPrice: boolean;
 }
 export interface Catalog {
   market: BillingMarket; salesEnabled: boolean; launchAt: string | null;
