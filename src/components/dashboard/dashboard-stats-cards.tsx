@@ -57,17 +57,17 @@ export function DashboardStatsCards({
       />
       <StatsCard
         title={t("今日剩余")}
-        mobileTwoColumns
         icon={BookOpen}
-        columns={2}
+        columns={3}
         items={[
           { label: "待开始复习", value: stats.pendingReview },
           { label: "待开始新语法", value: stats.pendingNew },
           {
             label: "进行中",
             value: stats.inProgressReview + stats.inProgressNew,
-            detail: `复习 ${stats.inProgressReview} · 新学 ${stats.inProgressNew}`,
           },
+          { label: "进行中复习", value: stats.inProgressReview },
+          { label: "进行中新学", value: stats.inProgressNew },
           { label: "剩余任务用时", value: minutes(estimatedMinutes) },
         ]}
       >
@@ -137,7 +137,6 @@ export function StatsCard({
   meta,
   items,
   columns = 2,
-  mobileTwoColumns = false,
   completedLayout = false,
   progress,
   children,
@@ -148,7 +147,6 @@ export function StatsCard({
   meta?: string;
   items: StatItem[];
   columns?: 2 | 3;
-  mobileTwoColumns?: boolean;
   completedLayout?: boolean;
   progress?: DashboardStats["progress"];
   children?: ReactNode;
@@ -178,7 +176,7 @@ export function StatsCard({
             ))}
           </div>
         )}
-        <dl className={cn("grid grid-cols-2 gap-x-4 gap-y-3", columns === 3 && (mobileTwoColumns ? "xl:grid-cols-3" : "sm:grid-cols-3 md:grid-cols-2 xl:grid-cols-3"), completedLayout && "grid-cols-6 gap-x-3")}>
+        <dl className={cn("grid grid-cols-2 gap-x-4 gap-y-3", columns === 3 && "grid-cols-3 gap-x-3", completedLayout && "grid-cols-6 gap-x-3")}>
           {items.map((item, index) => (
             <div key={t(item.label)} className={cn("min-w-0 border-t border-border/60 pt-2", completedLayout && (index < 3 ? "col-span-2" : "col-span-3"))}>
               <dt className="flex items-center gap-1.5 text-xs leading-5 text-muted-foreground sm:text-sm">

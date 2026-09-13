@@ -91,7 +91,7 @@ test("phone lists stack while tablet grids preserve odd cards, actions, paginati
       expect(Math.abs(buttonBox.y + buttonBox.height / 2 - durationBox.y - durationBox.height / 2)).toBeLessThan(1);
       expect(buttonBox.x).toBeGreaterThan(durationBox.x + durationBox.width);
       const stats = page.getByLabel("今日剩余", { exact: true }).locator("dl");
-      expect(await stats.evaluate(el => getComputedStyle(el).gridTemplateColumns.split(" ").length)).toBe(2);
+      expect(await stats.evaluate(el => getComputedStyle(el).gridTemplateColumns.split(" ").length)).toBe(3);
     }
   }
   await page.goto("/profile");

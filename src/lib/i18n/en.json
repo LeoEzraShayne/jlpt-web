@@ -468,6 +468,8 @@
   "· 当前节奏可行": "· Current pace is on track",
   "日期": "Date",
   "新学": "New",
+  "进行中复习": "Review in progress",
+  "进行中新学": "New learning in progress",
   "项": "items",
   "根据当前状态估算，假设每次复习均能记住；实际安排会持续调整。": "Estimated from current progress, assuming successful recall in each review. The actual schedule will adapt.",
   "退出失败，请重试": "Sign-out failed. Please retry.",
