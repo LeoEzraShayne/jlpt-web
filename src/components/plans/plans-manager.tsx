@@ -72,7 +72,7 @@ export function PlansManager({ settingsCard }: { settingsCard?: ReactNode } = {}
       {!settingsCard && (
         <Preferences key={user.targetLevel} user={user} onSaved={refresh} />
       )}
-      <div className="grid min-w-0 grid-cols-1 gap-3 min-[37.5rem]:grid-cols-2 lg:gap-5">
+      <div className="grid min-w-0 grid-cols-1 gap-3 min-[37.5rem]:grid-cols-2 lg:grid-cols-4 lg:gap-5">
         {levels.map((level) => {
           const plan = items.find(
             (item) => item.level === level && currentPlan(item),
@@ -226,7 +226,7 @@ function LevelPlan({
     }
   }
   return (
-    <Card className={cn("min-w-0 self-start max-lg:[--card-spacing:--spacing(3)] max-lg:[&_button]:h-auto max-lg:[&_button]:min-h-11 max-lg:[&_button]:whitespace-normal max-lg:[&_button]:px-2", (editing || forecast) && "max-lg:col-span-full")} aria-label={t(`${level} 学习计划`)}>
+    <Card className={cn("min-w-0 self-start max-lg:[--card-spacing:--spacing(3)] max-lg:[&_button]:h-auto max-lg:[&_button]:min-h-11 max-lg:[&_button]:whitespace-normal max-lg:[&_button]:px-2", (editing || forecast) && "max-lg:col-span-full lg:col-span-2")} aria-label={t(`${level} 学习计划`)}>
       <CardHeader>
         <CardTitle className="flex flex-wrap items-center gap-2">
           {level} {level === user.targetLevel && <Badge>{t("主目标")}</Badge>}
