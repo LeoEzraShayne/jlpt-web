@@ -18,6 +18,7 @@ const structuredData = {
 };
 
 const sections = [
+  { title: "安卓账号与 Google Play", paragraphs: ["安卓绑定后，应用在设备上加密保存登录凭据，并向服务端发送账号关联信息，以同步会员和学习权益。解除设备绑定会撤销该设备的登录授权，不会删除学习账号。", "通过 Google Play 购买时，Google 处理付款；应用服务端使用购买凭证、商品编号和随机账号关联标识核实购买，并保存订单、付款及退款状态。应用不接收 Google 账号密码或完整银行卡号。"] },
   { title: "购买与会员", paragraphs: ["Web 付款在 Stripe 托管页面完成。Stripe 处理付款所需的支付信息；应用不保存完整银行卡号。服务端保存订单编号、商品、币种、成交金额、付款及退款状态和会员权益，用于核实付款、提供会员、处理退款和对账。", "会员为一次性购买，不自动续费。日票连续 24 小时，年卡连续 365 天；续购保留剩余时长。未付款或仅返回成功页面不会开通会员。Web 新购买统一以美元（USD）付款；Google Play 按美元基准自动换算当地货币。界面语言不会决定价格，历史订单保留原币种。"] },
   {
     title: "收集的数据",
@@ -37,7 +38,22 @@ const sections = [
     title: "AI 批改",
     paragraphs: [
       "为了生成语法批改，你提交的日语句子、目标语法和必要的学习上下文会发送给应用当前配置的 AI 服务提供商处理。代码支持 Google Gemini 与 DeepSeek；实际使用的提供商由服务端配置决定。",
+      "使用 Gemini 免费服务时，Google 可使用提交内容和生成结果改进产品及机器学习技术，并可能由人工审核。不要提交敏感、保密或个人信息。",
       "请不要在造句或场景描述中输入姓名、联系方式、账号、住址、财务信息或其他不必要的个人敏感信息。AI 反馈可能不准确，不应视为权威语言或考试结论。",
+    ],
+  },
+  {
+    title: "安卓激励广告与隐私选择",
+    paragraphs: [
+      "安卓激励广告开放后，非会员可以自行选择观看。Google 广告 SDK 会处理 IP 地址（可用于估算大致位置）、广告互动、诊断信息，以及广告或设备标识，用于广告、分析和防欺诈；这些数据也会由 Google 处理。数据通过 TLS 加密传输。",
+      "广告奖励核验使用随机奖励标识和交易信息，不将你的邮箱、造句或录音作为广告奖励参数发送。需要征求同意时，应用通过 Google 的同意界面提供选择，并在需要时提供隐私选项入口；具体可用广告取决于你的选择和所在地区。",
+    ],
+  },
+  {
+    title: "旧功过格资料",
+    paragraphs: [
+      "安卓本地恢复页面读取支持格式的旧记录、待办、反思草稿和录音，用于查看、播放及由你选择位置导出。恢复页面不会自动上传这些资料。你选择的文件存储服务可能按其设置同步导出文件。",
+      "旧功过格网页入口打开原有独立服务；其账号、云端资料和订阅由原服务管理，并适用原服务的隐私说明。",
     ],
   },
   {
@@ -86,6 +102,12 @@ export function PrivacyView() {
         </p>
         <p className="mt-4 leading-7 text-muted-foreground">
           {t("项目联系渠道见")}<Link href="/about" className="mx-1 text-secondary-foreground hover:underline">{t("关于与联系")}</Link>{t("页面。")}</p>
+        <nav className="mt-6 flex flex-wrap gap-x-6 gap-y-3 text-sm" aria-label={t("服务提供商隐私说明")}>
+          <a className="underline underline-offset-4" href="https://ai.google.dev/gemini-api/terms">{t("Gemini 服务条款")}</a>
+          <a className="underline underline-offset-4" href="https://cdn.deepseek.com/policies/en-US/deepseek-open-platform-terms-of-service.html">{t("DeepSeek 开放平台条款")}</a>
+          <a className="underline underline-offset-4" href="https://policies.google.com/privacy">{t("Google 隐私政策")}</a>
+          <a className="underline underline-offset-4" href="https://official.meritledger.org/privacy-policy">{t("旧功过格隐私政策")}</a>
+        </nav>
       </main>
     </PublicPage>
   );

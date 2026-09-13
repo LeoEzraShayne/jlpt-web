@@ -811,5 +811,20 @@
   "实际价格以 Google Play 显示的当地货币为准。": "The final price is shown in your local currency by Google Play.",
   "账号删除申请": "Request account deletion",
   "账号与数据删除申请": "Account and data deletion request",
-  "账号与数据删除采用邮件申请、人工核验和处理方式。你可以在删除申请页面了解服务范围及需要保留的数据说明；发送申请不代表删除已经完成。请勿在公开 issue 中发布个人数据。": "Account and data deletion uses email requests with manual verification and processing. The deletion request page explains the service scope and retained records; sending a request does not complete deletion. Do not post personal data in public issues."
+  "账号与数据删除采用邮件申请、人工核验和处理方式。你可以在删除申请页面了解服务范围及需要保留的数据说明；发送申请不代表删除已经完成。请勿在公开 issue 中发布个人数据。": "Account and data deletion uses email requests with manual verification and processing. The deletion request page explains the service scope and retained records; sending a request does not complete deletion. Do not post personal data in public issues.",
+  "安卓账号与 Google Play": "Android account and Google Play",
+  "安卓绑定后，应用在设备上加密保存登录凭据，并向服务端发送账号关联信息，以同步会员和学习权益。解除设备绑定会撤销该设备的登录授权，不会删除学习账号。": "After you link Android, the app encrypts sign-in credentials on the device and sends account association information to the server to synchronize membership and study access. Unlinking revokes this device’s sign-in authorization; it does not delete your learning account.",
+  "通过 Google Play 购买时，Google 处理付款；应用服务端使用购买凭证、商品编号和随机账号关联标识核实购买，并保存订单、付款及退款状态。应用不接收 Google 账号密码或完整银行卡号。": "Google processes Google Play payments. Our server uses purchase tokens, product IDs and a random account association identifier to verify purchases, and stores orders, payment status and refund status. The app does not receive your Google password or full payment card number.",
+  "使用 Gemini 免费服务时，Google 可使用提交内容和生成结果改进产品及机器学习技术，并可能由人工审核。不要提交敏感、保密或个人信息。": "When unpaid Gemini services are used, Google may use submitted content and generated responses to improve its products and machine learning technologies, including human review. Do not submit sensitive, confidential or personal information.",
+  "安卓激励广告与隐私选择": "Android rewarded ads and privacy choices",
+  "安卓激励广告开放后，非会员可以自行选择观看。Google 广告 SDK 会处理 IP 地址（可用于估算大致位置）、广告互动、诊断信息，以及广告或设备标识，用于广告、分析和防欺诈；这些数据也会由 Google 处理。数据通过 TLS 加密传输。": "When Android rewarded ads are available, non-members can choose to watch them. The Google ads SDK processes IP addresses (which may indicate approximate location), ad interactions, diagnostics, and advertising or device identifiers for advertising, analytics and fraud prevention. Google also processes this data. Transmission is encrypted with TLS.",
+  "广告奖励核验使用随机奖励标识和交易信息，不将你的邮箱、造句或录音作为广告奖励参数发送。需要征求同意时，应用通过 Google 的同意界面提供选择，并在需要时提供隐私选项入口；具体可用广告取决于你的选择和所在地区。": "Reward verification uses random reward identifiers and transaction information. Your email, sentences and recordings are not sent as reward parameters. Where consent is required, the app offers choices through Google’s consent interface and provides a privacy options entry when required. Available ads depend on your choices and region.",
+  "旧功过格资料": "Legacy Merit Ledger data",
+  "安卓本地恢复页面读取支持格式的旧记录、待办、反思草稿和录音，用于查看、播放及由你选择位置导出。恢复页面不会自动上传这些资料。你选择的文件存储服务可能按其设置同步导出文件。": "The Android local recovery page reads supported legacy records, tasks, reflection drafts and recordings for viewing, playback and export to a location you choose. It does not upload this data automatically. Your chosen file storage service may synchronize exported files according to its settings.",
+  "旧功过格网页入口打开原有独立服务；其账号、云端资料和订阅由原服务管理，并适用原服务的隐私说明。": "The legacy Merit Ledger web entry opens the original separate service. That service manages its own accounts, cloud data and subscriptions under its own privacy notice.",
+  "服务提供商隐私说明": "Provider privacy information",
+  "Gemini 服务条款": "Gemini terms of service",
+  "DeepSeek 开放平台条款": "DeepSeek Open Platform terms",
+  "Google 隐私政策": "Google privacy policy",
+  "旧功过格隐私政策": "Legacy Merit Ledger privacy policy"
 }
