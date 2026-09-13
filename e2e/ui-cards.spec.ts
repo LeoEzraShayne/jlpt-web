@@ -44,11 +44,24 @@ test("compact grids preserve odd cards, readable actions, pagination and plan ed
   }
   await page.goto("/plans");
   const plan = page.getByLabel("N1 学习计划", { exact: true });
+  const compactWidth = (await plan.boundingBox())!.width;
   await plan.getByRole("button", { name: "调整计划" }).click();
   await expect(plan.getByLabel("计划开始日期")).toBeVisible();
+  if (width < 1024) {
+    expect((await plan.boundingBox())!.width).toBeGreaterThan(compactWidth * 1.9);
+    const start = (await plan.getByLabel("计划开始日期").boundingBox())!;
+    const end = (await plan.getByLabel("计划截止日期").boundingBox())!;
+    expect(end.y).toBeGreaterThan(start.y);
+    expect(start.x).toBe(end.x);
+  }
   await expectNoHorizontalOverflow(page);
   await plan.getByRole("button", { name: "取消", exact: true }).click();
   await expect(plan.getByRole("button", { name: "调整计划" })).toBeVisible();
+  expect((await plan.boundingBox())!.width).toBe(compactWidth);
+  await plan.getByRole("button", { name: "计划预估", exact: true }).click();
+  if (width < 1024) expect((await plan.boundingBox())!.width).toBeGreaterThan(compactWidth * 1.9);
+  await plan.getByRole("button", { name: "收起预估", exact: true }).click();
+  expect((await plan.boundingBox())!.width).toBe(compactWidth);
 });
 
 

@@ -2,6 +2,7 @@
 import { t } from "@/lib/i18n/locale-store";
 import { useLocale } from "@/components/locale/locale-provider";
 import { FormEvent, useState } from "react";
+import { cn } from "@/lib/utils";
 import { useSWRConfig } from "swr";
 import { useMe, usePlans } from "@/hooks/use-api";
 import { apiRequest } from "@/lib/api/client";
@@ -221,7 +222,7 @@ function LevelPlan({
     }
   }
   return (
-    <Card className="min-w-0 self-start max-lg:[--card-spacing:--spacing(3)] max-lg:[&_button]:h-auto max-lg:[&_button]:min-h-11 max-lg:[&_button]:whitespace-normal max-lg:[&_button]:px-2 max-lg:[&_input[type=date]]:px-1" aria-label={t(`${level} 学习计划`)}>
+    <Card className={cn("min-w-0 self-start max-lg:[--card-spacing:--spacing(3)] max-lg:[&_button]:h-auto max-lg:[&_button]:min-h-11 max-lg:[&_button]:whitespace-normal max-lg:[&_button]:px-2", (editing || forecast) && "max-lg:col-span-2")} aria-label={t(`${level} 学习计划`)}>
       <CardHeader>
         <CardTitle className="flex flex-wrap items-center gap-2">
           {level} {level === user.targetLevel && <Badge>{t("主目标")}</Badge>}
