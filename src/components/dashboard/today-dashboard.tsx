@@ -242,7 +242,7 @@ function TaskCard({ task }: { task: StudyTask }) {
   const explanationLocale = useExplanationLocale();
   useLocale();
   return (
-    <Card className="h-full min-w-0 warm-shadow max-lg:[--card-spacing:--spacing(3)] md:min-h-56">
+    <Card className={cn("h-full min-w-0 warm-shadow max-lg:[--card-spacing:--spacing(3)]", task.type === "LEARN" ? "md:min-h-51" : "md:min-h-56")}>
       <CardContent className="flex h-full min-w-0 flex-col">
         <span className="w-fit rounded-full bg-secondary px-3 py-1 text-xs font-medium text-secondary-foreground">
           {task.grammar.level} · {t(task.type === "LEARN"
