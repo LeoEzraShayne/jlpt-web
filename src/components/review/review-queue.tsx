@@ -3,12 +3,13 @@ import { localizedText } from "@/lib/i18n/content";
 import { useExplanationLocale } from "@/hooks/use-explanation-locale";
 import { t } from "@/lib/i18n/locale-store";
 import { useLocale } from "@/components/locale/locale-provider";
-import { ChevronDown, ChevronUp, Clock3, RefreshCcw } from "lucide-react";
+import { ChevronDown, ChevronUp, Clock3 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 import useSWRInfinite from "swr/infinite";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { GrammarSummaryCard } from "@/components/shared/grammar-summary-card";
 import { EmptyState } from "@/components/shared/empty-state";
 import { ErrorState } from "@/components/shared/error-state";
 import { LoadingState } from "@/components/shared/loading-state";
@@ -177,42 +178,30 @@ function Group({
         aria-label={t(`${title}复习列表`)}
       >
         {items.map((item) => (
-          <Card key={item.id} className="h-full min-w-0 warm-shadow max-lg:[--card-spacing:--spacing(3)]">
-            <CardContent className="flex h-full min-w-0 flex-col gap-3">
-              <div className="flex min-w-0 flex-col items-start gap-3 lg:flex-row">
-                <span className="grid size-10 shrink-0 place-items-center rounded-full bg-secondary text-secondary-foreground">
-                  <RefreshCcw className="size-5" />
-                </span>
-                <div className="min-w-0 flex-1">
-                  <h3 className="break-words font-semibold leading-7">
-                    {explanationLocale === "en" ? item.progress.grammar.displayTitle ?? item.progress.grammar.title : item.progress.grammar.title}
-                    <span
-                      className={`ml-1 inline-flex max-w-full whitespace-normal rounded-full px-2 py-0.5 align-middle text-xs font-normal leading-5 ${tone}`}
-                    >
-                      {item.overdueDays > 0
-                        ? t(`逾期 ${item.overdueDays} 天`)
-                        : title}
-                    </span>
-                  </h3>
-                  <p className="mt-1 line-clamp-2 break-words text-sm text-muted-foreground">
-                    {localizedText(item.progress.grammar.localized, "explanation", item.progress.grammar.chineseExplanation, explanationLocale)}
-                  </p>
-                </div>
-              </div>
-              <div className="mt-auto flex min-w-0 flex-col items-start gap-3 pt-2 lg:flex-row lg:items-center lg:justify-between">
-                <span className="flex min-w-0 items-center gap-1 text-xs text-muted-foreground">
-                  <Clock3 className="size-4" />{t("预计")}{item.estimatedMinutes} {t("分钟")}</span>
-                <StartStudyButton
-                  className="max-lg:w-full"
-                  buttonClassName="h-auto max-lg:min-h-11 whitespace-normal px-2 lg:w-auto lg:min-w-24 lg:px-4"
-                  grammarId={item.progress.grammar.id}
-                  mode="REVIEW"
-                  label={t("开始复习")}
-                  variant="outline"
-                />
-              </div>
-            </CardContent>
-          </Card>
+          <GrammarSummaryCard
+            key={item.id}
+            headingLevel="h3"
+            metadata={
+              <span className={`max-w-full rounded-full px-2 py-1 ${tone}`}>
+                {item.overdueDays > 0 ? t(`逾期 ${item.overdueDays} 天`) : t(title)}
+              </span>
+            }
+            title={explanationLocale === "en" ? item.progress.grammar.displayTitle ?? item.progress.grammar.title : item.progress.grammar.title}
+            description={localizedText(item.progress.grammar.localized, "explanation", item.progress.grammar.chineseExplanation, explanationLocale)}
+            footerInfo={
+              <span className="flex min-w-0 items-center gap-1 rounded-full bg-muted px-3 py-1.5 text-xs font-medium text-muted-foreground">
+                <Clock3 className="size-3.5 shrink-0" />{t("预计")}{item.estimatedMinutes} {t("分钟")}
+              </span>
+            }
+            action={
+              <StartStudyButton
+                className="ml-auto min-w-0 max-w-[60%]"
+                buttonClassName="h-auto w-auto max-w-full whitespace-normal rounded-full px-3"
+                grammarId={item.progress.grammar.id}
+                mode="REVIEW" label={t("开始复习")} variant="outline"
+              />
+            }
+          />
         ))}
       </div>
     </section>

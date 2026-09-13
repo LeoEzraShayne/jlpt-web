@@ -1,11 +1,11 @@
 "use client";
 import { currentLocale, t } from "@/lib/i18n/locale-store";
 import { useLocale } from "@/components/locale/locale-provider";
-import { History, RotateCcw } from "lucide-react";
+import { RotateCcw } from "lucide-react";
 import Link from "next/link";
 import useSWRInfinite from "swr/infinite";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { GrammarSummaryCard } from "@/components/shared/grammar-summary-card";
 import { EmptyState } from "@/components/shared/empty-state";
 import { ErrorState } from "@/components/shared/error-state";
 import { LoadingState } from "@/components/shared/loading-state";
@@ -54,46 +54,28 @@ export function HistoryList() {
           aria-label={t("学习记录列表")}
         >
           {items.map((attempt) => (
-            <Card key={attempt.id} className="h-full min-w-0 warm-shadow max-lg:[--card-spacing:--spacing(3)]">
-              <CardContent className="flex h-full min-w-0 flex-col gap-3">
-                <div className="flex min-w-0 flex-col items-start gap-3 lg:flex-row">
-                  <span className="grid size-10 shrink-0 place-items-center rounded-full bg-secondary text-secondary-foreground">
-                    <History className="size-5" />
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <h2 className="break-words font-semibold">
-                      {attempt.grammar?.title}
-                    </h2>
-                    <span className="mt-1 block text-xs text-muted-foreground">
-                      {new Date(attempt.createdAt).toLocaleString(currentLocale() === "en" ? "en-US" : "zh-CN")}
-                    </span>
-                  </div>
-                </div>
-                <p className="line-clamp-2 break-words text-sm text-muted-foreground">
-                  {attempt.sentence}
-                </p>
-                <div className="mt-auto flex items-center justify-between gap-3 pt-2">
-                  {attempt.aiJob?.result && (
-                    <strong
-                      className={`text-2xl ${historyScoreTone(attempt.aiJob.result.totalScore)}`}
-                    >
-                      {attempt.aiJob.result.totalScore}
-                      <span className="ml-0.5 text-sm">{t("分")}</span>
-                    </strong>
-                  )}
-                  <Button
-                    asChild
-                    variant="outline"
-                    size="sm"
-                    className="ml-auto max-lg:min-h-11"
-                  >
-                    <Link href={`/history/${attempt.id}`}>
-                      <RotateCcw />
-                      {t("查看详情")}</Link>
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+            <GrammarSummaryCard
+              key={attempt.id}
+              metadata={
+                <span className="py-1 text-muted-foreground">
+                  {new Date(attempt.createdAt).toLocaleString(currentLocale() === "en" ? "en-US" : "zh-CN")}
+                </span>
+              }
+              title={attempt.grammar?.title}
+              description={attempt.sentence}
+              footerInfo={attempt.aiJob?.result && (
+                <strong className={`text-2xl ${historyScoreTone(attempt.aiJob.result.totalScore)}`}>
+                  {attempt.aiJob.result.totalScore}
+                  <span className="ml-0.5 text-sm">{t("分")}</span>
+                </strong>
+              )}
+              action={
+                <Button asChild variant="outline" size="sm"
+                  className="ml-auto h-auto min-w-0 max-w-[60%] rounded-full px-3 whitespace-normal max-lg:min-h-11">
+                  <Link href={`/history/${attempt.id}`}><RotateCcw />{t("查看详情")}</Link>
+                </Button>
+              }
+            />
           ))}
           {hasMore && (
             <Button

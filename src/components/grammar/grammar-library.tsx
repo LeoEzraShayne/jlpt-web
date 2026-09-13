@@ -3,14 +3,14 @@ import { localizeGrammar } from "@/lib/i18n/content";
 import { useExplanationLocale } from "@/hooks/use-explanation-locale";
 import { t } from "@/lib/i18n/locale-store";
 import { useLocale } from "@/components/locale/locale-provider";
-import { LibraryCard, LibraryCardGrid } from "@/components/shared/library-card";
+import { LibraryCardGrid } from "@/components/shared/library-card";
 
 import { Search } from "lucide-react";
 import Link from "next/link";
 import { useDeferredValue, useMemo, useState } from "react";
 import useSWRInfinite from "swr/infinite";
 import { Button } from "@/components/ui/button";
-import { CardContent } from "@/components/ui/card";
+import { GrammarSummaryCard } from "@/components/shared/grammar-summary-card";
 import { EmptyState } from "@/components/shared/empty-state";
 import { ErrorState } from "@/components/shared/error-state";
 import { LoadingState } from "@/components/shared/loading-state";
@@ -150,39 +150,30 @@ export function GrammarLibrary() {
             {items.map((item) => {
               const progress = item.progress?.[0];
               return (
-                <LibraryCard key={item.id} className="h-full max-lg:[--card-spacing:--spacing(3)]">
-                  <CardContent className="flex h-full min-w-0 flex-col">
-                    <div className="mb-3 flex min-w-0 flex-wrap items-center gap-1.5 text-xs">
-                      <GrammarStatus progress={progress} />
-                      <span className="rounded-full bg-primary/10 px-1.5 py-1 font-medium text-primary">
-                        {t(progress?.lastScore != null
-                          ? `最近 ${progress.lastScore} 分`
-                          : "尚未练习")}
-                      </span>
-                    </div>
-                    <h2 className="min-w-0 break-words text-lg font-semibold">
-                      {item.title}
-                    </h2>
-                    <p className="mt-1 line-clamp-2 break-words text-sm text-muted-foreground">
-                      {item.chineseExplanation}
-                    </p>
-                    <div className="mt-auto flex min-w-0 items-center justify-between gap-2 pt-4 lg:pt-3">
-                      <span className="min-w-0 rounded-full bg-secondary px-1.5 py-1 text-xs font-medium text-secondary-foreground">
-                        {statusSummary(progress)}
-                      </span>
-                      <Button
-                        asChild
-                        size="sm"
-                        variant={progress ? "outline" : "default"}
-                        className="h-auto min-w-0 max-w-[50%] rounded-full px-3 py-1.5 whitespace-normal max-lg:min-h-11 lg:text-xs"
-                      >
-                        <Link href={`/grammar/${item.id}`}>
-                          {t(progress ? "查看并练习" : "开始学习")}
-                        </Link>
-                      </Button>
-                    </div>
-                  </CardContent>
-                </LibraryCard>
+                <GrammarSummaryCard
+                  key={item.id}
+                  metadata={<>
+                    <GrammarStatus progress={progress} />
+                    <span className="rounded-full bg-primary/10 px-1.5 py-1 font-medium text-primary">
+                      {t(progress?.lastScore != null ? `最近 ${progress.lastScore} 分` : "尚未练习")}
+                    </span>
+                  </>}
+                  title={item.title}
+                  description={item.chineseExplanation}
+                  footerInfo={
+                    <span className="min-w-0 rounded-full bg-secondary px-1.5 py-1 text-xs font-medium text-secondary-foreground">
+                      {statusSummary(progress)}
+                    </span>
+                  }
+                  action={
+                    <Button
+                      asChild size="sm" variant={progress ? "outline" : "default"}
+                      className="h-auto min-w-0 max-w-[50%] rounded-full px-3 py-1.5 whitespace-normal max-lg:min-h-11 lg:text-xs"
+                    >
+                      <Link href={`/grammar/${item.id}`}>{t(progress ? "查看并练习" : "开始学习")}</Link>
+                    </Button>
+                  }
+                />
               );
             })}
           </LibraryCardGrid>
