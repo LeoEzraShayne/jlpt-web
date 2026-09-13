@@ -19,7 +19,7 @@ export function DashboardActionCard({ icon: Icon, label, children, footer, ariaL
           <p className="min-w-0 text-sm font-semibold text-primary">{label}</p>
         </div>
         <div className="min-w-0">{children}</div>
-        <div className="w-full min-w-0 pt-1 [&_[data-slot=button]]:min-w-0 [&_[data-slot=button]]:whitespace-nowrap [&_[data-slot=button]]:px-2.5">{footer}</div>
+        <div className="mt-auto w-full min-w-0 pt-1 [&_[data-slot=button]]:min-w-0 [&_[data-slot=button]]:whitespace-nowrap [&_[data-slot=button]]:px-2.5">{footer}</div>
       </CardContent>
     </Card>
   );

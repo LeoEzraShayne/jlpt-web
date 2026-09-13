@@ -175,7 +175,7 @@ function RecommendedTask({ task }: { task: StudyTask }) {
       label={isReview
         ? task.overdueDays > 0 ? t(`最优先 · 已逾期 ${task.overdueDays} 天`) : t("最优先 · 今天到期")
         : t("开始今天的新语法")}
-      footer={<TaskAction task={task} defaultEnter />}
+      footer={<TaskAction className="items-end" task={task} defaultEnter />}
     >
       <h2 className="break-words text-2xl font-bold leading-snug">
         {explanationLocale === "en" ? task.grammar.displayTitle ?? task.grammar.title : task.grammar.title}
