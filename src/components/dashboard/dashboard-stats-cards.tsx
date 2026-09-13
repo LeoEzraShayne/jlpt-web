@@ -32,8 +32,12 @@ export function DashboardStatsCards({
 }: DashboardStatsCardsProps) {
   useLocale();
   return (
-    <section aria-label={t("今日学习概览")} className="grid min-w-0 grid-cols-1 gap-4 min-[37.5rem]:auto-rows-fr min-[37.5rem]:grid-cols-2 lg:grid-cols-3 [&:has(details[open])]:auto-rows-auto [&:has(details[open])]:items-start [&:has(details[open])_[data-slot=card]]:h-auto">
-      {recommendedTask && <div className="min-w-0">{recommendedTask}</div>}
+    <section aria-label={t("今日学习概览")} className="grid min-w-0 gap-4">
+      {(recommendedTask || vocabularyCard) && <div className={cn("grid min-w-0 gap-4", recommendedTask && vocabularyCard && "min-[37.5rem]:grid-cols-2")}>
+        {recommendedTask && <div className="min-w-0">{recommendedTask}</div>}
+        {vocabularyCard}
+      </div>}
+      <div className="grid min-w-0 gap-4 min-[37.5rem]:auto-rows-fr min-[37.5rem]:grid-cols-2 xl:grid-cols-4 [&:has(details[open])]:auto-rows-auto [&:has(details[open])]:items-start">
       <StatsCard
         title={t("今日剩余")}
         mobileTwoColumns
@@ -72,7 +76,6 @@ export function DashboardStatsCards({
           },
         ]}
       />
-      {vocabularyCard}
       <StatsCard
         title={t("复习总账")}
         icon={RefreshCcw}
@@ -102,6 +105,7 @@ export function DashboardStatsCards({
           { label: "尚未学习", value: stats.progress.notStarted, color: "bg-muted-foreground/25" },
         ]}
       />
+      </div>
     </section>
   );
 }
