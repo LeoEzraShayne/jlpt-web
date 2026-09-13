@@ -147,20 +147,22 @@ function Preferences({
       </CardHeader>
       <CardContent>
         <form onSubmit={save} className="flex flex-col gap-5">
-          <label className="flex min-w-0 items-center gap-3 text-sm">
+          <div className="flex min-w-0 items-center gap-3">
+          <label className="flex min-w-0 flex-1 items-center gap-3 text-sm">
             <span className="shrink-0">{t("主目标")}</span><select
               aria-label={t("主目标")}
               value={target}
               onChange={(e) => setTarget(e.target.value as JlptLevel)}
-              className={cn(selectClass, "mt-0 min-w-0 flex-1")}
+              className={cn(selectClass, "mt-0 min-w-14 flex-1")}
             >
               {levels.map((level) => (
                 <option key={level}>{level}</option>
               ))}
             </select>
           </label>
-          <Button disabled={busy} type="submit">
+          <Button disabled={busy} type="submit" size="sm" className="shrink-0 rounded-full">
             {t("保存每日安排")}</Button>
+          </div>
           {message && (
             <p role="status" className="text-sm">
               {t(message)}
