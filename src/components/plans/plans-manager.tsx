@@ -1,7 +1,7 @@
 "use client";
 import { t } from "@/lib/i18n/locale-store";
 import { useLocale } from "@/components/locale/locale-provider";
-import { FormEvent, useState } from "react";
+import { FormEvent, type ReactNode, useState } from "react";
 import { cn } from "@/lib/utils";
 import { useSWRConfig } from "swr";
 import { useMe, usePlans } from "@/hooks/use-api";
@@ -32,7 +32,7 @@ export const currentPlan = (plan: StudyPlan) =>
   ["ACTIVE", "PAUSED"].includes(plan.status);
 const selectClass = "mt-2 w-full rounded-lg border bg-background p-2 text-sm";
 
-export function PlansManager() {
+export function PlansManager({ settingsCard }: { settingsCard?: ReactNode } = {}) {
   useLocale();
   const me = useMe();
   const plans = usePlans();
@@ -58,16 +58,20 @@ export function PlansManager() {
   const items = plans.data.items;
   return (
     <div className="flex min-w-0 flex-col gap-5">
+      {settingsCard && (
+        <div className="grid min-w-0 grid-cols-1 items-stretch gap-5 lg:grid-cols-2" aria-label={t("学习设置")}>
+          {settingsCard}
+          <Preferences key={user.targetLevel} user={user} onSaved={refresh} />
+        </div>
+      )}
       <div>
         <h2 className="text-xl font-bold">{t("学习计划")}</h2>
         <p className="mt-2 text-sm text-muted-foreground">
           {t("每级别一个当前计划，到期复习全部安排。暂停后可随时恢复。")}</p>
       </div>
-      <Preferences
-        key={user.targetLevel}
-        user={user}
-        onSaved={refresh}
-      />
+      {!settingsCard && (
+        <Preferences key={user.targetLevel} user={user} onSaved={refresh} />
+      )}
       <div className="grid min-w-0 grid-cols-1 gap-3 min-[37.5rem]:grid-cols-2 lg:gap-5">
         {levels.map((level) => {
           const plan = items.find(

@@ -80,6 +80,22 @@ test("phone lists stack while tablet grids preserve odd cards, actions, paginati
       expect(await stats.evaluate(el => getComputedStyle(el).gridTemplateColumns.split(" ").length)).toBe(2);
     }
   }
+  await page.goto("/profile");
+  const settings = page.getByLabel("学习设置", { exact: true });
+  await expect(settings.locator(':scope > [data-slot="card"]')).toHaveCount(2);
+  const settingsCards = await settings.locator(':scope > [data-slot="card"]').all();
+  const languageBox = (await settingsCards[0].boundingBox())!;
+  const scheduleBox = (await settingsCards[1].boundingBox())!;
+  if (width >= 1024) {
+    expect(scheduleBox.y).toBe(languageBox.y);
+    expect(scheduleBox.x).toBeGreaterThan(languageBox.x + languageBox.width);
+    expect(Math.abs(scheduleBox.width - languageBox.width)).toBeLessThan(1);
+  } else expect(scheduleBox.y).toBeGreaterThan(languageBox.y);
+  await expect(settings.getByRole("link", { name: "会员与额度", exact: true })).toHaveAttribute("href", "/membership");
+  await expect(settings.getByLabel("讲解语言", { exact: true })).toBeVisible();
+  await settings.getByRole("button", { name: "保存每日安排", exact: true }).click();
+  await expect(settings.getByRole("status")).toHaveText("主目标已保存。");
+  await expectNoHorizontalOverflow(page);
   await page.goto("/plans");
   const plan = page.getByLabel("N1 学习计划", { exact: true });
   const compactWidth = (await plan.boundingBox())!.width;
@@ -128,7 +144,7 @@ test("English cards remain readable and single-column login has a 24px section g
     }
     await route.fulfill({ contentType: "application/json", body: JSON.stringify(layoutFixtureResponse(route.request().url())) });
   });
-  for (const path of ["/today", "/grammar", "/review", "/history", "/plans"]) {
+  for (const path of ["/today", "/grammar", "/review", "/history", "/plans", "/profile"]) {
     await page.goto(path);
     await expect(page.locator('[data-slot="card"]').first()).toBeVisible();
     await expectNoHorizontalOverflow(page);
