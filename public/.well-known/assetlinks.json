@@ -1,0 +1,13 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.meritledger.app",
+      "sha256_cert_fingerprints": [
+        "AC:D9:FE:6F:7A:58:41:ED:11:D3:2A:D6:66:83:59:3D:17:6F:39:77:C6:AA:1D:98:2B:99:5E:B9:2F:40:41:9D",
+        "99:E7:FB:68:5B:2D:A0:6A:44:6F:E3:77:69:1D:64:96:5F:71:74:D4:9F:30:01:EB:FD:B0:CC:8B:B3:52:AA:17"
+      ]
+    }
+  }
+]
