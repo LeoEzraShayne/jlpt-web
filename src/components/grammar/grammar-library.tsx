@@ -144,7 +144,7 @@ export function GrammarLibrary() {
       ) : items.length ? (
         <>
           <LibraryCardGrid
-            className="grid-cols-2 gap-3 lg:gap-4"
+            className="grid-cols-1 gap-3 min-[37.5rem]:grid-cols-2 lg:gap-4"
             aria-label={t("语法卡片列表")}
           >
             {items.map((item) => {

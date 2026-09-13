@@ -173,7 +173,7 @@ function Group({
         )}
       </div>
       <div
-        className={cn("grid min-w-0 items-stretch gap-3 md:grid-cols-2 2xl:grid-cols-3", !onCollapse && "grid-cols-2")}
+        className={cn("grid min-w-0 grid-cols-1 items-stretch gap-3 md:grid-cols-2 2xl:grid-cols-3", !onCollapse && "min-[37.5rem]:grid-cols-2")}
         aria-label={t(`${title}复习列表`)}
       >
         {items.map((item) => (

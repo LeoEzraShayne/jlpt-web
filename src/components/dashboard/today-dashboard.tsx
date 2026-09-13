@@ -238,7 +238,7 @@ function TaskGroup({
         <p className="text-sm text-muted-foreground">{description}</p>
       </div>
       <div
-        className="grid min-w-0 grid-cols-2 items-stretch gap-3 lg:gap-4 xl:grid-cols-3"
+        className="grid min-w-0 grid-cols-1 items-stretch gap-3 min-[37.5rem]:grid-cols-2 lg:gap-4 xl:grid-cols-3"
         aria-label={t(`${title}任务列表`)}
       >
         {tasks.map((task) => (

@@ -2,7 +2,7 @@ import { expect, test } from "./adult-fixture";
 import { expectNoHorizontalOverflow } from "./layout";
 import { layoutFixtureResponse } from "./ui-layout-fixture";
 
-test("compact grids preserve odd cards, readable actions, pagination and plan editing", async ({ page }) => {
+test("phone lists stack while tablet grids preserve odd cards, actions, pagination and editing", async ({ page }) => {
   layoutFixtureResponse("/api/v1/me/preferences", "PUT", { uiLocale: "zh", explanationLocale: "zh" });
   await page.route("**/api/v1/**", async route => {
     const request = route.request();
@@ -20,13 +20,16 @@ test("compact grids preserve odd cards, readable actions, pagination and plan ed
     const grid = page.getByLabel(label, { exact: true });
     await expect(grid.locator(':scope > [data-slot="card"]')).toHaveCount(3);
     await expectNoHorizontalOverflow(page);
-    expect(await grid.evaluate(el => getComputedStyle(el).gridTemplateColumns.split(" ").length)).toBe(desktopColumns);
+    expect(await grid.evaluate(el => getComputedStyle(el).gridTemplateColumns.split(" ").length)).toBe(width < 600 ? 1 : desktopColumns);
     if (width < 1024) {
       const cards = grid.locator(':scope > [data-slot="card"]');
       const first = (await cards.nth(0).boundingBox())!;
       const second = (await cards.nth(1).boundingBox())!;
       const third = (await cards.nth(2).boundingBox())!;
-      expect(second.y).toBe(first.y);
+      if (width < 600) {
+        expect(second.x).toBe(first.x);
+        expect(second.y).toBeGreaterThan(first.y);
+      } else expect(second.y).toBe(first.y);
       expect(third.x).toBe(first.x);
       expect(third.y).toBeGreaterThan(first.y);
       for (const action of await grid.locator('button, a[data-slot="button"]').all()) {
@@ -45,10 +48,17 @@ test("compact grids preserve odd cards, readable actions, pagination and plan ed
   await page.goto("/plans");
   const plan = page.getByLabel("N1 学习计划", { exact: true });
   const compactWidth = (await plan.boundingBox())!.width;
+  const nextPlan = (await page.getByLabel("N2 学习计划", { exact: true }).boundingBox())!;
+  const firstPlan = (await plan.boundingBox())!;
+  if (width < 600) {
+    expect(nextPlan.x).toBe(firstPlan.x);
+    expect(nextPlan.y).toBeGreaterThan(firstPlan.y);
+  } else expect(nextPlan.y).toBe(firstPlan.y);
   await plan.getByRole("button", { name: "调整计划" }).click();
   await expect(plan.getByLabel("计划开始日期")).toBeVisible();
   if (width < 1024) {
-    expect((await plan.boundingBox())!.width).toBeGreaterThan(compactWidth * 1.9);
+    if (width >= 600) expect((await plan.boundingBox())!.width).toBeGreaterThan(compactWidth * 1.9);
+    else expect((await plan.boundingBox())!.width).toBe(compactWidth);
     const start = (await plan.getByLabel("计划开始日期").boundingBox())!;
     const end = (await plan.getByLabel("计划截止日期").boundingBox())!;
     expect(end.y).toBeGreaterThan(start.y);
@@ -59,7 +69,8 @@ test("compact grids preserve odd cards, readable actions, pagination and plan ed
   await expect(plan.getByRole("button", { name: "调整计划" })).toBeVisible();
   expect((await plan.boundingBox())!.width).toBe(compactWidth);
   await plan.getByRole("button", { name: "计划预估", exact: true }).click();
-  if (width < 1024) expect((await plan.boundingBox())!.width).toBeGreaterThan(compactWidth * 1.9);
+  if (width >= 600 && width < 1024) expect((await plan.boundingBox())!.width).toBeGreaterThan(compactWidth * 1.9);
+  if (width < 600) expect((await plan.boundingBox())!.width).toBe(compactWidth);
   await plan.getByRole("button", { name: "收起预估", exact: true }).click();
   expect((await plan.boundingBox())!.width).toBe(compactWidth);
 });
