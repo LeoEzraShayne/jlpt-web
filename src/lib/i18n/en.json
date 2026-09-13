@@ -738,7 +738,7 @@
   "账号和学习数据存储在应用运行所需的基础设施中；仅在提供登录、托管、数据库、AI 批改和运维功能所必需的范围内由相关服务处理。": "Account and learning data are stored in the infrastructure needed to operate the app. Relevant services process them only as needed for sign-in, hosting, databases, AI assessment and operations.",
   "当前版本尚未在界面中提供自助导出或删除账号功能。如需隐私协助，可通过关于页面所列项目渠道联系维护者，但请勿在公开 issue 中发布个人数据。": "The current interface does not offer self-service account export or deletion. For privacy assistance, contact the maintainer through the channels on the About page. Do not post personal data in a public issue.",
   "最后更新：2026 年 9 月 13 日": "Last updated: September 13, 2026",
-  "本说明描述JLPT Sentence Lab在当前版本中如何处理登录信息、学习数据和 AI 批改内容。": "This notice explains how the current version of JLPT Sentence Lab handles sign-in information, learning data and AI assessment content.",
+  "本说明描述日语造句实验室在网页及安卓端如何处理账号、学习、付款、广告和旧资料恢复相关数据。": "This notice explains how JLPT Sentence Lab handles account, learning, payment, advertising and legacy recovery data on the web and Android.",
   "JLPT Sentence Lab是提供中英文体验的 JLPT N1～N4 日语语法学习工具，通过日语造句、AI 语法批改、个性化计划和间隔复习帮助学习者把语法用于实际表达。": "JLPT Sentence Lab helps you put N1–N4 grammar into practice through Japanese sentences, AI feedback, personal study plans and spaced reviews, with Chinese and English explanations.",
   "N1～N4 语法库": "N1–N4 grammar library",
   "按 JLPT 级别查看语法点、中英文解释、接续方式和日语例句。": "Browse grammar by JLPT level, with Chinese or English explanations, connection rules and Japanese examples.",

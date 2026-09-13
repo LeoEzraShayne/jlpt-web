@@ -86,7 +86,7 @@ export function PrivacyView() {
         <h1 className="mt-6 text-4xl font-bold tracking-tight sm:text-5xl">{t("隐私说明")}</h1>
         <p className="mt-4 text-sm text-muted-foreground">{t("最后更新：2026 年 9 月 13 日")}</p>
         <p className="mt-6 text-lg leading-8 text-foreground/75">
-          {t("本说明描述JLPT Sentence Lab在当前版本中如何处理登录信息、学习数据和 AI 批改内容。")}</p>
+          {t("本说明描述日语造句实验室在网页及安卓端如何处理账号、学习、付款、广告和旧资料恢复相关数据。")}</p>
         <div className="mt-10 space-y-8">
           {sections.map((section) => (
             <section key={section.title} className="rounded-2xl border bg-card p-6 sm:p-8">
