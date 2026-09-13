@@ -18,6 +18,7 @@ const titles: Record<string, { zh: string; en: string }> = {
   "/membership/return": { zh: "付款状态", en: "Payment status" },
   "/about": { zh: "关于与联系", en: "About & contact" },
   "/privacy": { zh: "隐私说明", en: "Privacy" },
+  "/delete-account": { zh: "账号与数据删除申请", en: "Account and data deletion request" },
   "/study": { zh: "语法造句练习", en: "Grammar sentence practice" },
   "/vocabulary-learning": { zh: "词汇学习清单", en: "Vocabulary learning list" },
   "/vocabulary-practice": { zh: "词汇造句练习", en: "Vocabulary sentence practice" },

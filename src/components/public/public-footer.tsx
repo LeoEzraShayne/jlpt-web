@@ -12,6 +12,7 @@ export function PublicFooter() {
         <nav className="flex flex-wrap gap-x-5 gap-y-2" aria-label={t("页脚导航")}>
           <Link href="/about" className="hover:text-foreground">{t("关于与联系")}</Link>
           <Link href="/privacy" className="hover:text-foreground">{t("隐私说明")}</Link>
+          <Link href="/delete-account" className="hover:text-foreground">{t("账号删除申请")}</Link>
           <Link href="/login" className="hover:text-foreground">{t("登录")}</Link>
         </nav>
       </div>

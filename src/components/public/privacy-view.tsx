@@ -51,7 +51,7 @@ const sections = [
     title: "数据共享与保留",
     paragraphs: [
       "账号和学习数据存储在应用运行所需的基础设施中；仅在提供登录、托管、数据库、AI 批改和运维功能所必需的范围内由相关服务处理。",
-      "当前版本尚未在界面中提供自助导出或删除账号功能。如需隐私协助，可通过关于页面所列项目渠道联系维护者，但请勿在公开 issue 中发布个人数据。",
+      "账号与数据删除采用邮件申请、人工核验和处理方式。你可以在删除申请页面了解服务范围及需要保留的数据说明；发送申请不代表删除已经完成。请勿在公开 issue 中发布个人数据。",
     ],
   },
 ];
@@ -82,6 +82,9 @@ export function PrivacyView() {
           ))}
         </div>
         <p className="mt-8 leading-7 text-muted-foreground">
+          <Link href="/delete-account" className="text-secondary-foreground underline underline-offset-4">{t("账号与数据删除申请")}</Link>
+        </p>
+        <p className="mt-4 leading-7 text-muted-foreground">
           {t("项目联系渠道见")}<Link href="/about" className="mx-1 text-secondary-foreground hover:underline">{t("关于与联系")}</Link>{t("页面。")}</p>
       </main>
     </PublicPage>

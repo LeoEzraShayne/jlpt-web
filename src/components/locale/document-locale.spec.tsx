@@ -58,5 +58,7 @@ describe("saved document language", () => {
     new Function("localStorage", "document", localeBootstrapScript)({ getItem: () => "unexpected" }, document);
     expect(document.documentElement.lang).toBe("zh-CN");
     expect(localizedDocumentTitle("/study/session-1", "en")).toBe("Grammar sentence practice | JLPT Sentence Lab");
+    expect(localizedDocumentTitle("/delete-account", "en")).toBe("Account and data deletion request | JLPT Sentence Lab");
+    expect(localizedDocumentTitle("/delete-account", "zh")).toBe("账号与数据删除申请 | 日语造句实验室");
   });
 });

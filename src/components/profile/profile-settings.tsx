@@ -47,6 +47,7 @@ export function ProfileSettings() {
       </div>
       {error && <p role="alert">{t(error)}</p>}
       <LanguagePicker explanations /><Button asChild variant="outline"><Link href="/membership">{t("会员与额度")}</Link></Button><PlansManager />
+      <Link href="/delete-account" className="text-sm underline underline-offset-4">{t("账号与数据删除申请")}</Link>
     </div>
   );
 }
