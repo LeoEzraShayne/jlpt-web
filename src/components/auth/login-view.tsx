@@ -96,7 +96,7 @@ function LoginContent() {
           <Button
             asChild
             size="lg"
-            className="mt-7 h-12 w-full max-w-full text-base sm:mt-8 xl:h-[3.25rem] xl:text-[1.0625rem]"
+            className="mt-7 h-12 w-full max-w-full text-base sm:mt-8 xl:text-[1.0625rem]"
           >
             <a href={authUrl} onClick={() => rememberAndroidLogin(params.get("next"))}>
               {t("使用 Google 登录")}<ArrowRight className="size-5" />

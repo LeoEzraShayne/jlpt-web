@@ -64,6 +64,10 @@ test("phone lists stack while tablet grids preserve odd cards, actions, paginati
       await page.getByRole("button", { name: /加载更多/ }).click();
       await expect(grid.locator(':scope > [data-slot="card"]')).toHaveCount(4);
     }
+    if (width >= 1024) {
+      const actions = await grid.locator('a[data-slot="button"], button[data-slot="button"]').all();
+      for (const action of actions) expect((await action.boundingBox())!.height).toBe(32);
+    }
     if (path === "/today" && width < 1024) {
       const task = grid.locator(':scope > [data-slot="card"]').first();
       const action = task.getByRole("button", { name: "开始复习", exact: true });

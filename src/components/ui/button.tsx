@@ -58,7 +58,11 @@ function Button({
       data-slot="button"
       data-variant={variant}
       data-size={size}
-      className={cn(buttonVariants({ variant, size, className }))}
+      className={cn(
+        buttonVariants({ variant, size, className }),
+        !size?.startsWith("icon") &&
+          "lg:h-auto lg:min-h-8 lg:rounded-full lg:px-4 lg:py-1",
+      )}
       {...props}
     />
   )

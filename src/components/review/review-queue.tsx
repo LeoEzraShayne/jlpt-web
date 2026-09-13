@@ -204,7 +204,7 @@ function Group({
                   <Clock3 className="size-4" />{t("预计")}{item.estimatedMinutes} {t("分钟")}</span>
                 <StartStudyButton
                   className="max-lg:w-full"
-                  buttonClassName="h-auto min-h-11 whitespace-normal px-2 lg:w-auto lg:min-w-24 lg:px-4"
+                  buttonClassName="h-auto max-lg:min-h-11 whitespace-normal px-2 lg:w-auto lg:min-w-24 lg:px-4"
                   grammarId={item.progress.grammar.id}
                   mode="REVIEW"
                   label={t("开始复习")}

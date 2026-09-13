@@ -296,7 +296,7 @@ function TaskAction({
       <StartStudyButton
         defaultEnter={defaultEnter}
         className={compact ? "ml-auto min-w-0 max-w-[60%]" : "shrink-0"}
-        buttonClassName={compact ? "h-auto min-h-11 w-auto max-w-full whitespace-normal px-4 lg:min-w-32" : "w-auto min-w-28 px-4 sm:min-w-32"}
+        buttonClassName={compact ? "h-auto max-lg:min-h-11 w-auto max-w-full whitespace-normal px-4 lg:min-w-32" : "w-auto min-w-28 px-4 sm:min-w-32"}
         grammarId={task.grammarId}
         taskId={task.id}
         mode={task.type === "LEARN" ? "LEARN" : "REVIEW"}
