@@ -17,6 +17,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { ThemePicker } from "@/components/theme/theme-picker";
 import { FocusCycleCompact } from "@/components/focus/focus-cycle-display";
+import { MembershipBadge } from "./membership-badge";
 import { useMe } from "@/hooks/use-api";
 import { cn } from "@/lib/utils";
 
@@ -94,8 +95,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </Link>
           <div className="hidden lg:block" />
           <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
-            {pathname.startsWith("/study/") && <FocusCycleCompact />}
-            <LanguagePicker compact /><ThemePicker compact />
+            {(pathname.startsWith("/study/") || pathname.startsWith("/vocabulary-practice/")) && <FocusCycleCompact />}
+            <LanguagePicker compact /><span className="hidden lg:inline-flex"><ThemePicker compact /></span><span className="inline-flex lg:hidden"><MembershipBadge /></span>
             <Button
               variant="ghost"
               size="icon"
@@ -116,8 +117,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 {initial}
               </AvatarFallback>
             </Avatar>
-            <span className="hidden max-w-40 truncate text-sm font-medium sm:inline">
-              {user?.displayName}
+            <span className="hidden max-w-40 flex-col items-start gap-1 text-sm font-medium lg:flex">
+              <span className="max-w-full truncate">{user?.displayName}</span>
+              <MembershipBadge />
             </span>
           </div>
         </header>
@@ -135,14 +137,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 key={href}
                 href={href}
                 className={cn(
-                  "flex items-center justify-center gap-1.5 rounded-lg py-3 text-[11px]",
+                  "flex min-w-0 items-center justify-center gap-1 whitespace-nowrap! rounded-lg py-3 text-[10px] min-[390px]:text-[11px]",
                   active
                     ? "bg-secondary font-semibold text-secondary-foreground"
                     : "text-muted-foreground",
                 )}
               >
-                <Icon className="size-5 shrink-0" />
-                {t(label)}
+                <Icon className="size-4 shrink-0 min-[390px]:size-5" />
+                <span className="whitespace-nowrap!">{t(label)}</span>
               </Link>
             );
           })}

@@ -2,7 +2,7 @@ import type { AppLocale } from "@/lib/api/sentence-lab";
 
 const brands = { zh: "日语造句实验室", en: "JLPT Sentence Lab" };
 const titles: Record<string, { zh: string; en: string }> = {
-  "/": { zh: "日语语法与词汇练习", en: "Japanese grammar & vocabulary practice" },
+  "/": { zh: "JLPT N1～N4 日语语法与词汇练习", en: "JLPT N1–N4 Japanese grammar & vocabulary practice" },
   "/login": { zh: "Google 登录", en: "Google sign-in" },
   "/android/link": { zh: "连接安卓应用", en: "Connect Android app" },
   "/onboarding": { zh: "建立学习计划", en: "Create your study plan" },

@@ -11,6 +11,12 @@ const documentRoutes = [
   "/history",
   "/history/:path*",
   "/profile",
+  "/plans",
+  "/library",
+  "/membership/:path*",
+  "/vocabulary-learning/:path*",
+  "/vocabulary-practice/:path*",
+  "/redirect-recovery",
 ];
 
 const nextConfig: NextConfig = {
@@ -38,7 +44,10 @@ const nextConfig: NextConfig = {
     return [
       ...documentRoutes.map((source) => ({
         source,
-        headers: [{ key: "Cache-Control", value: "no-cache, no-store, must-revalidate" }],
+        headers: [
+          { key: "Cache-Control", value: "no-cache, no-store, must-revalidate" },
+          { key: "X-Robots-Tag", value: "noindex, nofollow" },
+        ],
       })),
       {
         source: "/:path*",

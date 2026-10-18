@@ -9,7 +9,9 @@ const email = "contact@meritledger.org";
 const copy = {
   zh: {
     title: "账号与数据删除申请",
-    intro: "你可以通过邮件申请删除日语造句实验室（JLPT）或旧功过格服务的账号与关联数据。本页无需登录，也不要求重新安装应用。",
+    appIdentity: "适用应用：JLPT造句实验室（JLPT Sentence Lab）",
+    developerIdentity: "开发者：Leo.Shayne · Android 包名：com.meritledger.app",
+    intro: "本页是 JLPT造句实验室（JLPT Sentence Lab）的账号与数据删除申请入口。你可以通过邮件申请删除账号及关联数据，无需登录，也无需重新安装应用。如需删除旧功过格服务的数据，请在申请中另外注明。",
     requestTitle: "如何申请",
     steps: [
       "请使用该服务的注册邮箱发送申请；JLPT 用户请使用登录时的 Google 邮箱。注明申请范围：日语学习服务、旧功过格服务，或两者。",
@@ -35,7 +37,9 @@ const copy = {
   },
   en: {
     title: "Account and data deletion request",
-    intro: "You can request deletion of your JLPT Sentence Lab account, your legacy Merit Ledger account, or both by email. This page does not require sign-in or reinstalling the app.",
+    appIdentity: "App: JLPT Sentence Lab (JLPT造句实验室)",
+    developerIdentity: "Developer: Leo.Shayne · Android package: com.meritledger.app",
+    intro: "This is the account and data deletion request page for JLPT Sentence Lab (JLPT造句实验室). Request deletion of your account and associated data by email, without signing in or reinstalling the app. If you also want legacy Merit Ledger data deleted, specify that separately in your request.",
     requestTitle: "How to request deletion",
     steps: [
       "Send your request from the email registered with the service. For JLPT, use the Google email you sign in with. Specify JLPT Sentence Lab, legacy Merit Ledger, or both.",
@@ -69,6 +73,8 @@ export function DeleteAccountView() {
     <PublicPage>
       <main className="mx-auto max-w-3xl px-4 py-12 sm:px-6 sm:py-16">
         <h1 className="text-3xl font-bold leading-tight sm:text-4xl">{text.title}</h1>
+        <p className="mt-5 font-semibold leading-7">{text.appIdentity}</p>
+        <p className="mt-2 break-words text-sm leading-6 text-muted-foreground">{text.developerIdentity}</p>
         <p className="mt-5 leading-7 text-muted-foreground">{text.intro}</p>
         <section className="mt-8 rounded-2xl border bg-card p-5 sm:p-7" aria-labelledby="deletion-request">
           <h2 id="deletion-request" className="text-xl font-semibold">{text.requestTitle}</h2>

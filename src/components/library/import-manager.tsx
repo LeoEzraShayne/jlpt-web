@@ -81,7 +81,7 @@ export function ImportManager() {
         <CardHeader>
           <CardTitle>{t("私人资料候选导入")}</CardTitle>
           <CardDescription>
-            {t("先预览与去重，逐条核对来源后再提交。支持已清洗的 JSON，每批最多 1000 条；扫描件 OCR 后续支持。")}</CardDescription>
+            {t("上传符合示例格式的 JSON 文件（最大 2 MB，每批最多 1000 条），先预览、去重并核对，再提交。不支持 PDF 或图片。")}</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-3">
           <label className="text-sm">

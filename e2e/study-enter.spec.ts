@@ -134,7 +134,9 @@ test("retry actions share one row and Enter defaults to retry", async ({ page },
   await page.keyboard.press("Enter");
   await expect(page.getByPlaceholder(/请使用/)).toHaveValue("");
   await expect(page.getByText("上次 AI 修改后的句子", { exact: true })).toBeVisible();
-  await expect(page.getByRole("button", { name: /提交给 AI/ })).toBeDisabled();
+  await page.getByRole("button", { name: /提交给 AI/ }).click();
+  await expect(page.locator("#sentence-required")).toHaveText("请先输入日语句子，再提交批改。");
+  expect(mock.submissions).toHaveLength(1);
   expect(mock.completions).toHaveLength(0);
 });
 

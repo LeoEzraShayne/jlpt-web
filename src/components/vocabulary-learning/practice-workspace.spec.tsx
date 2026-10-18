@@ -23,6 +23,22 @@ beforeEach(() => vi.resetAllMocks());
 afterEach(cleanup);
 
 describe("vocabulary evidence boundaries", () => {
+  it("disables a restored failed practice that cannot legally retry", async () => {
+    mount(fixture({ status: "FAILED", canRetry: false, answer: "予定があります。" }));
+    expect(await screen.findByRole("button", { name: "重试批改" })).toBeDisabled();
+    expect(screen.getByText(/本次无法重试/)).toBeInTheDocument();
+  });
+  it("locks duplicate retry clicks and resumes the persisted assessment", async () => {
+    const practice = fixture({ status: "FAILED", canRetry: true, answer: "予定があります。" });
+    mount(practice);
+    const retry = await screen.findByRole("button", { name: "重试批改" });
+    let finish!: (value: { data: VocabularyPractice }) => void;
+    vi.mocked(apiRequest).mockImplementation(() => new Promise(resolve => { finish = resolve as typeof finish; }));
+    fireEvent.click(retry); fireEvent.click(retry);
+    expect(apiRequest).toHaveBeenCalledTimes(1);
+    await act(async () => finish({ data: { ...practice, status: "ASSESSING" } }));
+    expect(screen.getByText(/句子已保存/)).toBeInTheDocument();
+  });
   it("hides unrevealed payload fields, previews and references for known READY practices", async () => {
     mount(fixture({ hints: { meaning: "保密词义", reading: "よてい", word: "予定", chunks: [{ id: "c1", text: "秘密词块" }] },
       learningPreview: { word: "泄漏预览", reading: "秘密读音", chineseGloss: "秘密释义", exampleSentence: "秘密例句", exampleFurigana: "", exampleTranslationZh: "秘密翻译" },
@@ -111,11 +127,12 @@ describe("vocabulary evidence boundaries", () => {
   it("describes alternate expressions as unverified, with reading untested", () => {
     render(<PracticeFeedback practice={fixture({ status: "COMPLETED", result: {
       outcome: "UNVERIFIED", usedTarget: false, targetCorrect: null, meaningCorrect: null, readingCorrect: null,
-      explanationZh: "表达自然。", corrections: [], correctedSentence: "", correctedFurigana: "", correctedTranslationZh: "",
+      explanationZh: "表达自然。", corrections: [], correctedSentence: "本を読みます。", correctedFurigana: null, correctedTranslationZh: "读书。",
     } })} />);
     expect(screen.getByText("词汇反馈 · 暂未验证")).toBeInTheDocument();
     expect(screen.getByText(/这句话没有提供目标词的使用证据，不代表句子错误/)).toBeInTheDocument();
     expect(screen.queryByText("需修改")).not.toBeInTheDocument();
     expect(screen.getAllByText("未验证")).toHaveLength(3);
+    expect(screen.getByText("本を読みます。")).toBeInTheDocument();
   });
 });

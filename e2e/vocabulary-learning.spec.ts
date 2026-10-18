@@ -88,10 +88,11 @@ test("per-sense controls preserve remembered + practice, pause/resume/stop and l
   await expect(first.getByRole("button", { name: "根本不会", exact: true })).toHaveAttribute("aria-pressed", "true");
   await expect(first).toContainText("词义学习中");
   await expect(second.getByRole("button", { name: "根本不会", exact: true })).toHaveAttribute("aria-pressed", "false");
-  await first.getByRole("button", { name: "认识但想练熟", exact: true }).click();
+  await first.getByRole("button", { name: "想熟练", exact: true }).click();
   await first.getByRole("button", { name: "已记住", exact: true }).click();
-  await expect(first.getByRole("button", { name: "认识但想练熟", exact: true })).toHaveAttribute("aria-pressed", "true");
+  await expect(first.getByRole("button", { name: "想熟练", exact: true })).toHaveAttribute("aria-pressed", "true");
   await expect(first.getByRole("button", { name: "已记住", exact: true })).toHaveAttribute("aria-pressed", "true");
+  await first.getByText("学习安排与历史", { exact: true }).click();
   await first.getByRole("button", { name: "暂停练习", exact: true }).click();
   await expect(first.getByRole("button", { name: "练习此释义" })).toBeDisabled();
   await first.getByRole("button", { name: "恢复练习", exact: true }).click();
@@ -99,18 +100,40 @@ test("per-sense controls preserve remembered + practice, pause/resume/stop and l
   await first.getByRole("button", { name: "停止练习", exact: true }).click();
   await expect(first.getByRole("button", { name: "已记住", exact: true })).toHaveAttribute("aria-pressed", "true");
   expect(state.actions).toEqual(["v1:UNKNOWN", "v1:PRACTICE", "v1:REMEMBERED", "v1:PAUSE", "v1:RESUME", "v1:STOP_PRACTICE"]);
-  await page.getByLabel("内容类型").selectOption("learning");
-  await page.getByRole("group", { name: "词汇学习清单", exact: true }).getByRole("button", { name: "根本不会" }).click();
-  await page.getByLabel("学习词汇参考级别").selectOption("N1");
+  await page.getByRole("navigation", { name: "词汇筛选" }).getByRole("button", { name: "根本不会", exact: true }).click();
   await expect.poll(() => state.queries.at(-1)).toContain("list=UNKNOWN");
   const grid = page.getByLabel("学习词汇卡片列表");
   await expect(grid.getByRole("heading")).toHaveCount(3);
+  await expect(grid.getByText("参考词汇", { exact: true })).toHaveCount(0);
+  const compactActions = grid.getByRole("group", { name: "此释义的学习状态" }).first().getByRole("button");
+  await expect(compactActions).toHaveText(["根本不会", "想熟练", "已记住", "收藏生词"]);
+  expect(await compactActions.evaluateAll(buttons => {
+    const tops = buttons.map(button => button.getBoundingClientRect().top);
+    return new Set(tops.map(top => Math.round(top))).size === 1
+      && buttons.every(button => button.scrollWidth <= button.clientWidth);
+  })).toBe(true);
   expect(await grid.evaluate(el => getComputedStyle(el).gridTemplateColumns.split(" ").length)).toBe(info.project.name === "desktop" ? 3 : 1);
   await page.screenshot({ path: `/tmp/vocabulary-e-list-${info.project.name}.png`, fullPage: true });
   await expectNoHorizontalOverflow(page);
-  await page.getByLabel("搜索学习词汇").fill("无结果");
-  await page.getByRole("button", { name: "搜索", exact: true }).click();
+  await page.getByLabel("搜索词汇").fill("无结果");
   await expect(page.getByText("这个清单暂时没有词汇")).toBeVisible();
+});
+
+test("English compact learning actions fit on one row", async ({ page }, info) => {
+  await page.addInitScript(() => localStorage.setItem("jlpt-ui-locale", "en"));
+  await mockVocabularyLearning(page);
+  await page.goto("/library");
+  await page.getByLabel("Vocabulary filters").getByRole("button", { name: "Vocabulary learning list", exact: true }).click();
+  const actions = page.getByLabel("Learning vocabulary cards")
+    .getByRole("group", { name: "Learning status for this meaning" }).first().getByRole("button");
+  await expect(actions).toHaveText(["Unknown", "Practice more", "Learned", "Bookmark"]);
+  expect(await actions.evaluateAll(buttons => {
+    const tops = buttons.map(button => button.getBoundingClientRect().top);
+    return new Set(tops.map(top => Math.round(top))).size === 1
+      && buttons.every(button => button.scrollWidth <= button.clientWidth);
+  })).toBe(true);
+  await expectNoHorizontalOverflow(page);
+  await page.screenshot({ path: `/tmp/vocabulary-e-list-en-${info.project.name}.png`, fullPage: true });
 });
 
 test("today works with paused grammar plan; grammar start sends context without a random word", async ({ page }) => {

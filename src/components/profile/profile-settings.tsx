@@ -6,7 +6,6 @@ import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSWRConfig } from "swr";
-import { useMe } from "@/hooks/use-api";
 import { apiRequest } from "@/lib/api/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
@@ -15,8 +14,7 @@ import { PlansManager } from "@/components/plans/plans-manager";
 import { setAdultAccessConfirmed } from "@/lib/adult-access";
 
 export function ProfileSettings() {
-  useLocale();
-  const me = useMe();
+  const { locale } = useLocale();
   const router = useRouter();
   const { cache } = useSWRConfig();
   const [error, setError] = useState("");
@@ -35,14 +33,11 @@ export function ProfileSettings() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold">{t("我的学习")}</h1>
-          <p className="break-all text-sm text-muted-foreground">
-            {me.data?.displayName} · {me.data?.email}
-          </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <ThemePicker />
           <Button asChild variant="outline">
-            <Link href="/library">{t("词汇与表达库")}</Link>
+            <Link href="/library"><span className="lg:hidden">{locale === "en" ? "Vocabulary" : t("词汇与表达库")}</span><span className="hidden lg:inline">{t("词汇与表达库")}</span></Link>
           </Button>
           <Button variant="outline" onClick={() => void logout()}>
             {t("退出登录")}</Button>
@@ -58,7 +53,7 @@ export function ProfileSettings() {
           <CardContent>
             <LanguagePicker explanations showExplanationHint={false} explanationAction={
               <Button asChild size="sm" className="shrink-0 rounded-full">
-                <Link href="/membership">{t("会员与额度")}</Link>
+                <Link href="/membership"><span className="lg:hidden">{locale === "en" ? "VIP" : t("会员与额度")}</span><span className="hidden lg:inline">{t("会员与额度")}</span></Link>
               </Button>
             } />
           </CardContent>

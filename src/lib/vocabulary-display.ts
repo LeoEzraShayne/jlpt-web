@@ -1,5 +1,12 @@
 import type { VocabularyEntry } from "@/lib/api/types";
 
+// Normalize half-width kana for detection only; keep the original word intact.
+export function showVocabularyReading(word: string): boolean {
+  const normalized = word.normalize("NFKC").trim();
+  return !(/^[\p{Script=Hiragana}\p{Script=Katakana}ー・\u3099\u309a\s]+$/u.test(normalized)
+    && /[\p{Script=Hiragana}\p{Script=Katakana}]/u.test(normalized));
+}
+
 const parts: Record<string, string> = {
   "adjectival nouns or quasi-adjectives (keiyodoshi)": "形容动词",
   "adjective (keiyoushi)": "形容词",

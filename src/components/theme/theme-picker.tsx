@@ -35,7 +35,7 @@ export function ThemePicker({ compact = false }: { compact?: boolean }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size={compact ? "icon" : "sm"} aria-label={t("选择主题颜色")} className="bg-card">
+        <Button variant="outline" size={compact ? "icon" : "sm"} aria-label={t("选择主题颜色")}>
           <Palette className="size-4" />{!compact && <span>{t("主题")}</span>}
         </Button>
       </DropdownMenuTrigger>

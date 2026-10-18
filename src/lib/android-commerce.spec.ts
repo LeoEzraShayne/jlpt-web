@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { androidBindingPath, androidClient, androidSurfaceBootstrapScript, consumeAndroidLogin, nativeCommerceUrl, rememberAndroidLogin, validatedAndroidCallback } from "./android-commerce";
+import { androidBindingPath, androidClient, androidSurfaceBootstrapScript, consumeAndroidLogin, nativeCommerceUrl, nativeHandoffAvailable, rememberAndroidLogin, validatedAndroidCallback } from "./android-commerce";
 import { androidCallbackResponse } from "./android-callback-response";
 
 const path = "/android/link?bindingId=aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee";
@@ -13,6 +13,20 @@ describe("Android browser handoff boundaries", () => {
     expect(androidClient()).toBe("android-test");
     sessionStorage.clear();
     expect(androidClient()).toBeNull();
+  });
+  it("keeps handoff capability across same-tab navigation and clears it for old apps or web", () => {
+    window.history.replaceState(null, "", "/today?platform=android&client=android-release&nativeAuth=handoff-v1");
+    window.eval(androidSurfaceBootstrapScript);
+    window.history.replaceState(null, "", "/membership");
+    expect(nativeHandoffAvailable()).toBe(true);
+    window.history.replaceState(null, "", "/today?platform=android&client=android-release");
+    window.eval(androidSurfaceBootstrapScript);
+    expect(nativeHandoffAvailable()).toBe(false);
+  });
+  it("permits only bounded opaque handoff tickets in the fixed native URL", () => {
+    const ticket = "a".repeat(43);
+    expect(nativeCommerceUrl("android-release", "membership", ticket)).toContain(`&handoff=${ticket}#Intent`);
+    expect(() => nativeCommerceUrl("android-release", "membership", "bad&userId=other")).toThrow();
   });
   it("uses fixed native actions and package names without caller URLs", () => {
     expect(nativeCommerceUrl("android-release", "membership")).toBe("intent://commerce?action=membership#Intent;scheme=jlpt;package=com.meritledger.app;end");

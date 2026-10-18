@@ -20,6 +20,12 @@ const progress: Progress = {
 };
 
 describe("GrammarStatus", () => {
+  it("manual mastery overrides a due schedule without changing the stored learning status", () => {
+    const manuallyMastered = { ...progress, manuallyMastered: true };
+    expect(learningStatus(manuallyMastered)).toBe("MANUALLY_MASTERED");
+    render(<GrammarStatus progress={manuallyMastered} />);
+    expect(screen.getByText("已掌握")).toBeInTheDocument();
+  });
   it("prefers the dynamic learning state over the stored progress label", () => {
     expect(learningStatus(progress)).toBe("DUE");
     render(<GrammarStatus progress={progress} />);

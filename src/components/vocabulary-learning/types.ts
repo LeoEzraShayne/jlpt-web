@@ -25,6 +25,7 @@ export type VocabularyPractice = {
   linkedStudySessionId: string | null;
   status: "QUEUED" | "GENERATING" | "READY" | "ASSESSING" | "COMPLETED" | "FAILED";
   unknownAtStart: boolean; hintLevel: number; errorCode?: string | null;
+  canRetry?: boolean;
   createdAt: string; completedAt?: string | null; promptZh?: string;
   grammar?: { id: string; title: string } | null;
   hints: { meaning?: string; reading?: string; word?: string; chunks?: Array<{ id: string; text: string }> };
@@ -32,17 +33,18 @@ export type VocabularyPractice = {
   answer?: string | null;
   result?: {
     localizedFeedback?: { locale: "zh" | "en"; explanation: string; correctedTranslation: string; corrections: Array<{ text: string; replacement: string; reason: string }> } | null;
+    senseVerificationReason?: "INSUFFICIENT_CONTEXT";
     outcome: PracticeOutcome; meaningCorrect: boolean | null; readingCorrect: boolean | null;
     usedTarget: boolean; targetCorrect: boolean | null; explanationZh: string;
     corrections: Array<{ text: string; replacement: string; reason: string }>;
-    correctedSentence: string; correctedFurigana: string; correctedTranslationZh: string;
+    correctedSentence: string; correctedFurigana: string | null; correctedTranslationZh: string;
   } | null;
   reference?: { sentence: string; furigana: string; translationZh: string };
   nextReviewAt?: string | null;
 };
 
 export const listLabels: Record<LearningList, string> = {
-  UNKNOWN: "根本不会", PRACTICE: "认识但想练熟", REMEMBERED: "已记住", DUE: "待复习",
+  UNKNOWN: "根本不会", PRACTICE: "想熟练", REMEMBERED: "已记住", DUE: "待复习",
 };
 export const outcomeLabels: Record<PracticeOutcome, string> = {
   INDEPENDENT: "独立回忆", PROMPTED: "辅助练习", INCORRECT: "需要再练", UNVERIFIED: "暂未验证",

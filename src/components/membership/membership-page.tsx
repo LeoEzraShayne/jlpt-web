@@ -2,16 +2,17 @@
 import Link from "next/link";
 import { useRef, useState } from "react";
 import useSWR from "swr";
-import { apiFetcher, apiRequest } from "@/lib/api/client";
+import { ApiError, apiFetcher, apiRequest } from "@/lib/api/client";
 import type { Catalog, ProductCode } from "@/lib/api/sentence-lab";
 import { useLocale } from "@/components/locale/locale-provider";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { ErrorState } from "@/components/shared/error-state";
 import { LoadingState } from "@/components/shared/loading-state";
 import { billingError, useMembership, usePaymentSurface } from "./use-membership";
 import { MembershipPackages } from "./membership-packages";
-import { androidClient, nativeCommerceUrl } from "@/lib/android-commerce";
+import { androidClient } from "@/lib/android-commerce";
+import { NativeCommerceLink } from "@/components/android/native-commerce-link";
 export function formatPrice(amount: number, currency: string, locale: string) { return new Intl.NumberFormat(locale, { style: "currency", currency }).format(currency === "JPY" ? amount : amount / 100); }
 export function MembershipPage() {
   const { locale, t } = useLocale();
@@ -26,19 +27,22 @@ export function MembershipPage() {
   async function checkout(productCode: ProductCode) {
     if (lock.current || surface !== "web" || !catalog.data?.salesEnabled) return;
     lock.current = true; setPending(productCode); setError("");
-    const key = productCode;
+    const expectedAmount = catalog.data.products.find(product => product.productCode === productCode)?.amount;
+    const key = `${productCode}:${expectedAmount}`;
     const requestKey = keys.current.get(key) ?? crypto.randomUUID();
     keys.current.set(key, requestKey);
     try {
-      const { data } = await apiRequest<{ orderId: string; checkoutUrl: string }>("/billing/checkout", { method: "POST", body: JSON.stringify({ productCode, market: "GLOBAL", requestKey, locale }) });
+      const { data } = await apiRequest<{ orderId: string; checkoutUrl: string }>("/billing/checkout", { method: "POST", body: JSON.stringify({ productCode, market: "GLOBAL", requestKey, locale, expectedAmount }) });
       const target = new URL(data.checkoutUrl);
       if (target.protocol !== "https:" || target.hostname !== "checkout.stripe.com") throw new Error("Invalid Checkout URL");
       window.location.assign(target.href);
-    } catch (cause) { setError(billingError(cause, t)); setPending(null); lock.current = false; }
+    } catch (cause) {
+      if (cause instanceof ApiError && cause.code === "PRICE_CHANGED") { keys.current.delete(key); await catalog.mutate(); }
+      setError(billingError(cause, t)); setPending(null); lock.current = false; }
   }
   return <div className="flex flex-col gap-6">
-    <div className="flex flex-wrap items-center justify-between gap-3"><div><h1 className="text-2xl font-bold">{t("会员与额度")}</h1><p className="mt-2 text-sm text-muted-foreground">{t("一次购买，不自动续费。续购保留剩余时长。")}</p></div><Button asChild variant="outline"><Link href="/membership/orders">{t("订单记录")}</Link></Button></div>
-    {membership.isLoading ? <LoadingState /> : membership.error ? <ErrorState message={billingError(membership.error, t)} onRetry={() => void membership.mutate()} /> : membership.data && <Card>
+    <div><h1 className="text-2xl font-bold">{t("会员与额度")}</h1><div className="mt-2 flex min-w-0 items-center justify-between gap-1.5"><p className={`whitespace-nowrap! text-muted-foreground ${locale === "en" ? "text-[9px] min-[390px]:text-[10px]" : "text-[10px] min-[390px]:text-[11px]"} sm:text-sm`}>{t("一次购买，不自动续费。续购保留剩余时长。")}</p><Button asChild size="sm" className="h-auto min-h-8 shrink-0 rounded-full px-2 py-1 text-[10px] sm:text-sm"><Link href="/membership/orders">{t("订单记录")}</Link></Button></div></div>
+    {membership.isLoading ? <LoadingState /> : membership.error ? <ErrorState message={billingError(membership.error, t)} onRetry={() => void membership.mutate()} /> : membership.data && !membership.data.isMember && <Card>
       <CardHeader>
         <CardTitle>{t(membership.data.isMember ? "会员已生效" : "免费学习")}</CardTitle>
         <CardDescription>
@@ -57,11 +61,10 @@ export function MembershipPage() {
         <p className="text-muted-foreground">{t("系统失败不计入成功批改；复习积压会保留。")}</p>
       </CardContent>
     </Card>}
-    {surface === "android" ? <Card><CardHeader><CardTitle>{t("Android 购买")}</CardTitle><CardDescription>{t("请使用应用内 Google Play 购买入口。已有会员在所有设备生效。")}</CardDescription></CardHeader><CardContent className="flex flex-col gap-3"><Button asChild><a href={nativeCommerceUrl(androidClient() ?? "android-release", "membership")}>{t("在应用内查看价格与购买")}</a></Button>{membership.data && !membership.data.isMember && <Button asChild variant="outline"><a href={nativeCommerceUrl(androidClient() ?? "android-release", "reward")}>{t("在应用内查看奖励任务")}</a></Button>}<p className="text-xs text-muted-foreground">{t("实际价格以 Google Play 显示的当地货币为准。")}</p></CardContent></Card> : surface === "web" && <>
-      <p className="text-xs text-muted-foreground">{t("Web 新购买统一以美元（USD）付款，切换语言不会改变价格。")}</p>
+    {surface === "android" ? <Card><CardHeader><CardTitle>{t("Android 购买")}</CardTitle><CardDescription>{t("请使用应用内 Google Play 购买入口。已有会员在所有设备生效。")}</CardDescription></CardHeader><CardContent className="flex flex-col gap-3"><NativeCommerceLink className={buttonVariants()} client={androidClient() ?? "android-release"} action="membership">{t("在应用内查看价格与购买")}</NativeCommerceLink>{membership.data && !membership.data.isMember && <NativeCommerceLink className={buttonVariants({ variant: "outline" })} client={androidClient() ?? "android-release"} action="reward">{t("在应用内查看奖励任务")}</NativeCommerceLink>}<p className="text-xs text-muted-foreground">{t("实际价格以 Google Play 显示的当地货币为准。")}</p></CardContent></Card> : surface === "web" && <>
       {catalog.isLoading ? <LoadingState /> : catalog.error ? <ErrorState message={billingError(catalog.error, t)} onRetry={() => void catalog.mutate()} /> : catalog.data && <>
         {!catalog.data.salesEnabled && <p role="status" className="rounded-xl border p-4 text-sm">{t("购买尚未开放，请稍后再来。")}</p>}
-        <MembershipPackages catalog={catalog.data} pending={pending} onCheckout={checkout} onOfferExpired={catalog.mutate} />
+        <MembershipPackages catalog={catalog.data} pending={pending} onCheckout={checkout} />
       </>}
     </>}
     {error && <p role="alert" className="text-sm text-destructive">{error}</p>}

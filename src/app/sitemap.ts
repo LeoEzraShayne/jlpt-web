@@ -1,25 +1,8 @@
 import type { MetadataRoute } from "next";
+import { PUBLIC_PAGES, SITE_URL } from "@/lib/seo";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const lastModified = new Date("2026-08-19");
-  return [
-    {
-      url: "https://jlpt.meritledger.org/",
-      lastModified,
-      changeFrequency: "weekly",
-      priority: 1,
-    },
-    {
-      url: "https://jlpt.meritledger.org/about",
-      lastModified,
-      changeFrequency: "monthly",
-      priority: 0.6,
-    },
-    {
-      url: "https://jlpt.meritledger.org/privacy",
-      lastModified,
-      changeFrequency: "monthly",
-      priority: 0.4,
-    },
-  ];
+  // Omit lastModified until maintained per-page dates exist; do not report a
+  // stale shared date or manufacture a content update on every build.
+  return Object.keys(PUBLIC_PAGES).map((path) => ({ url: `${SITE_URL}${path}` }));
 }

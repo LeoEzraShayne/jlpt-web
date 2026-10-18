@@ -16,7 +16,7 @@ export function VocabularyTodaySummary() {
   const actions = {
     label: "学习清单",
     labelContent: <Link href="/vocabulary-learning" className="text-xs leading-5 underline underline-offset-4 hover:text-foreground">{t("学习清单")}</Link>,
-    value: <StartVocabularyPractice disabled={!data || !data.dueCount || !!error}
+    value: <StartVocabularyPractice label={t("开始练习")} disabled={!data || !data.dueCount || !!error}
       buttonClassName="h-auto min-h-8 min-w-max w-full max-w-full whitespace-nowrap rounded-full px-1.5! py-1 text-xs leading-4" />,
   };
   return (

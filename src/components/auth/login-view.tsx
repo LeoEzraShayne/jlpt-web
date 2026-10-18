@@ -46,8 +46,8 @@ function LoginContent() {
     }
   }, [params, plan.data, plan.error, me.data, router]);
   return (
-    <main className="relative min-h-screen overflow-x-clip bg-background px-4 py-5 sm:px-5 sm:py-8">
-      <div className="soft-grid absolute inset-0 opacity-50" />
+    <main className="page-canvas relative min-h-screen overflow-x-clip bg-background px-4 py-5 sm:px-5 sm:py-8">
+      <div className="canvas-grid soft-grid absolute inset-0 opacity-50" />
       <div className="relative mx-auto flex max-w-[82.5rem] justify-end">
         <LanguagePicker /><ThemePicker compact />
       </div>

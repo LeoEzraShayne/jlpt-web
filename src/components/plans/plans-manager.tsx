@@ -115,7 +115,7 @@ function Preferences({
   user: User;
   onSaved: () => Promise<void>;
 }) {
-  useLocale();
+  const { locale } = useLocale();
   const [target, setTarget] = useState(user.targetLevel);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
@@ -153,7 +153,7 @@ function Preferences({
               aria-label={t("主目标")}
               value={target}
               onChange={(e) => setTarget(e.target.value as JlptLevel)}
-              className={cn(selectClass, "mt-0 min-w-14 flex-1")}
+              className={cn(selectClass, "mt-0 min-w-14 flex-1 w-auto")}
             >
               {levels.map((level) => (
                 <option key={level}>{level}</option>
@@ -161,7 +161,7 @@ function Preferences({
             </select>
           </label>
           <Button disabled={busy} type="submit" size="sm" className="shrink-0 rounded-full">
-            {t("保存每日安排")}</Button>
+            <span className="lg:hidden">{locale === "en" ? "Save" : t("保存每日安排")}</span><span className="hidden lg:inline">{t("保存每日安排")}</span></Button>
           </div>
           {message && (
             <p role="status" className="text-sm">

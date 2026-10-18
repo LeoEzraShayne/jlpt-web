@@ -2,18 +2,21 @@
 import { t } from "@/lib/i18n/locale-store";
 import { useLocale } from "@/components/locale/locale-provider";
 import { useState } from "react";
+import { useSWRConfig } from "swr";
 import { apiRequest } from "@/lib/api/client";
 import type { LearningVocabulary as VocabularyEntry } from "@/components/vocabulary-learning/types";
 import { LearningControls } from "@/components/vocabulary-learning/learning-controls";
 import { useExplanationLocale } from "@/hooks/use-explanation-locale";
 import { vocabularyMeaning } from "@/lib/i18n/content";
-import { chineseParts } from "@/lib/vocabulary-display";
+import { chineseParts, showVocabularyReading } from "@/lib/vocabulary-display";
+import { refreshVocabularyLists } from "@/lib/vocabulary-cache";
 import { LibraryCard } from "@/components/shared/library-card";
 import { CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 export type Bookmark = { id: string; note: string; vocabulary: VocabularyEntry };
 export function WordCard({word, bookmark, refresh}: {word: VocabularyEntry; bookmark?: Bookmark; refresh: () => Promise<unknown>}) {
   useLocale();
+  const { cache, mutate } = useSWRConfig();
   const [note, setNote] = useState(bookmark?.note ?? "");
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
@@ -24,31 +27,36 @@ export function WordCard({word, bookmark, refresh}: {word: VocabularyEntry; book
         method: remove ? "DELETE" : "PUT",
         ...(!remove ? { body: JSON.stringify({ note }) } : {}),
       });
-      await refresh();
+      await refreshVocabularyLists(cache, mutate, refresh);
       setMessage(remove ? t("已取消收藏") : t("已保存生词收藏"));
     } catch (error) { setMessage(error instanceof Error ? error.message : t("保存失败")); }
     finally { setBusy(false); }
   }
   const explanationLocale = useExplanationLocale();
   const meaning = vocabularyMeaning(word, explanationLocale);
-  return <LibraryCard>
-    <CardContent className="flex min-w-0 flex-col md:h-full">
-      <div className="flex min-w-0 items-start justify-between gap-3">
-        <h2 className="min-w-0 text-lg font-semibold">{word.word}<span className="ml-2 inline-block text-sm font-normal text-muted-foreground">{word.reading}</span></h2>
-        <span className="shrink-0 rounded-full bg-secondary px-2 py-1 text-xs font-medium text-secondary-foreground">{t(word.level ?? "未分级")}</span>
+  return <LibraryCard className="h-full max-lg:[--card-spacing:--spacing(3)]">
+    <CardContent className="flex h-full min-w-0 flex-col">
+      <div className="mb-3 flex min-w-0 flex-wrap items-center gap-1.5 text-xs">
+        <span className="rounded-full bg-secondary px-1.5 py-1 font-medium text-secondary-foreground">{t(word.level ?? "未分级")}</span>
+        <span className="rounded-full bg-muted px-1.5 py-1 text-muted-foreground">{explanationLocale === "en" ? word.partOfSpeech.join(", ") : chineseParts(word.partOfSpeech)}</span>
       </div>
-      <p className="mt-1 text-xs text-muted-foreground">{explanationLocale === "en" ? word.partOfSpeech.join(", ") : chineseParts(word.partOfSpeech)}</p>
-      <p className="mt-2 line-clamp-2 text-sm leading-6" title={meaning}>{meaning}</p>
-      <LearningControls word={word} refresh={refresh} />
-      <div className="mt-4 md:mt-auto md:pt-3">
-        <div className="flex items-center justify-between gap-2">
-          <span className="text-xs text-muted-foreground">{t(bookmark ? "已收藏" : "参考词汇")}</span>
+      <h2 className="min-w-0 break-words text-lg font-semibold">{word.word}{word.reading && showVocabularyReading(word.word) && <span className="ml-2 inline-block text-sm font-normal text-muted-foreground">{word.reading}</span>}</h2>
+      <p className="mt-1 line-clamp-2 break-words text-sm text-muted-foreground" title={meaning}>{meaning}</p>
+      <LearningControls
+        compact
+        word={word}
+        refresh={refresh}
+        trailingAction={!bookmark && <Button size="sm" className="min-w-0 rounded-full px-1 text-xs" disabled={busy} onClick={()=>void update()}>{t("收藏生词")}</Button>}
+      />
+      <div className="mt-auto pt-4 lg:pt-3">
+        {bookmark && <div className="flex items-center justify-between gap-2">
+          <span className="text-xs text-muted-foreground">{t("已收藏")}</span>
           <div className="flex flex-wrap justify-end gap-2">
-            {bookmark && <Button size="sm" variant="outline" disabled={busy} onClick={()=>void update(true)}>{t("取消收藏")}</Button>}
-            <Button size="sm" className="rounded-full" disabled={busy} onClick={()=>void update()}>{t(bookmark ? "保存备注" : "收藏生词")}</Button>
+            <Button size="sm" variant="outline" disabled={busy} onClick={()=>void update(true)}>{t("取消收藏")}</Button>
+            <Button size="sm" className="rounded-full" disabled={busy} onClick={()=>void update()}>{t("保存备注")}</Button>
           </div>
-        </div>
-        <details className="mt-3 text-xs text-muted-foreground">
+        </div>}
+        <details className={`${bookmark ? "mt-3 " : ""}text-xs text-muted-foreground`}>
           <summary className="cursor-pointer">{t("释义详情、备注与来源")}</summary>
           <div className="mt-3 flex min-w-0 flex-col gap-3 break-words">
             <p className="text-sm leading-6 text-foreground">{meaning}</p>

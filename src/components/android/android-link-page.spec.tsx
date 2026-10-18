@@ -41,3 +41,12 @@ it("does not fetch malformed or duplicate bindings", async () => {
   expect(await screen.findByRole("alert")).toHaveTextContent("连接链接无效");
   expect(apiFetcher).not.toHaveBeenCalled(); expect(apiRequest).not.toHaveBeenCalled();
 });
+
+it("auto-syncs only server-marked handoffs, once, and hides account details", async () => {
+  vi.mocked(apiFetcher).mockResolvedValue({ clientId: "android-test", automatic: true, expiresAt: new Date(Date.now() + 120000).toISOString(), scopes: [] });
+  vi.mocked(apiRequest).mockRejectedValue(new Error("request failed"));
+  mount();
+  await screen.findByRole("alert");
+  expect(apiRequest).toHaveBeenCalledTimes(1);
+  expect(screen.queryByText("learner@example.test")).not.toBeInTheDocument();
+});

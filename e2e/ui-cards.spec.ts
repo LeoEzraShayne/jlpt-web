@@ -50,7 +50,7 @@ test("phone lists stack while tablet grids preserve odd cards, actions, paginati
     if (path === "/today") {
       const overview = page.getByLabel("今日学习概览", { exact: true });
       expect((await overview.getByRole("button", { name: "开始复习", exact: true }).boundingBox())!.height).toBe(32);
-      expect((await overview.getByRole("button", { name: "开始词汇练习", exact: true }).boundingBox())!.height).toBe(32);
+      expect((await overview.getByRole("button", { name: "开始练习", exact: true }).boundingBox())!.height).toBe(32);
       await expect(overview.getByLabel("今日剩余", { exact: true }).getByText("102分", { exact: true })).toBeVisible();
     }
     if (path === "/grammar" || path === "/history") {

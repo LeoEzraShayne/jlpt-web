@@ -23,13 +23,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { ErrorState } from "@/components/shared/error-state";
 import { FuriganaText } from "@/components/shared/furigana-text";
 import { LoadingState } from "@/components/shared/loading-state";
-import { StartVocabularyPractice } from "@/components/vocabulary-learning/start-practice-button";
 import { TrainingPanel } from "./training-panel";
 import { ReviewResultCard } from "./review-result-card";
+import { RecallPolicyMessage } from "./recall-policy-message";
 import { DefaultStudyButton } from "./default-study-button";
 import { FocusCycleCard } from "@/components/focus/focus-cycle-display";
 import { apiFetcher, apiRequest, ApiError } from "@/lib/api/client";
 import { apiKeys } from "@/lib/api/keys";
+import { recoverableReviewError, useReviewStatus } from "@/hooks/use-review-status";
 import type { AiReviewJob, RecallRating, ReviewResult, StudySession } from "@/lib/api/types";
 import { saveCompletionNotice } from "@/lib/study-display";
 
@@ -41,12 +42,17 @@ export function StudyWorkspace({ sessionId }: { sessionId: string }) {
     apiKeys.session(sessionId),
     apiFetcher,
   );
-  const [showHint, setShowHint] = useState<boolean | null>(null);
+  const [showHint, setShowHint] = useState(false);
   const [sentence, setSentence] = useState("");
+  const [sentenceRequired, setSentenceRequired] = useState(false);
+  const sentenceInput = useRef<HTMLTextAreaElement>(null);
   const [previousCorrection, setPreviousCorrection] = useState<ReviewResult | null>(null);
   const [submittedReviewId, setSubmittedReviewId] = useState<string | null>();
-  const [pollInterval, setPollInterval] = useState(500);
+  const [pollInterval, setPollInterval] = useState(1_000);
   const [submitting, setSubmitting] = useState(false);
+  const [retrying, setRetrying] = useState(false);
+  const [retryRevision, setRetryRevision] = useState(0);
+  const retryPending = useRef(false);
   const [completing, setCompleting] = useState(false);
   const completionPending = useRef(false);
   const submissionKey = useRef<{ sentence: string; key: string } | null>(null);
@@ -60,7 +66,7 @@ export function StudyWorkspace({ sessionId }: { sessionId: string }) {
     if (!reviewId) return;
     const timer = window.setTimeout(() => setPollInterval(2_000), 30_000);
     return () => window.clearTimeout(timer);
-  }, [reviewId]);
+  }, [reviewId, retryRevision]);
   useEffect(() => {
     if (sessionSWR.data?.status !== "ACTIVE") return;
     const timer = window.setInterval(() => {
@@ -71,16 +77,7 @@ export function StudyWorkspace({ sessionId }: { sessionId: string }) {
     }, 60_000);
     return () => window.clearInterval(timer);
   }, [sessionId, sessionSWR.data?.status]);
-  const reviewSWR = useSWR<AiReviewJob>(
-    reviewId ? apiKeys.review(reviewId) : null,
-    apiFetcher,
-    {
-      refreshInterval: (job) =>
-        !job || ["QUEUED", "PROCESSING"].includes(job.status)
-          ? pollInterval
-          : 0,
-    },
-  );
+  const reviewSWR = useReviewStatus(reviewId, pollInterval);
   if (sessionSWR.isLoading) return <LoadingState label={t("正在恢复学习进度…")} />;
   if (sessionSWR.error || !sessionSWR.data)
     return (
@@ -93,15 +90,21 @@ export function StudyWorkspace({ sessionId }: { sessionId: string }) {
     );
   const session = sessionSWR.data;
   const grammar = localizeGrammar(session.grammar, session.explanationLocale ?? "zh");
-  const hintVisible = session.mode === "REVIEW" && session.trainingContext?.referenceHidden ? false : (showHint ?? session.mode === "LEARN");
+  const hintVisible = session.mode === "REVIEW" && session.trainingContext?.referenceHidden ? false : showHint;
   const job = reviewSWR.data;
   const result = job?.result ? feedbackSnapshot(job.result) : undefined;
   const correction = result ?? previousCorrection;
   const reviewing = Boolean(
     reviewId && (!job || ["QUEUED", "PROCESSING"].includes(job.status)),
   );
-  const submitDisabled = !sentence.trim() || submitting || reviewing || Boolean(result);
+  const permanentReadError = reviewSWR.error && !recoverableReviewError(reviewSWR.error);
+  const submitDisabled = submitting || retrying || reviewing || Boolean(result);
   const allowedRatings = result?.recallPolicy?.allowedRatings ?? [];
+  const revisionRecommended = Boolean(result && (
+    result.totalScore < 80 || (result.scorePolicyVersion === "sentence-quality-v1" && (
+      result.usedTargetGrammar !== true || result.targetGrammarCorrect !== true ||
+      !result.isCorrect || !allowedRatings.includes("REMEMBERED")
+    ))));
   async function reveal() {
     if (session.mode !== "REVIEW" && session.revealedAt) { setShowHint(true); return; }
     try {
@@ -126,6 +129,12 @@ export function StudyWorkspace({ sessionId }: { sessionId: string }) {
   async function submit(event: FormEvent) {
     event.preventDefault();
     if (submitDisabled) return;
+    if (!sentence.trim()) {
+      setSentenceRequired(true);
+      sentenceInput.current?.focus();
+      return;
+    }
+    setSentenceRequired(false);
     setSubmitting(true);
     setQuotaCode("");
     setMessage("");
@@ -139,7 +148,7 @@ export function StudyWorkspace({ sessionId }: { sessionId: string }) {
           body: JSON.stringify({ sessionId, sentence: pending.sentence, requestKey: pending.key }),
         },
       );
-      setPollInterval(500);
+      setPollInterval(1_000);
       setSubmittedReviewId(data.reviewId);
     } catch (cause) {
       setQuotaCode(quotaErrorCode(cause));
@@ -151,12 +160,17 @@ export function StudyWorkspace({ sessionId }: { sessionId: string }) {
     }
   }
   async function retryJob() {
-    if (!reviewId) return;
+    if (!reviewId || retryPending.current || job?.canRetry === false) return;
+    retryPending.current = true;
+    setRetrying(true);
+    setMessage("");
     try {
-      await apiRequest(`/sentence-reviews/${reviewId}/retry`, { method: "POST" });
-      setPollInterval(500);
-      void reviewSWR.mutate();
+      const { data } = await apiRequest<AiReviewJob>(`/sentence-reviews/${reviewId}/retry`, { method: "POST" });
+      setPollInterval(1_000);
+      setRetryRevision(value => value + 1);
+      await reviewSWR.mutate(data, { revalidate: true });
     } catch (cause) { setQuotaCode(quotaErrorCode(cause)); setMessage(billingError(cause, t)); }
+    finally { retryPending.current = false; setRetrying(false); }
   }
   async function complete(rating: RecallRating, includeAiResult = true) {
     if (completionPending.current) return;
@@ -200,7 +214,7 @@ export function StudyWorkspace({ sessionId }: { sessionId: string }) {
     setMessage(t("请重新写一句，再提交批改。"));
   }
   return (
-    <main className="min-h-screen min-w-0 max-w-full overflow-x-clip bg-background">
+    <main className="page-canvas min-h-screen min-w-0 max-w-full overflow-x-clip bg-background">
       <header className="border-b bg-card">
         <div className="mx-auto flex h-16 min-w-0 max-w-5xl items-center gap-2 px-2 sm:px-4">
           <Button asChild variant="ghost" className="shrink-0 px-2 sm:px-4">
@@ -230,17 +244,15 @@ export function StudyWorkspace({ sessionId }: { sessionId: string }) {
         </div>
         <QuotaNotice code={quotaCode} /><FocusCycleCard />
         <TrainingPanel session={session} hintVisible={hintVisible} reveal={reveal} />
-        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border p-3">
-          <p className="text-xs text-muted-foreground">{t("独立词汇练习计入每日免费任务总额度，不改变关联语法的正式复习记录。")}</p>
-          <StartVocabularyPractice grammarId={grammar.id} studySessionId={sessionId} label={t("练习到期词汇")} />
-        </div>
-        <Card className="mt-7 min-w-0 warm-shadow">
+        <Card className="mt-7 min-w-0 warm-shadow" size={hintVisible ? "default" : "sm"}>
           <CardHeader>
             <CardTitle className="flex min-w-0 flex-wrap items-center justify-between gap-2">
               <span>{t("语法提示")}</span>
               <Button
                 variant="ghost"
                 size="sm"
+                aria-expanded={hintVisible}
+                aria-controls="grammar-hint-content"
                 onClick={() =>
                   hintVisible ? setShowHint(false) : void reveal()
                 }
@@ -250,9 +262,9 @@ export function StudyWorkspace({ sessionId }: { sessionId: string }) {
               </Button>
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            {hintVisible ? (
-              <div className="min-w-0 space-y-4">
+          {hintVisible && (
+            <CardContent id="grammar-hint-content">
+              <div className="flex min-w-0 flex-col gap-4">
                 <Hint label={t("中文解释")} value={grammar.chineseExplanation} />
                 <Hint
                   label={t("接续方式")}
@@ -265,11 +277,8 @@ export function StudyWorkspace({ sessionId }: { sessionId: string }) {
                   />
                 )}
               </div>
-            ) : (
-              <div className="rounded-xl border border-dashed p-5 text-center text-sm text-muted-foreground sm:p-7">
-                {t("尽量先凭记忆造句，需要时再查看提示。")}</div>
-            )}
-          </CardContent>
+            </CardContent>
+          )}
         </Card>
         <Card className="mt-6 min-w-0 warm-shadow">
           <CardHeader>
@@ -298,7 +307,10 @@ export function StudyWorkspace({ sessionId }: { sessionId: string }) {
               {!result && (
                 <>
                   <Textarea
+                    ref={sentenceInput}
                     aria-label={t("日语句子")}
+                    aria-invalid={sentenceRequired}
+                    aria-describedby={sentenceRequired ? "sentence-required" : undefined}
                     value={sentence}
                     onKeyDown={(event) => {
                       if (
@@ -312,12 +324,19 @@ export function StudyWorkspace({ sessionId }: { sessionId: string }) {
                       if (!event.repeat && !submitDisabled)
                         event.currentTarget.form?.requestSubmit();
                     }}
-                    onChange={(event) =>
-                      setSentence(event.target.value.slice(0, 150))
-                    }
+                    onChange={(event) => {
+                      const value = event.target.value.slice(0, 150);
+                      setSentence(value);
+                      if (value.trim()) setSentenceRequired(false);
+                    }}
                     rows={6}
                     placeholder={t(`请使用「${grammar.title}」造句`)}
                   />
+                  {sentenceRequired && (
+                    <p id="sentence-required" role="alert" className="mt-2 text-sm text-destructive">
+                      {t("请先输入日语句子，再提交批改。")}
+                    </p>
+                  )}
                   <div className="mt-2 flex flex-wrap justify-between gap-2 text-xs text-muted-foreground">
                     <span>{t("Enter 提交 · Shift+Enter 换行")}</span>
                     <span>{sentence.length}/150</span>
@@ -328,15 +347,16 @@ export function StudyWorkspace({ sessionId }: { sessionId: string }) {
                     disabled={submitDisabled}
                     className="mt-4 h-11 w-full"
                   >
-                    {submitting || reviewing ? (
+                    {submitting || (reviewing && !permanentReadError) ? (
                       <LoaderCircle className="animate-spin" />
                     ) : (
-                      <Send />
+                      permanentReadError ? <TriangleAlert /> : <Send />
                     )}
                     {t(reviewing
-                      ? "AI 正在批改…"
+                      ? permanentReadError ? "无法获取批改结果" : reviewSWR.error ? "正在获取批改结果…" : "AI 正在批改…"
                       : "提交给 AI 批改")}
                   </Button>
+                  {reviewSWR.error && reviewing && <p role="status" className="mt-3 text-sm text-muted-foreground">{t(reviewSWR.error.status === 429 ? "结果查询过于频繁，等待限流解除后会自动恢复，请勿重复提交。" : recoverableReviewError(reviewSWR.error) ? "连接暂时中断，正在恢复批改状态…" : reviewSWR.error.status === 401 ? "登录已失效，请重新登录后查看批改结果。" : "无法读取批改结果，请刷新页面确认登录状态；无需重复提交句子。")}</p>}
                   {job?.status === "FAILED" && (
                     <div className="mt-4 rounded-xl bg-destructive/10 p-4 text-sm text-destructive">
                       <p className="flex items-start gap-2">
@@ -348,9 +368,11 @@ export function StudyWorkspace({ sessionId }: { sessionId: string }) {
                         variant="outline"
                         size="sm"
                         className="mt-3"
+                        disabled={retrying || !(job.canRetry ?? job.retryCount < 4)}
                         onClick={() => void retryJob()}
                       >
-                        {t("重新批改")}</Button>
+                        {t(retrying ? "正在重新批改…" : "重新批改")}</Button>
+                      {!(job.canRetry ?? job.retryCount < 4) && <p className="mt-2">{t("本次批改已达到重试次数上限。")}</p>}
                       <p className="mt-3 text-xs text-muted-foreground">
                         {t("也可以按真实回忆情况完成。缺少合格评分时，本次不增加掌握证据或延长间隔。")}</p>
                       <div className="mt-2 grid grid-cols-3 gap-2">
@@ -390,7 +412,7 @@ export function StudyWorkspace({ sessionId }: { sessionId: string }) {
                   {t("系统会结合你的真实回忆和本次目标语法表现安排复习。")}</p>
                 {result.recallPolicy &&
                   result.recallPolicy.reason !== "NONE" && (
-                    <RecallPolicyMessage reason={result.recallPolicy.reason} />
+                    <RecallPolicyMessage reason={result.recallPolicy.reason} scorePolicyVersion={result.scorePolicyVersion} />
                   )}
                 {allowedRatings.length === 0 ? (
                   <div className="mt-auto pt-4">
@@ -400,22 +422,22 @@ export function StudyWorkspace({ sessionId }: { sessionId: string }) {
                   </div>
                 ) : (
                   <div className="mt-auto grid auto-cols-fr grid-flow-col gap-2 pt-4 sm:gap-3">
-                    <Button
+                    {allowedRatings.includes("FORGOT") && <Button
                       className="min-w-0 px-2 text-xs sm:text-sm"
                       variant="outline"
                       disabled={completing}
                       onClick={() => void complete("FORGOT")}
                     >
-                      {t("忘记了")}</Button>
-                    <Button
+                      {t("忘记了")}</Button>}
+                    {allowedRatings.includes("FUZZY") && <Button
                       className="min-w-0 px-2 text-xs sm:text-sm"
                       variant="outline"
                       disabled={completing}
                       onClick={() => void complete("FUZZY")}
                     >
-                      {t("有些模糊")}</Button>
+                      {t("有些模糊")}</Button>}
                     {allowedRatings.includes("REMEMBERED") && (
-                      result.totalScore < 80 ? (
+                      revisionRecommended ? (
                         <Button variant="outline" disabled={completing}
                           onClick={() => void complete("REMEMBERED")}>
                           {t("记住了")}</Button>
@@ -425,14 +447,14 @@ export function StudyWorkspace({ sessionId }: { sessionId: string }) {
                           {t("记住了")}</DefaultStudyButton>
                       )
                     )}
-                    {result.totalScore < 80 && (
+                    {revisionRecommended && (
                       <DefaultStudyButton disabled={completing} onClick={revise} title={t("修改后重试")}>
                         <RefreshCcw className="hidden sm:block" />
                         {t("修改后重试")}</DefaultStudyButton>
                     )}
                   </div>
                 )}
-                {result.totalScore < 80 && (
+                {revisionRecommended && (
                   <p className="mt-2 text-xs text-muted-foreground">
                     {t("首次结果仍会保留")}</p>
                 )}
@@ -449,27 +471,9 @@ export function StudyWorkspace({ sessionId }: { sessionId: string }) {
     </main>
   );
 }
-function RecallPolicyMessage({
-  reason,
-}: {
-  reason: NonNullable<ReviewResult["recallPolicy"]>["reason"] | undefined;
-}) {
-  useLocale();
-  const messages = {
-    SCORE_BELOW_80: "本次造句质量低于 80 分，最高按“有些模糊”安排。",
-    TARGET_GRAMMAR_MISSING: "句子没有使用目标语法，本次排期会按“忘记了”处理。",
-    TARGET_GRAMMAR_INCORRECT: "目标语法使用不正确，本次排期会按“忘记了”处理。",
-  } as const;
-  if (!reason || reason === "NONE") return null;
-  return (
-    <p className="mt-3 rounded-xl bg-secondary p-3 text-sm text-secondary-foreground">
-      {t(messages[reason])}
-    </p>
-  );
-}
 
 function reviewFailureMessage(job: AiReviewJob) {
-  if (["AI_TIMEOUT", "AI_NETWORK_ERROR"].includes(job.errorCode ?? ""))
+  if (["AI_TIMEOUT", "AI_NETWORK_ERROR", "AI_REVIEW_DEADLINE"].includes(job.errorCode ?? ""))
     return t("AI 批改响应超时，请稍后重新批改。");
   return t("AI 批改服务暂时不可用，请稍后重新批改。");
 }

@@ -45,7 +45,8 @@ export function DashboardStatsCards({
           { label: "完成新学", value: stats.completedNew },
           {
             label: "今日实际用时",
-            value: minutes(allocation?.spentMinutes ?? stats.studyMinutesToday),
+            value: Number((allocation?.spentMinutes ?? stats.studyMinutesToday).toFixed(1)),
+            unit: locale === "zh" ? "分钟" : "min",
             hint: "实际用时包含已完成、进行中及额外练习。",
           },
           {
@@ -68,7 +69,7 @@ export function DashboardStatsCards({
           },
           { label: "进行中复习", value: stats.inProgressReview },
           { label: "进行中新学", value: stats.inProgressNew },
-          { label: "剩余任务用时", value: locale === "zh" ? `${Number(estimatedMinutes.toFixed(1))}分` : minutes(estimatedMinutes) },
+          { label: "剩余任务用时", value: Number(estimatedMinutes.toFixed(1)), unit: locale === "zh" ? "分" : "min" },
         ]}
       >
         <AllocationDetails levels={levels} />
@@ -125,6 +126,7 @@ function AllocationDetails({ levels }: Pick<Dashboard, "levels">) {
 interface StatItem {
   label: string;
   value: ReactNode;
+  unit?: string;
   labelContent?: ReactNode;
   detail?: string;
   hint?: string;
@@ -179,12 +181,12 @@ export function StatsCard({
         )}
         <dl className={cn("grid grid-cols-2 gap-x-4 gap-y-3", columns === 3 && "grid-cols-3 gap-x-3", completedLayout && "grid-cols-6 gap-x-3")}>
           {items.map((item, index) => (
-            <div key={t(item.label)} className={cn("min-w-0 border-t border-border/60 pt-2", completedLayout && (index < 3 ? "col-span-2" : "col-span-3"))}>
-              <dt className="flex items-center gap-1.5 text-xs leading-5 text-muted-foreground sm:text-sm">
+            <div key={t(item.label)} className={cn("row-span-3 grid min-w-0 grid-rows-subgrid gap-y-0 border-t border-border/60 pt-2", completedLayout && (index < 3 ? "col-span-2" : "col-span-3"))}>
+              <dt className="flex items-start gap-1.5 text-xs leading-5 text-muted-foreground sm:text-sm">
                 {item.color && <span aria-hidden="true" className={`size-1.5 shrink-0 rounded-full ${item.color}`} />}
                 {item.hint ? <StatHint label={t(item.label)} hint={t(item.hint)} /> : item.labelContent ?? t(item.label)}
               </dt>
-              <dd className="mt-1 text-2xl font-semibold tracking-tight tabular-nums">{item.value}</dd>
+              <dd className={cn("mt-1 text-2xl font-semibold tracking-tight tabular-nums", item.unit && "whitespace-nowrap!")}><span>{item.value}</span>{item.unit && <> <span className="text-xs font-normal tracking-normal sm:text-sm">{item.unit}</span></>}</dd>
               {item.detail && <p className="mt-1 text-xs leading-5 text-muted-foreground">{t(item.detail)}</p>}
             </div>
           ))}

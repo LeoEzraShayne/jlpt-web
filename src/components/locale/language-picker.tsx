@@ -29,11 +29,11 @@ export function LanguagePicker({ explanations = false, compact = false, showExpl
     } catch { setError(t("语言保存失败，请重试")); }
     finally { setBusy(false); }
   }
-  const labelClass = explanationAction ? "flex min-w-40 flex-1 items-center gap-2 text-sm" : "flex items-center gap-2 text-sm";
-  const selectClass = explanationAction ? "min-w-0 flex-1 border bg-background p-2" : "rounded-lg border bg-background p-2";
-  return <div className="flex flex-wrap items-center gap-3">
-    <label className={labelClass}><span className={compact ? "sr-only shrink-0 sm:not-sr-only" : "shrink-0"}>{t("界面语言")}</span><select aria-label={t("界面语言")} disabled={busy} className={selectClass} value={locale} onChange={event => void change("uiLocale", event.target.value as AppLocale)}><option value="zh">中文</option><option value="en">English</option></select></label>
-    {explanations && <><label className={labelClass}><span className="shrink-0">{t("讲解语言")}</span><select aria-label={t("讲解语言")} disabled={busy} className={selectClass} value={me.data?.explanationLocale ?? "zh"} onChange={event => void change("explanationLocale", event.target.value as AppLocale)}><option value="zh">中文</option><option value="en">English</option></select></label>{explanationAction}{showExplanationHint && <p className="w-full text-xs text-muted-foreground">{t("讲解语言用于新练习，已有练习和历史保持原来的语言。")}</p>}</>}
-    {error && <p role="alert" className="w-full text-sm text-destructive">{error}</p>}
+  const labelClass = explanationAction ? "contents text-[11px] sm:text-sm" : "flex items-center gap-2 text-sm";
+  const selectClass = explanationAction ? "min-w-0 w-full border bg-background px-1 py-2 text-xs sm:px-2 sm:text-sm" : "rounded-lg border bg-background p-2";
+  return <div className={explanationAction ? "grid grid-cols-[max-content_minmax(0,1fr)_max-content] items-center gap-x-2 gap-y-3" : "flex flex-wrap items-center gap-3"}>
+    <label className={labelClass}><span className={compact ? "sr-only shrink-0 sm:not-sr-only" : "shrink-0"}>{t("界面语言")}</span><select aria-label={t("界面语言")} disabled={busy} className={selectClass} value={locale} onChange={event => void change("uiLocale", event.target.value as AppLocale)}><option value="zh">中文</option><option value="en">English</option></select></label>{explanationAction && <span aria-hidden="true" />}
+    {explanations && <><label className={labelClass}><span className="shrink-0">{t("讲解语言")}</span><select aria-label={t("讲解语言")} disabled={busy} className={selectClass} value={me.data?.explanationLocale ?? "zh"} onChange={event => void change("explanationLocale", event.target.value as AppLocale)}><option value="zh">中文</option><option value="en">English</option></select></label>{explanationAction}{showExplanationHint && <p className="col-span-3 w-full text-xs text-muted-foreground">{t("讲解语言用于新练习，已有练习和历史保持原来的语言。")}</p>}</>}
+    {error && <p role="alert" className="col-span-3 w-full text-sm text-destructive">{error}</p>}
   </div>;
 }

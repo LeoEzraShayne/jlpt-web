@@ -22,7 +22,7 @@ export function AdultAccessBoundary({ children }: { children: React.ReactNode })
   if (!ready) return <LoadingState label={t("正在准备学习空间…")} />;
   if (accepted) return children;
   return (
-    <main className="grid min-h-[80vh] place-items-center bg-background px-4 py-10">
+    <main className="page-canvas grid min-h-[80vh] place-items-center bg-background px-4 py-10">
       <section className="w-full max-w-lg space-y-6 rounded-2xl border bg-card p-6 sm:p-8" aria-labelledby="adult-access-title">
         <div className="flex justify-end"><LanguagePicker /></div>
         <div className="space-y-3">

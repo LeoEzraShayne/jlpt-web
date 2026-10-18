@@ -14,6 +14,7 @@ import {
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { QuotaSummary } from "@/components/membership/quota-notice";
 import { EmptyState } from "@/components/shared/empty-state";
 import { ErrorState } from "@/components/shared/error-state";
@@ -89,9 +90,9 @@ function GrammarTodayDashboard() {
             {data.estimatedMinutes} {t("分钟")}</strong>
         </p>
         </div>
-        <nav aria-label={t("学习管理")} className="flex flex-wrap gap-x-4 gap-y-2 text-sm">
+        <nav aria-label={t("学习管理")} className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
           <Link href="/plans" className="text-muted-foreground underline-offset-4 hover:text-foreground hover:underline">{t("管理各级别计划")}</Link>
-          <Link href="/library" className="text-muted-foreground underline-offset-4 hover:text-foreground hover:underline">{t("词汇与表达库")}</Link>
+          <Button asChild size="sm" className="h-auto min-h-8 rounded-full px-3 py-1"><Link href="/library">{t("词汇库")}</Link></Button>
         </nav>
       </div>
       {completionNotice && (

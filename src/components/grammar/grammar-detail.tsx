@@ -13,6 +13,7 @@ import { ErrorState } from "@/components/shared/error-state";
 import { LoadingState } from "@/components/shared/loading-state";
 import { StartStudyButton } from "@/components/study/start-study-button";
 import { useGrammarDetail } from "@/hooks/use-api";
+import { GrammarMasteryButton } from "./grammar-mastery-button";
 import { GrammarStatus } from "./grammar-status";
 import { formatStudyDate } from "@/lib/study-display";
 
@@ -62,9 +63,9 @@ export function GrammarDetail({ id }: { id: string }) {
             <span className="text-xs text-muted-foreground">{t("当前状态")}</span>
             <GrammarStatus progress={progress} />
           </div>
-          {progress?.status === "MASTERED" && progress.masteryRuleVersion !== "mastery-v2" && <p className="mt-2 text-xs text-muted-foreground">{t("历史规则下的掌握状态，待后续复习重新确认。")}</p>}
+          {!progress?.manuallyMastered && progress?.status === "MASTERED" && progress.masteryRuleVersion !== "mastery-v2" && <p className="mt-2 text-xs text-muted-foreground">{t("历史规则下的掌握状态，待后续复习重新确认。")}</p>}
           <p className="mt-3 text-sm text-muted-foreground">
-            {t(progress?.learningState?.nextReviewOn
+            {t(progress?.manuallyMastered ? "不再安排学习和复习" : progress?.learningState?.nextReviewOn
               ? `预计 ${formatStudyDate(progress.learningState.nextReviewOn)} 复习`
               : "完成练习后自动安排复习")}
           </p>
@@ -128,7 +129,8 @@ export function GrammarDetail({ id }: { id: string }) {
             <CardContent>
               <p className="text-sm leading-6 text-muted-foreground">
                 {t("先主动回忆，再写出自己的句子，AI 会检查接续与表达自然度。")}</p>
-              <Button className="mt-4 w-full" variant="outline" disabled={saving} onClick={async () => {
+              <div className="mt-4"><GrammarMasteryButton grammarId={id} mastered={Boolean(progress?.manuallyMastered)} refresh={() => swr.mutate()} /></div>
+              <Button className="mt-4 w-full" variant="outline" disabled={saving || progress?.manuallyMastered} onClick={async () => {
                 setSaving(true);
                 try { await apiRequest(`/grammar-points/${id}/needs-work`, { method: "PUT", body: JSON.stringify({ needsWork: !progress?.needsWork }) }); await swr.mutate(); setMessage(t("已更新加强标记；未学内容会安排首次检查。")); }
                 catch (error) { setMessage(error instanceof Error ? error.message : t("更新失败")); }
@@ -138,8 +140,8 @@ export function GrammarDetail({ id }: { id: string }) {
               <StartStudyButton
                 className="mt-5"
                 grammarId={item.id}
-                mode={progress ? "PRACTICE" : "LEARN"}
-                label={progress ? t("再次练习") : t("开始学习")}
+                mode={progress && (progress.manuallyMastered || progress.status !== "NOT_STARTED") ? "PRACTICE" : "LEARN"}
+                label={progress && (progress.manuallyMastered || progress.status !== "NOT_STARTED") ? t("再次练习") : t("开始学习")}
               />
             </CardContent>
           </Card>

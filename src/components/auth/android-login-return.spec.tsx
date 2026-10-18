@@ -29,3 +29,14 @@ it("retains ordinary onboarding when no Android return is pending", async () => 
   render(<LoginView />);
   await waitFor(() => expect(state.replace).toHaveBeenCalledWith("/onboarding"));
 });
+
+it.each([
+  "/membership/orders?platform=android&client=android-release&nativeAuth=handoff-v1",
+  "/membership?platform=android&client=android-release",
+  "/android/launch?client=android-release&action=membership&platform=android&nativeAuth=handoff-v1",
+])("restores the allowlisted commerce destination after OAuth: %s", async destination => {
+  rememberAndroidLogin(destination);
+  render(<LoginView />);
+  await waitFor(() => expect(state.replace).toHaveBeenCalledWith(destination));
+  expect(state.replace).not.toHaveBeenCalledWith("/onboarding");
+});

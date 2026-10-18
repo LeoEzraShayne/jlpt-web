@@ -8,7 +8,6 @@ import { useRef, useState } from "react";
 import { useDefaultEnter } from "@/hooks/use-default-enter";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { useFocusCycle } from "@/components/focus/focus-cycle-provider";
 import { apiRequest } from "@/lib/api/client";
 import { cn } from "@/lib/utils";
 import type { SessionMode, StudySession } from "@/lib/api/types";
@@ -36,7 +35,6 @@ export function StartStudyButton({
 }) {
   useLocale();
   const router = useRouter();
-  const focus = useFocusCycle();
   const buttonRef = useRef<HTMLButtonElement>(null);
   const starting = useRef(false);
   useDefaultEnter(buttonRef, defaultEnter);
@@ -57,7 +55,6 @@ export function StartStudyButton({
           body: JSON.stringify({ grammarId, taskId, mode }),
         },
       );
-      focus.startFocus();
       router.push(`/study/${data.session.id}`);
     } catch (cause) {
       setQuotaCode(quotaErrorCode(cause));

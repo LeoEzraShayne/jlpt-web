@@ -41,6 +41,7 @@ export interface Progress {
   stage: number;
   masteryScore: number;
   needsWork?: boolean;
+  manuallyMastered?: boolean;
   masteryRuleVersion?: string;
   lastScore?: number | null;
   lastStudiedAt?: string | null;
@@ -222,7 +223,8 @@ export interface ReviewResult {
       | "NONE"
       | "SCORE_BELOW_80"
       | "TARGET_GRAMMAR_MISSING"
-      | "TARGET_GRAMMAR_INCORRECT";
+      | "TARGET_GRAMMAR_INCORRECT"
+      | "TARGET_GRAMMAR_UNVERIFIED";
     scorePolicyVersion: string;
   };
 }
@@ -231,6 +233,7 @@ export interface AiReviewJob {
   id: string;
   status: "QUEUED" | "PROCESSING" | "COMPLETED" | "FAILED";
   retryCount: number;
+  canRetry?: boolean;
   errorCode?: string | null;
   errorMessage?: string | null;
   result?: ReviewResult | null;

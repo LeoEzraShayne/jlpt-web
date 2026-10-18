@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { chineseMeaning, chineseParts } from "./vocabulary-display";
+import { chineseMeaning, chineseParts, showVocabularyReading } from "./vocabulary-display";
+describe("vocabulary title readings", () => {
+ it.each(["あっさり", "あべこべ", "コーヒー", "ｺｰﾋｰ", "ｶﾞﾗｽ", "コンピューター・ゲーム", "いろいろ", "すゞめ", "ヽヾ", "カタカナ ひらがな"])("hides the redundant reading for %s", word => {
+  expect(showVocabularyReading(word)).toBe(false);
+ });
+ it.each(["明白", "食べる", "時々", "第1", "AI", "", "ー・"])("does not classify %s as a kana-only word", word => {
+  expect(showVocabularyReading(word)).toBe(true);
+ });
+});
 describe("vocabulary Chinese display", () => {
  it("prefers Chinese without presenting English as the meaning", () => {
   expect(chineseMeaning({chineseGloss:"花哨的；刺眼的",glosses:[{language:"eng",text:"gaudy"}]})).toBe("花哨的；刺眼的");

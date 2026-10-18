@@ -4,6 +4,8 @@ import { t } from "@/lib/i18n/locale-store";
 import { useLocale } from "@/components/locale/locale-provider";
 import {
   CheckCircle2,
+  CircleHelp,
+  TriangleAlert,
   MessageCircleMore,
   Sparkles,
   WandSparkles,
@@ -21,8 +23,13 @@ export function ReviewResultCard({
 }) {
   useLocale();
   const result = feedbackSnapshot(rawResult);
+  const qualityScoring = result.scorePolicyVersion === "sentence-quality-v1";
+  const targetComplete = result.usedTargetGrammar === true && result.targetGrammarCorrect === true;
+  const targetFailed = result.usedTargetGrammar === false || result.targetGrammarCorrect === false;
+  const TargetIcon = targetComplete ? CheckCircle2 : targetFailed ? TriangleAlert : CircleHelp;
+  const targetTitle = targetComplete ? "本次目标已完成" : targetFailed ? "本次目标未完成" : "本次目标尚未确认";
   const scores = [
-    [t("语法使用"), result.grammarScore, 30],
+    [t(qualityScoring ? "语法正确性" : "语法使用"), result.grammarScore, 30],
     [t("接续正确"), result.connectionScore, 20],
     [t("句子完整"), result.completenessScore, 20],
     [t("自然度"), result.naturalnessScore, 20],
@@ -35,15 +42,19 @@ export function ReviewResultCard({
           <div className="grid place-items-center rounded-2xl bg-secondary p-5 text-center">
             <span className="text-5xl font-bold">{result.totalScore}</span>
             <span className="mt-1 text-xs text-muted-foreground">
-              {t("本次造句质量 / 100")}</span>
+              {t(qualityScoring ? "句子质量 / 100" : "本次练习得分 / 100")}</span>
           </div>
           <div className="min-w-0">
             <h2 className="flex items-start gap-2 text-xl font-bold">
-              <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-success" />
-              {result.encouragement}
+              {qualityScoring ? (
+                <TargetIcon className={`mt-0.5 size-5 shrink-0 ${targetComplete ? "text-success" : "text-muted-foreground"}`} />
+              ) : <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-success" />}
+              {qualityScoring ? t(targetTitle) : result.encouragement}
             </h2>
             <p className="mt-2 text-sm text-muted-foreground">
               {t(targetGrammarMessage(result))}{t("。分数用于检查语法和表达，不代表真实记忆率。")}</p>
+            {qualityScoring && !targetComplete && <p className="mt-2 text-sm font-medium">{t("句子质量分与目标完成情况分开，本次不计为目标掌握证据。")}</p>}
+            {qualityScoring && <p className="mt-2 text-sm text-muted-foreground">{result.encouragement}</p>}
             <div className="mt-4 grid min-w-0 gap-3 sm:grid-cols-2">
               {scores.map(([label, value, max]) => (
                 <div className="min-w-0" key={label}>
@@ -110,7 +121,7 @@ export function ReviewResultCard({
       {result.alternativeSentence && (
         <Feedback
           icon={Sparkles}
-          title={t("拓展示例")}
+          title={t(qualityScoring ? "目标练习示例" : "拓展示例")}
           text={result.alternativeSentence}
           annotated={result.alternativeSentenceFurigana}
           translation={result.alternativeSentenceTranslationZh}
@@ -124,7 +135,8 @@ export function ReviewResultCard({
 function targetGrammarMessage(result: ReviewResult) {
   if (result.usedTargetGrammar === false) return t("目标语法未使用");
   if (result.targetGrammarCorrect === false) return t("目标语法使用不正确");
-  if (result.targetGrammarCorrect === true) return t("目标语法使用正确");
+  if (result.usedTargetGrammar === true && result.targetGrammarCorrect === true) return t("目标语法使用正确");
+  if (result.scorePolicyVersion === "sentence-quality-v1") return t("目标语法的使用尚未确认");
   return t("目标语法表现已纳入反馈");
 }
 

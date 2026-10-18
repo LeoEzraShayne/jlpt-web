@@ -18,6 +18,8 @@
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
+  --color-disabled: var(--disabled);
+  --color-disabled-foreground: var(--disabled-foreground);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
@@ -61,6 +63,8 @@
   --success: #3f9b67;
   --review: #a855f7;
   --destructive: #dc5a55;
+  --disabled: #e5e7eb;
+  --disabled-foreground: #6b7280;
   --radius: 0.875rem;
 }
 
@@ -120,6 +124,62 @@
   --sidebar-accent-foreground: #563b8d;
 }
 
+/* Keep the store artwork's warm corners responsive without downloading an image. */
+:root {
+  --page-artwork: none;
+}
+
+:root:not([data-theme]),
+:root[data-theme="sunshine"] {
+  --page-artwork:
+    radial-gradient(
+      circle clamp(15rem, 32vw, 30rem) at calc(100% + clamp(4rem, 10vw, 10rem)) -6rem,
+      rgb(248 204 83 / 20%) 0 99.8%,
+      transparent 100%
+    ),
+    radial-gradient(
+      circle clamp(11rem, 28vw, 28rem) at -5rem calc(100% + 6rem),
+      rgb(248 204 83 / 18%) 0 99.8%,
+      transparent 100%
+    ),
+    radial-gradient(ellipse 80% 60% at 100% 0%, #fff5dc, transparent 70%);
+}
+
+body {
+  isolation: isolate;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image: var(--page-artwork);
+  background-repeat: no-repeat;
+}
+
+:root:not([data-theme]) .page-canvas,
+:root[data-theme="sunshine"] .page-canvas {
+  background-color: transparent;
+}
+
+:root:not([data-theme]) .canvas-grid,
+:root[data-theme="sunshine"] .canvas-grid {
+  background-image: none;
+}
+
+:root.dark,
+:root[data-mode="dark"] {
+  --page-artwork: none;
+}
+
+@media (forced-colors: active), print {
+  body::before {
+    display: none;
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -156,6 +216,22 @@
     color: var(--muted-foreground);
     font-size: 0.62em;
     font-weight: 500;
+  }
+  .grammar-filter-scrollbar::-webkit-scrollbar {
+    height: 2px;
+  }
+  .grammar-filter-scrollbar::-webkit-scrollbar-thumb {
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--muted-foreground) 45%, transparent);
+  }
+  .grammar-filter-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  @supports not selector(::-webkit-scrollbar) {
+    .grammar-filter-scrollbar {
+      scrollbar-width: thin;
+      scrollbar-color: color-mix(in srgb, var(--muted-foreground) 45%, transparent) transparent;
+    }
   }
 }
 

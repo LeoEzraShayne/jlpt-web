@@ -4,9 +4,10 @@ import { useLocale } from "@/components/locale/locale-provider";
 import { Badge } from "@/components/ui/badge";
 import type { Progress } from "@/lib/api/types";
 
-export type LearningStatus = Progress["status"];
+export type LearningStatus = Progress["status"] | "MANUALLY_MASTERED";
 
 const labels: Record<LearningStatus, string> = {
+  MANUALLY_MASTERED: "已掌握",
   NOT_STARTED: "未学习",
   LEARNING: "巩固中",
   DUE: "今天复习",
@@ -14,6 +15,7 @@ const labels: Record<LearningStatus, string> = {
   NEEDS_WORK: "需加强",
 };
 const styles: Record<LearningStatus, string> = {
+  MANUALLY_MASTERED: "bg-secondary text-secondary-foreground",
   NOT_STARTED: "bg-muted text-muted-foreground",
   LEARNING: "bg-secondary text-secondary-foreground",
   DUE: "bg-violet-100 text-violet-700",
@@ -22,6 +24,7 @@ const styles: Record<LearningStatus, string> = {
 };
 
 export function learningStatus(progress?: Progress): LearningStatus {
+  if (progress?.manuallyMastered) return "MANUALLY_MASTERED";
   return progress?.learningState?.status ?? progress?.status ?? "NOT_STARTED";
 }
 

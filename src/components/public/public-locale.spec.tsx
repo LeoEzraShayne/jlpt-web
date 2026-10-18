@@ -12,7 +12,8 @@ describe("public English pages", () => {
     act(() => setLocale("en"));
     const { container } = render(<View />);
     const copy = Array.from(container.querySelectorAll("main p, main h1, main h2, main h3, main dd, main dt, main li, nav a")).map(node => node.textContent).join(" ");
-    expect(copy).not.toMatch(/[\u4e00-\u9fff]/);
+    // The official app identity may be bilingual; English explanatory prose must still be translated.
+    expect(copy.replaceAll("JLPT造句实验室", "JLPT Sentence Lab")).not.toMatch(/[\u4e00-\u9fff]/);
     expect(screen.getByLabelText("Interface")).toHaveValue("en");
   });
   it.each(["zh", "en"] as const)("offers a user-composed deletion email without sign-in in %s", locale => {

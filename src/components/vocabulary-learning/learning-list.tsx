@@ -30,7 +30,7 @@ export function VocabularyLearningList() {
       <Button type="submit">{t("搜索")}</Button>
     </form>
     <LoadStatus loading={swr.isLoading} error={swr.error} retry={() => void swr.mutate()} />
-    {!swr.isLoading && !swr.error && !swr.items.length && <EmptyState title={t("这个清单暂时没有词汇")} description={t("可调整筛选，或在词汇查询中标记需要学习的释义。")} />}
+    {!swr.isLoading && !swr.error && !swr.items.length && <EmptyState title={t("这个清单暂时没有词汇")} description={t("可调整筛选，或在词汇库中标记需要学习的释义。")} />}
     <LibraryCardGrid aria-label={t("学习词汇卡片列表")}>
       {swr.items.map(word => <WordCard key={word.id} word={word} refresh={() => swr.mutate()} />)}
     </LibraryCardGrid>

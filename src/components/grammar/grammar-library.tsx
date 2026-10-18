@@ -16,6 +16,7 @@ import { ErrorState } from "@/components/shared/error-state";
 import { LoadingState } from "@/components/shared/loading-state";
 import { LevelSelector } from "@/components/shared/level-selector";
 import { PageHeading } from "@/components/shared/page-heading";
+import { GrammarMasteryButton } from "./grammar-mastery-button";
 import { GrammarStatus, learningStatus } from "./grammar-status";
 import { formatStudyDate } from "@/lib/study-display";
 import { apiRequest } from "@/lib/api/client";
@@ -30,6 +31,7 @@ const filters = [
   "DUE",
   "MASTERED",
   "NEEDS_WORK",
+  "MANUALLY_MASTERED",
 ] as const;
 const filterLabels = {
   ALL: "全部",
@@ -38,6 +40,7 @@ const filterLabels = {
   DUE: "待复习",
   MASTERED: "较稳定",
   NEEDS_WORK: "需加强",
+  MANUALLY_MASTERED: "已掌握",
 };
 
 interface GrammarPage {
@@ -45,10 +48,11 @@ interface GrammarPage {
   nextCursor?: string | null;
 }
 
-function grammarKey(level: JlptLevel, query: string, locale: string) {
+function grammarKey(level: JlptLevel, query: string, locale: string, filter: (typeof filters)[number]) {
   return (index: number, previous: GrammarPage | null) => {
     if (previous && !previous.nextCursor) return null;
     const params = new URLSearchParams({ level, limit: "30", locale });
+    if (filter !== "ALL") params.set("mastered", filter === "MANUALLY_MASTERED" ? "true" : "false");
     if (query) params.set("query", query);
     if (index > 0 && previous?.nextCursor)
       params.set("cursor", previous.nextCursor);
@@ -73,7 +77,7 @@ export function GrammarLibrary() {
   const levelSummary =
     levelItems.find((item) => item.level === level) ?? fallbackGrammarLevels[0];
   const swr = useSWRInfinite<GrammarPage>(
-    grammarKey(level, deferred.trim(), explanationLocale),
+    grammarKey(level, deferred.trim(), explanationLocale, filter),
     fetchGrammarPage,
   );
   const items = useMemo(
@@ -122,12 +126,13 @@ export function GrammarLibrary() {
           />
         </label>
       </div>
-      <div className="mb-6 flex max-w-full gap-2 overflow-x-auto pb-1">
+      <div className="grammar-filter-scrollbar mb-6 flex max-w-full gap-2 overflow-x-auto pb-[7px]">
         {filters.map((value) => (
           <Button
             key={value}
             size="sm"
             variant={filter === value ? "default" : "outline"}
+            aria-pressed={filter === value}
             onClick={() => setFilter(value)}
           >
             {t(filterLabels[value])}
@@ -158,6 +163,7 @@ export function GrammarLibrary() {
                       {t(progress?.lastScore != null ? `最近 ${progress.lastScore} 分` : "尚未练习")}
                     </span>
                   </>}
+                  metadataAction={<GrammarMasteryButton grammarId={item.id} mastered={Boolean(progress?.manuallyMastered)} refresh={() => swr.mutate()} />}
                   title={item.title}
                   description={item.chineseExplanation}
                   footerInfo={
@@ -167,10 +173,10 @@ export function GrammarLibrary() {
                   }
                   action={
                     <Button
-                      asChild size="sm" variant={progress ? "outline" : "default"}
+                      asChild size="sm" variant={progress && progress.status !== "NOT_STARTED" ? "outline" : "default"}
                       className="h-auto min-h-8 min-w-0 max-w-[50%] rounded-full px-3 py-1 whitespace-normal lg:text-xs"
                     >
-                      <Link href={`/grammar/${item.id}`}>{t(progress ? "查看并练习" : "开始学习")}</Link>
+                      <Link href={`/grammar/${item.id}`}>{t(progress?.manuallyMastered ? "查看语法" : progress && progress.status !== "NOT_STARTED" ? "查看并练习" : "开始学习")}</Link>
                     </Button>
                   }
                 />
@@ -196,6 +202,7 @@ export function GrammarLibrary() {
 }
 
 function statusSummary(progress?: GrammarProgress) {
+  if (progress?.manuallyMastered) return t("不再安排学习和复习");
   const nextReviewOn = progress?.learningState?.nextReviewOn;
   if (nextReviewOn)
     return t(`预计 ${formatStudyDate(nextReviewOn)} 复习`);

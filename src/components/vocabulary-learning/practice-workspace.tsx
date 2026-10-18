@@ -29,8 +29,10 @@ export function VocabularyPracticeWorkspace({ id }: { id: string }) {
   useLocale();
   const path = `/vocabulary-practices/${encodeURIComponent(id)}`;
   const swr = useSWR<VocabularyPractice>(path, apiFetcher, {
-    refreshInterval: data => isPracticePending(data) ? 1_000 : 0,
-    dedupingInterval: 500,
+    refreshInterval: data => isPracticePending(data) ? 500 : 0,
+    dedupingInterval: 400,
+    refreshWhenHidden: false,
+    refreshWhenOffline: false,
   });
   const [sentence, setSentence] = useState("");
   const [revising, setRevising] = useState(false);
@@ -41,7 +43,7 @@ export function VocabularyPracticeWorkspace({ id }: { id: string }) {
   const [submission, setSubmission] = useState<{ sentence: string; requestKey: string }>();
   const lock = useRef(false);
   async function act(action: "hint" | "answer" | "retry") {
-    if (lock.current) return;
+    if (lock.current || (action === "retry" && swr.data?.canRetry === false)) return;
     lock.current = true; setBusy(true); setError(""); setActionErrorCode(""); setQuotaCode("");
     let body: object = {};
     if (action === "answer") {
@@ -83,7 +85,7 @@ export function VocabularyPracticeWorkspace({ id }: { id: string }) {
     {!terminalMessage && !quotaCode && (error || swr.error) && <div role="alert" className="rounded-xl border p-3 text-sm"><p>{t(error || swr.error.message)}</p><Button size="sm" variant="outline" className="mt-2" disabled={busy} onClick={() => void swr.mutate()}>{t("刷新练习状态")}</Button></div>}
     {!terminalMessage && isPracticePending(practice) && <div role="status" className="rounded-xl bg-secondary p-4 text-sm">{t(practice.status === "ASSESSING" ? "句子已保存，正在批改…" : "正在准备场景…")} {t("可以离开，稍后会恢复进度。")}</div>}
     {terminalMessage && <div role="alert" className="space-y-3 rounded-xl border p-4 text-sm"><p>{t(terminalMessage)}</p><Link href="/vocabulary-learning" className="inline-block underline underline-offset-4">{t("返回词汇学习清单")}</Link></div>}
-    {!terminalMessage && practice.status === "FAILED" && <Card><CardContent className="space-y-3"><p role="alert">{t(practice.answer ? "批改暂时失败，已保留原句。" : "场景生成暂时失败。")}{t("本次未完成，请稍后重试。")}</p><Button disabled={busy} onClick={() => void act("retry")}>{t("重试")}{t(practice.answer ? "批改" : "生成")}</Button></CardContent></Card>}
+    {!terminalMessage && practice.status === "FAILED" && <Card><CardContent className="space-y-3"><p role="alert">{t(practice.answer ? "批改暂时失败，已保留原句。" : "场景生成暂时失败。")}{t(practice.canRetry === false ? "本次无法重试，请返回学习清单重新开始。" : "本次未完成，请稍后重试。")}</p><Button disabled={busy || practice.canRetry === false} onClick={() => void act("retry")}>{t("重试")}{t(practice.answer ? "批改" : "生成")}</Button></CardContent></Card>}
     {preview && !complete && <Card><CardHeader><CardTitle>{t("先认识这个词")}</CardTitle></CardHeader><CardContent className="space-y-3"><p lang="ja" className="text-xl font-semibold">{preview.word} <span className="text-sm font-normal">{preview.reading}</span></p><p>{preview.chineseGloss}</p><p lang="ja" className="leading-9"><FuriganaText annotated={preview.exampleFurigana} fallback={preview.exampleSentence} /></p><p className="text-sm text-muted-foreground">{preview.exampleTranslationZh}</p><p className="text-xs text-muted-foreground">{t("初学预览已提供词义与例句，本次属于辅助学习，不计为独立回忆。")}</p></CardContent></Card>}
     {practice.promptZh && <Card><CardHeader><CardTitle>{t("表达场景")}</CardTitle></CardHeader><CardContent className="space-y-3"><p className="leading-7">{practice.promptZh}</p>{practice.grammar && <p className="text-sm text-muted-foreground">{t("可练习语法：")}{practice.grammar.title}{t("（自然时使用）")}</p>}</CardContent></Card>}
     {!complete && <Card><CardHeader><CardTitle>{t("写出你的句子")}</CardTitle></CardHeader><CardContent className="space-y-4">

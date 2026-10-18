@@ -11,7 +11,19 @@ export class ApiError extends Error {
     public readonly code = "UNKNOWN_ERROR",
     public readonly details?: unknown,
     public readonly requestId?: string,
+    public readonly retryAfterMs?: number,
   ) { super(message); }
+}
+
+export function parseRetryAfter(value: string | null, now = Date.now()): number | undefined {
+  if (!value?.trim()) return undefined;
+  const text = value.trim();
+  if (/^\d+(?:\.\d+)?$/.test(text)) {
+    const ms = Number(text) * 1000;
+    return Number.isFinite(ms) ? ms : undefined;
+  }
+  const date = Date.parse(text);
+  return Number.isFinite(date) ? Math.max(0, date - now) : undefined;
 }
 
 export type ApiMeta = {
@@ -59,6 +71,7 @@ export async function apiRequest<T>(path: string, init?: RequestInit): Promise<E
       payload.error?.code,
       payload.error?.details,
       payload.error?.requestId,
+      parseRetryAfter(response.headers.get('Retry-After')),
     );
   }
   return { data: payload.data as T, meta: payload.meta };

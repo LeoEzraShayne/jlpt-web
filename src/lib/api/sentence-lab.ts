@@ -5,10 +5,11 @@ export type ProductCode = 'DAY_PASS' | 'YEAR_PASS';
 export type TaskKind = 'GRAMMAR' | 'VOCABULARY';
 export interface CatalogProduct {
   productCode: ProductCode; currency: 'USD' | 'JPY'; amount: number;
-  regularAmount?: number; durationSeconds: number; launchPrice: boolean;
+  regularAmount?: number; discountAmount?: number; promotionEndsAt?: string | null; durationSeconds: number; launchPrice: boolean;
 }
 export interface Catalog {
   market: BillingMarket; salesEnabled: boolean; launchAt: string | null;
+  /** Deprecated compatibility field; the server always returns null. */
   launchEndsAt: string | null; products: CatalogProduct[];
 }
 export interface MembershipSummary {
@@ -19,5 +20,13 @@ export interface MembershipSummary {
 export interface OrderSummary {
   id: string; provider: string; productCode: ProductCode; currency: string;
   amount: number; durationSeconds: number; status: string; createdAt: string;
-  paidAt: string | null; refundedAmount: number;
+  paidAt: string | null; refundedAmount: number; regularAmount?: number; discountAmount?: number; promotionEndsAt?: string | null;
 }
+
+/** Historical acquisition records; unpaid checkout attempts are not acquisitions. */
+export type MembershipHistoryRecord =
+  | (OrderSummary & { kind: 'PAYMENT' })
+  | {
+      kind: 'GIFT'; id: string; giftedAt: string; createdAt: string;
+      durationSeconds: number; revokedAt: string | null;
+    };

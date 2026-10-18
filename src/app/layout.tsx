@@ -23,7 +23,6 @@ export const metadata: Metadata = {
   authors: [{ name: "JLPT Sentence Lab" }],
   creator: "JLPT Sentence Lab",
   category: "education",
-  alternates: { canonical: "/" },
   icons: {
     icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
     apple: "/apple-icon.png",
@@ -31,7 +30,6 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "zh_CN",
-    url: "/",
     siteName: "JLPT Sentence Lab",
     title: "JLPT N1～N4 日语语法学习｜JLPT Sentence Lab",
     description: "用日语造句、AI 批改和间隔复习，真正掌握 JLPT N1～N4 语法。",
@@ -53,7 +51,7 @@ export const metadata: Metadata = {
     },
   },
   referrer: "strict-origin-when-cross-origin",
-  appleWebApp: { capable: true, title: "JLPT Sentence Lab", statusBarStyle: "default" },
+  appleWebApp: { capable: true, title: "JLPT Lab", statusBarStyle: "default" },
 };
 
 export const viewport: Viewport = {

@@ -133,7 +133,7 @@ export function HomeView() {
         }}
       />
       <main>
-        <section className="soft-grid border-b">
+        <section className="canvas-grid soft-grid border-b">
           <div className="mx-auto grid max-w-[76rem] items-center gap-12 px-4 py-16 sm:px-6 sm:py-20 lg:grid-cols-[1.1fr_.9fr] lg:px-8 lg:py-28">
             <div>
               <p className="inline-flex items-center gap-2 rounded-full border bg-card px-4 py-2 text-sm font-medium">
