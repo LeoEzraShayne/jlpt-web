@@ -40,6 +40,8 @@
 :root,
 [data-theme="sunshine"] {
   --background: #fffcf5;
+  --page-artwork-rgb: 248 204 83;
+  --page-artwork-glow: #fff5dc;
   --foreground: #2d281f;
   --card: #ffffff;
   --card-foreground: #2d281f;
@@ -70,6 +72,8 @@
 
 [data-theme="coral"] {
   --background: #fff9f7;
+  --page-artwork-rgb: 242 123 103;
+  --page-artwork-glow: #ffebe6;
   --primary: #f27b67;
   --primary-foreground: #351b17;
   --secondary: #ffebe6;
@@ -84,6 +88,8 @@
 
 [data-theme="mint"] {
   --background: #f8fdfa;
+  --page-artwork-rgb: 99 196 154;
+  --page-artwork-glow: #e9f8f1;
   --primary: #63c49a;
   --primary-foreground: #123126;
   --secondary: #e2f7ee;
@@ -98,6 +104,8 @@
 
 [data-theme="ocean"] {
   --background: #f7fbff;
+  --page-artwork-rgb: 106 169 233;
+  --page-artwork-glow: #e8f3ff;
   --primary: #6aa9e9;
   --primary-foreground: #102a43;
   --secondary: #e6f2ff;
@@ -112,6 +120,8 @@
 
 [data-theme="violet"] {
   --background: #fbf9ff;
+  --page-artwork-rgb: 167 139 250;
+  --page-artwork-glow: #f0eaff;
   --primary: #a78bfa;
   --primary-foreground: #251747;
   --secondary: #eee8ff;
@@ -124,25 +134,20 @@
   --sidebar-accent-foreground: #563b8d;
 }
 
-/* Keep the store artwork's warm corners responsive without downloading an image. */
+/* Share the store artwork's responsive corners across every color theme. */
 :root {
-  --page-artwork: none;
-}
-
-:root:not([data-theme]),
-:root[data-theme="sunshine"] {
   --page-artwork:
     radial-gradient(
       circle clamp(15rem, 32vw, 30rem) at calc(100% + clamp(4rem, 10vw, 10rem)) -6rem,
-      rgb(248 204 83 / 20%) 0 99.8%,
+      rgb(var(--page-artwork-rgb) / 20%) 0 99.8%,
       transparent 100%
     ),
     radial-gradient(
       circle clamp(11rem, 28vw, 28rem) at -5rem calc(100% + 6rem),
-      rgb(248 204 83 / 18%) 0 99.8%,
+      rgb(var(--page-artwork-rgb) / 18%) 0 99.8%,
       transparent 100%
     ),
-    radial-gradient(ellipse 80% 60% at 100% 0%, #fff5dc, transparent 70%);
+    radial-gradient(ellipse 80% 60% at 100% 0%, var(--page-artwork-glow), transparent 70%);
 }
 
 body {
@@ -159,13 +164,11 @@ body::before {
   background-repeat: no-repeat;
 }
 
-:root:not([data-theme]) .page-canvas,
-:root[data-theme="sunshine"] .page-canvas {
+.page-canvas {
   background-color: transparent;
 }
 
-:root:not([data-theme]) .canvas-grid,
-:root[data-theme="sunshine"] .canvas-grid {
+.canvas-grid {
   background-image: none;
 }
 
